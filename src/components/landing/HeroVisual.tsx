@@ -29,6 +29,8 @@ export function HeroVisual() {
           shape="rounded-2xl"
           label="Shopify"
           icon={<Box className="size-5" />}
+          animation="float-1"
+          delay="0s"
         />
         <OrbitIcon
           className="left-4 top-1/2 -translate-y-1/2"
@@ -36,6 +38,8 @@ export function HeroVisual() {
           shape="rounded-2xl"
           label="Instagram"
           icon={<Camera className="size-5" />}
+          animation="float-2"
+          delay="-1.2s"
         />
         <OrbitIcon
           className="left-0 bottom-8"
@@ -43,6 +47,8 @@ export function HeroVisual() {
           shape="rounded-2xl"
           label="Loja"
           icon={<ShoppingBag className="size-5" />}
+          animation="float-3"
+          delay="-0.6s"
         />
         {/* Right side */}
         <OrbitIcon
@@ -51,6 +57,8 @@ export function HeroVisual() {
           shape="rounded-full"
           label="WhatsApp"
           icon={<MessageCircle className="size-5" />}
+          animation="float-2"
+          delay="-2s"
         />
         <OrbitIcon
           className="right-4 top-1/2 -translate-y-1/2"
@@ -58,6 +66,8 @@ export function HeroVisual() {
           shape="rounded-2xl"
           label="Pix"
           icon={<Heart className="size-5" />}
+          animation="float-1"
+          delay="-2.8s"
         />
         <OrbitIcon
           className="right-0 bottom-8"
@@ -65,6 +75,8 @@ export function HeroVisual() {
           shape="rounded-full"
           label="Google"
           icon={<Search className="size-5" />}
+          animation="float-3"
+          delay="-1.8s"
         />
       </div>
 
@@ -123,7 +135,10 @@ export function HeroVisual() {
         </div>
 
         {/* Floating notification card */}
-        <div className="absolute -bottom-6 left-4 w-56 rounded-xl border border-gray-200 bg-white p-3 shadow-xl shadow-indigo-100 md:-bottom-8 md:left-8">
+        <div
+          className="absolute -bottom-6 left-4 w-56 rounded-xl border border-gray-200 bg-white p-3 shadow-xl shadow-indigo-100 md:-bottom-8 md:left-8 animate-float-1"
+          style={{ animationDelay: "-0.4s" }}
+        >
           <div className="flex items-start gap-2">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
               <MessageCircle className="size-4" />
@@ -141,7 +156,10 @@ export function HeroVisual() {
         </div>
 
         {/* Floating rating card */}
-        <div className="absolute -top-4 right-4 hidden rounded-xl border border-gray-200 bg-white p-3 shadow-xl shadow-indigo-100 md:right-12 md:block">
+        <div
+          className="absolute -top-4 right-4 hidden rounded-xl border border-gray-200 bg-white p-3 shadow-xl shadow-indigo-100 md:right-12 md:block animate-float-2"
+          style={{ animationDelay: "-1.5s" }}
+        >
           <div className="flex items-center gap-2">
             <div className="flex">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -170,12 +188,29 @@ interface OrbitIconProps {
   shape: string;
   label: string;
   icon: React.ReactNode;
+  animation?: "float-1" | "float-2" | "float-3";
+  delay?: string;
 }
 
-function OrbitIcon({ className = "", color, shape, label, icon }: OrbitIconProps) {
+const ANIMATION_CLASS = {
+  "float-1": "animate-float-1",
+  "float-2": "animate-float-2",
+  "float-3": "animate-float-3",
+} as const;
+
+function OrbitIcon({
+  className = "",
+  color,
+  shape,
+  label,
+  icon,
+  animation = "float-1",
+  delay = "0s",
+}: OrbitIconProps) {
   return (
     <div
-      className={`absolute flex size-12 items-center justify-center shadow-sm ${shape} ${color} ${className}`}
+      className={`absolute flex size-12 items-center justify-center shadow-sm ${shape} ${color} ${ANIMATION_CLASS[animation]} ${className}`}
+      style={{ animationDelay: delay }}
     >
       {icon}
       <span className="sr-only">{label}</span>
