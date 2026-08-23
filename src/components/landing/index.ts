@@ -6,6 +6,7 @@ export { FeatureGrid } from "./FeatureGrid";
 export { ProductShowcase } from "./ProductShowcase";
 export { FeatureTabs } from "./FeatureTabs";
 export { IntegrationsList } from "./IntegrationsList";
+export { PricingSection } from "./PricingSection";
 export { FinalCta } from "./FinalCta";
 export { Footer } from "./Footer";
 export { SectionHeader } from "./SectionHeader";

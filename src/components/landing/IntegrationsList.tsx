@@ -1,42 +1,47 @@
 import {
   MessageCircle,
-  CreditCard,
-  AtSign,
-  HardDrive,
-  BarChart3,
+  Camera,
+  Link2,
+  QrCode,
   Globe,
+  Layout,
 } from "lucide-react";
 
-const INTEGRATIONS = [
+const CHANNELS = [
   {
     icon: MessageCircle,
     name: "WhatsApp",
-    description: "Receba pedidos direto no WhatsApp com mensagem pré-pronta.",
+    description:
+      "Receba clientes diretamente pelo WhatsApp através da sua página.",
   },
   {
-    icon: CreditCard,
-    name: "Pix e pagamentos",
-    description: "Gere QR Code Pix e links de pagamento para cada pedido.",
+    icon: Camera,
+    name: "Instagram",
+    description:
+      "Coloque seu link na bio e transforme seus seguidores em clientes.",
   },
   {
-    icon: AtSign,
-    name: "Instagram e TikTok",
-    description: "Adicione o link do catálogo na bio das suas redes sociais.",
+    icon: Link2,
+    name: "Link compartilhável",
+    description:
+      "Envie sua página pelo WhatsApp, redes sociais ou onde quiser.",
   },
   {
-    icon: HardDrive,
-    name: "Google Drive",
-    description: "Importe fotos dos produtos direto das suas pastas.",
-  },
-  {
-    icon: BarChart3,
-    name: "Relatórios",
-    description: "Acompanhe visualizações, cliques e pedidos mais vendidos.",
+    icon: QrCode,
+    name: "QR Code",
+    description:
+      "Gere um QR Code para divulgar sua página em materiais físicos.",
   },
   {
     icon: Globe,
-    name: "Domínio próprio",
-    description: "Use seu próprio domínio para deixar sua marca ainda mais forte.",
+    name: "Domínio personalizado",
+    description: "Tenha um endereço próprio para apresentar seu negócio.",
+  },
+  {
+    icon: Layout,
+    name: "Página profissional",
+    description:
+      "Mostre seus produtos ou serviços de forma clara, bonita e profissional.",
   },
 ];
 
@@ -44,35 +49,35 @@ export function IntegrationsList() {
   return (
     <section
       className="bg-gray-50 py-20 md:py-28"
-      aria-labelledby="integrations-title"
+      aria-labelledby="divulgacao-title"
     >
       <div className="mx-auto max-w-6xl px-4">
         <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
           <div>
             <p className="mb-3 text-sm font-medium uppercase tracking-wider text-indigo-600">
-              Integrações
+              DIVULGAÇÃO
             </p>
             <h2
-              id="integrations-title"
+              id="divulgacao-title"
               className="text-3xl font-bold tracking-tight text-gray-900 md:text-4xl"
             >
-              Conecte às ferramentas que você já usa
+              Leve sua página para onde seus clientes estão
             </h2>
             <p className="mt-4 text-base text-gray-600 md:text-lg">
-              O Cataloguei conversa com os apps que fazem parte do seu dia a
-              dia. Sua loja integrada, seu trabalho simplificado.
+              Compartilhe seu catálogo em poucos cliques e facilite o contato
+              com quem quer comprar ou pedir um orçamento.
             </p>
             <p className="mt-6 text-sm font-medium text-gray-700">
-              Loved by small businesses
+              Feito para pequenos negócios
             </p>
             <p className="mt-1 text-sm text-gray-500">
-              Ajudamos pequenos negócios a se organizarem e venderem mais todos
-              os dias.
+              Uma página profissional para divulgar seu trabalho onde seus
+              clientes já estão.
             </p>
           </div>
 
           <ul className="space-y-3">
-            {INTEGRATIONS.map(({ icon: Icon, name, description }) => (
+            {CHANNELS.map(({ icon: Icon, name, description }) => (
               <li
                 key={name}
                 className="flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-4 transition-shadow hover:shadow-sm"

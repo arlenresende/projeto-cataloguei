@@ -6,6 +6,7 @@ import {
   ProductShowcase,
   FeatureTabs,
   IntegrationsList,
+  PricingSection,
   FinalCta,
   Footer,
 } from "@/components/landing";
@@ -21,6 +22,7 @@ export default function LandingPage() {
         <ProductShowcase />
         <FeatureTabs />
         <IntegrationsList />
+        <PricingSection />
         <FinalCta />
       </main>
       <Footer />
