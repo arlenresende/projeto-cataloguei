@@ -8,18 +8,18 @@ export function Hero() {
     <section className="relative overflow-hidden pt-12 md:pt-20 lg:pt-24 pb-12 md:pb-24">
       <div className="mx-auto max-w-6xl px-4">
         <div className="mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50/60 px-3 py-1 text-xs font-medium text-indigo-700">
+          <span className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-medium text-violet-700">
             <Sparkles className="size-3.5" />
             Novo · Catálogos com IA e integração WhatsApp
           </span>
 
-          <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-gray-900 md:text-5xl lg:text-6xl">
+          <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-zinc-900 md:text-5xl lg:text-6xl">
             Seu catálogo online
             <br className="hidden sm:block" />{" "}
-            <span className="text-indigo-600">pronto em minutos</span>
+            <span className="text-violet-600">pronto em minutos</span>
           </h1>
 
-          <p className="mx-auto mt-5 max-w-2xl text-base text-gray-600 md:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl text-base text-zinc-500 md:text-lg">
             Crie um catálogo profissional para sua pequena empresa, escolha um
             tema que combina com seu segmento e receba pedidos diretamente no
             WhatsApp. Sem complicação.
@@ -41,7 +41,7 @@ export function Hero() {
             </Button>
           </div>
 
-          <p className="mt-4 text-xs text-gray-500">
+          <p className="mt-4 text-xs text-zinc-500">
             Sem cartão de crédito · Setup em menos de 5 minutos
           </p>
         </div>

@@ -10,17 +10,17 @@ export function FinalCta() {
       aria-labelledby="final-cta-title"
     >
       <div
-        className="absolute inset-0 -z-10 bg-gradient-to-b from-white via-indigo-50/40 to-white"
+        className="absolute inset-0 -z-10 bg-gradient-to-b from-white via-violet-50/70 to-white"
         aria-hidden="true"
       />
       <div className="mx-auto max-w-3xl px-4 text-center">
         <h2
           id="final-cta-title"
-          className="text-3xl font-bold tracking-tight text-gray-900 md:text-4xl lg:text-5xl"
+          className="text-3xl font-bold tracking-tight text-zinc-900 md:text-4xl lg:text-5xl"
         >
           Comece a vender online hoje
         </h2>
-        <p className="mt-4 text-base text-gray-600 md:text-lg">
+        <p className="mt-4 text-base text-zinc-500 md:text-lg">
           Crie seu catálogo em minutos, compartilhe com seus clientes e receba
           pedidos pelo WhatsApp. Plano grátis para começar.
         </p>

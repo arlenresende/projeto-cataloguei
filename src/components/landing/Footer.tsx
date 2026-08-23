@@ -31,7 +31,7 @@ const FOOTER_LINKS = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-gray-100 bg-white py-12 md:py-16">
+    <footer className="border-t border-zinc-200 bg-white py-12 md:py-16">
       <div className="mx-auto max-w-6xl px-4">
         <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
           <div className="col-span-2 md:col-span-1">
@@ -41,16 +41,16 @@ export function Footer() {
               aria-label="Cataloguei - Página inicial"
             >
               <span
-                className="flex size-9 items-center justify-center rounded-lg bg-gray-900 text-white"
+                className="flex size-9 items-center justify-center rounded-lg bg-violet-600 text-white"
                 aria-hidden="true"
               >
                 <Store className="size-5" />
               </span>
-              <span className="text-lg font-bold text-gray-900">
+              <span className="text-lg font-bold text-zinc-900">
                 Cataloguei
               </span>
             </Link>
-            <p className="mt-3 text-sm text-gray-500">
+            <p className="mt-3 text-sm text-zinc-500">
               Catálogos online para pequenos negócios. Comece grátis e venda
               pelo WhatsApp.
             </p>
@@ -58,7 +58,7 @@ export function Footer() {
 
           {FOOTER_LINKS.map((group) => (
             <nav key={group.title} aria-label={group.title}>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-zinc-900">
                 {group.title}
               </p>
               <ul className="mt-4 space-y-3">
@@ -66,7 +66,7 @@ export function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-gray-600 transition-colors hover:text-gray-900"
+                      className="text-sm text-zinc-500 transition-colors hover:text-zinc-900"
                     >
                       {link.label}
                     </Link>
@@ -77,12 +77,12 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-gray-100 pt-8 md:flex-row">
-          <p className="text-xs text-gray-500">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-zinc-200 pt-8 md:flex-row">
+          <p className="text-xs text-zinc-500">
             &copy; {new Date().getFullYear()} Cataloguei. Todos os direitos
             reservados.
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-zinc-500">
             Feito com carinho para pequenos negócios.
           </p>
         </div>
