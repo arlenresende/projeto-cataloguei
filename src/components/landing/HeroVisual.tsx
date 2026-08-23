@@ -1,9 +1,17 @@
-import { MessageCircle, Star } from "lucide-react";
+import {
+  MessageCircle,
+  Star,
+  Camera,
+  Search,
+  Heart,
+  ShoppingBag,
+  Box,
+} from "lucide-react";
 
 export function HeroVisual() {
   return (
     <div
-      className="relative mx-auto mt-16 w-full max-w-4xl"
+      className="relative mx-auto mt-24 w-full max-w-4xl"
       aria-hidden="true"
     >
       {/* Glow background */}
@@ -13,42 +21,50 @@ export function HeroVisual() {
       />
 
       {/* Orbiting tool icons */}
-      <div className="pointer-events-none absolute inset-0 hidden md:block">
+      <div className="pointer-events-none absolute -inset-8 hidden md:block">
+        {/* Left side */}
         <OrbitIcon
-          className="left-2 top-8"
+          className="left-0 top-8"
           color="bg-orange-100 text-orange-600"
           shape="rounded-2xl"
           label="Shopify"
+          icon={<Box className="size-5" />}
         />
         <OrbitIcon
-          className="right-4 top-12"
-          color="bg-blue-100 text-blue-600"
-          shape="rounded-full"
-          label="WhatsApp"
-        />
-        <OrbitIcon
-          className="left-10 top-1/2 -translate-y-1/2"
+          className="left-4 top-1/2 -translate-y-1/2"
           color="bg-purple-100 text-purple-600"
           shape="rounded-2xl"
           label="Instagram"
+          icon={<Camera className="size-5" />}
         />
         <OrbitIcon
-          className="right-12 top-1/2 -translate-y-1/2"
-          color="bg-emerald-100 text-emerald-600"
-          shape="rounded-2xl"
-          label="Pix"
-        />
-        <OrbitIcon
-          className="left-1/4 bottom-6"
+          className="left-0 bottom-8"
           color="bg-pink-100 text-pink-600"
           shape="rounded-2xl"
           label="Loja"
+          icon={<ShoppingBag className="size-5" />}
+        />
+        {/* Right side */}
+        <OrbitIcon
+          className="right-0 top-8"
+          color="bg-blue-100 text-blue-600"
+          shape="rounded-full"
+          label="WhatsApp"
+          icon={<MessageCircle className="size-5" />}
         />
         <OrbitIcon
-          className="right-1/4 bottom-2"
+          className="right-4 top-1/2 -translate-y-1/2"
+          color="bg-emerald-100 text-emerald-600"
+          shape="rounded-2xl"
+          label="Pix"
+          icon={<Heart className="size-5" />}
+        />
+        <OrbitIcon
+          className="right-0 bottom-8"
           color="bg-yellow-100 text-yellow-700"
           shape="rounded-full"
           label="Google"
+          icon={<Search className="size-5" />}
         />
       </div>
 
@@ -153,14 +169,15 @@ interface OrbitIconProps {
   color: string;
   shape: string;
   label: string;
+  icon: React.ReactNode;
 }
 
-function OrbitIcon({ className = "", color, shape, label }: OrbitIconProps) {
+function OrbitIcon({ className = "", color, shape, label, icon }: OrbitIconProps) {
   return (
     <div
       className={`absolute flex size-12 items-center justify-center shadow-sm ${shape} ${color} ${className}`}
     >
-      <span className="text-[10px] font-semibold">{label.charAt(0)}</span>
+      {icon}
       <span className="sr-only">{label}</span>
     </div>
   );
