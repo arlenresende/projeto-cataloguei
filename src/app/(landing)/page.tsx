@@ -8,6 +8,7 @@ import {
   IntegrationsList,
   PricingSection,
   FinalCta,
+  ContactSection,
   Footer,
 } from "@/components/landing";
 
@@ -24,6 +25,7 @@ export default function LandingPage() {
         <IntegrationsList />
         <PricingSection />
         <FinalCta />
+        <ContactSection />
       </main>
       <Footer />
     </div>

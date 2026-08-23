@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { label: "Temas", href: "#themes" },
   { label: "Como funciona", href: "#how-it-works" },
   { label: "Preços", href: "#pricing" },
+  { label: "Contato", href: "#contato" },
 ];
 
 export function Header() {
