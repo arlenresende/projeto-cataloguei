@@ -131,43 +131,61 @@
 
 @layer utilities {
   .animate-float-1 {
-    animation: float-1 4.5s ease-in-out infinite;
+    animation: float-1 5s ease-in-out infinite;
   }
   .animate-float-2 {
-    animation: float-2 5.5s ease-in-out infinite;
+    animation: float-2 6s ease-in-out infinite;
   }
   .animate-float-3 {
-    animation: float-3 6.5s ease-in-out infinite;
+    animation: float-3 7s ease-in-out infinite;
   }
 }
 
 @keyframes float-1 {
   0%,
   100% {
-    transform: translateY(0) rotate(0deg);
+    transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translateY(-8px) translateX(2px) rotate(3deg) scale(1.04);
   }
   50% {
-    transform: translateY(-10px) rotate(2deg);
+    transform: translateY(-16px) translateX(0) rotate(0deg) scale(1);
+  }
+  75% {
+    transform: translateY(-8px) translateX(-2px) rotate(-3deg) scale(1.04);
   }
 }
 
 @keyframes float-2 {
   0%,
   100% {
-    transform: translateY(0) rotate(0deg);
+    transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translateY(-10px) translateX(-3px) rotate(-4deg) scale(1.05);
   }
   50% {
-    transform: translateY(-14px) rotate(-3deg);
+    transform: translateY(-20px) translateX(0) rotate(0deg) scale(1);
+  }
+  75% {
+    transform: translateY(-10px) translateX(3px) rotate(4deg) scale(1.05);
   }
 }
 
 @keyframes float-3 {
   0%,
   100% {
-    transform: translateY(0) rotate(0deg);
+    transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translateY(-6px) translateX(3px) rotate(2deg) scale(1.03);
   }
   50% {
-    transform: translateY(-8px) rotate(3deg);
+    transform: translateY(-14px) translateX(0) rotate(0deg) scale(1);
+  }
+  75% {
+    transform: translateY(-6px) translateX(-3px) rotate(-2deg) scale(1.03);
   }
 }
 
