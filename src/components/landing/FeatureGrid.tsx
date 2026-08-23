@@ -1,43 +1,55 @@
 import {
   ArrowUpRight,
   MessageCircle,
-  Palette,
   Smartphone,
-  Store,
-  BarChart3,
   Link2,
+  LayoutGrid,
+  Monitor,
+  Palette,
 } from "lucide-react";
 
 const FEATURES = [
   {
-    icon: Store,
-    title: "Catálogo online completo",
+    icon: LayoutGrid,
+    title: "Catálogo profissional",
+    description:
+      "Produtos e serviços organizados em uma página bonita e fácil de consultar.",
     category: "Catálogo",
   },
   {
-    icon: Palette,
-    title: "Temas para cada segmento",
-    category: "Personalização",
-  },
-  {
-    icon: Smartphone,
-    title: "100% responsivo",
-    category: "Mobile",
+    icon: Monitor,
+    title: "Página pronta para divulgar",
+    description:
+      "Apresente seu negócio de forma profissional sem precisar criar um site.",
+    category: "Página online",
   },
   {
     icon: MessageCircle,
-    title: "Pedidos via WhatsApp",
+    title: "Pedidos pelo WhatsApp",
+    description:
+      "Seus clientes entram em contato e fazem pedidos direto pelo WhatsApp.",
     category: "WhatsApp",
-  },
-  {
-    icon: BarChart3,
-    title: "Relatórios e métricas",
-    category: "Relatórios",
   },
   {
     icon: Link2,
     title: "Link personalizado",
-    category: "Link",
+    description:
+      "Tenha um link próprio para colocar na bio, divulgar e compartilhar.",
+    category: "Divulgação",
+  },
+  {
+    icon: Smartphone,
+    title: "Funciona em qualquer celular",
+    description:
+      "Sua página se adapta automaticamente a celulares, tablets e computadores.",
+    category: "Responsivo",
+  },
+  {
+    icon: Palette,
+    title: "Personalize seu negócio",
+    description:
+      "Use suas informações, imagens e identidade para deixar a página com a cara da sua empresa.",
+    category: "Personalização",
   },
 ];
 
@@ -53,7 +65,7 @@ export function FeatureGrid() {
           {/* Heading column */}
           <div className="md:col-span-5 md:pt-2">
             <p className="text-sm font-medium uppercase tracking-wider text-indigo-600">
-              Recursos
+              RECURSOS
             </p>
             <h2
               id="features-title"
@@ -61,7 +73,7 @@ export function FeatureGrid() {
             >
               Tudo que você precisa para{" "}
               <span className="relative inline-block">
-                <span className="relative z-10">vender online</span>
+                <span className="relative z-10">vender seu negócio online</span>
                 <span
                   className="absolute inset-x-0 bottom-1 -z-0 h-3 rounded bg-indigo-100 md:bottom-2 md:h-4"
                   aria-hidden="true"
@@ -69,8 +81,8 @@ export function FeatureGrid() {
               </span>
             </h2>
             <p className="mt-4 max-w-md text-base text-gray-600 md:text-lg">
-              Ferramentas pensadas para pequenos negócios começarem a vender
-              pela internet sem complicação.
+              Crie uma página profissional para apresentar seus produtos ou
+              serviços e receba pedidos e orçamentos direto pelo WhatsApp.
             </p>
           </div>
 
@@ -93,6 +105,9 @@ export function FeatureGrid() {
                     <h3 className="mt-5 text-base font-semibold leading-snug text-gray-900 md:text-lg">
                       {feature.title}
                     </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-gray-500">
+                      {feature.description}
+                    </p>
                   </div>
                   <div className="mt-6 flex items-center justify-between">
                     <span className="text-sm text-gray-500">
