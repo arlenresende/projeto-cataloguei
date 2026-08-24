@@ -1,0 +1,107 @@
+// Prisma schema - Cataloguei
+// Documentação: https://www.prisma.io/docs
+//
+// Prisma 7 não aceita mais `url`/`directUrl` no bloco `datasource`.
+// A conexão é configurada em `prisma.config.ts` (datasource.url) e no
+// runtime via driver adapter em `src/lib/prisma.ts`.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// Enums
+// ============================================================
+
+// Segmento/tema visual da loja. Mantém coerência com THEME_SEGMENTS
+// em src/lib/themes/types.ts — qualquer adição precisa ser refletida
+// nos dois lugares até a Fase 3 unificar a fonte da verdade.
+enum StoreThemeSegment {
+  TECHNOLOGY
+  FOOD
+  FASHION
+  HEALTH
+  EDUCATION
+  BEAUTY
+  SPORTS
+  MUSIC
+  MINIMAL
+  LUXURY
+  NATURE
+  KIDS
+  PET
+  AUTOMOTIVE
+  ART
+}
+
+// ============================================================
+// Models
+// ============================================================
+
+// User: preparado para a Fase 3 com Better Auth.
+// Campos seguem o padrão esperado pelo Better Auth (name, email, image),
+// mas sem as tabelas de Account/Session/Verification — adicionadas depois.
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  store Store?
+
+  @@index([email])
+  @@map("users")
+}
+
+// Store: representa uma loja/catálogo.
+// 1 User → 1 Store no MVP; o relacionamento 1:N pode ser ativado
+// depois trocando `store Store?` por `stores Store[]` no User.
+model Store {
+  id             String            @id @default(cuid())
+  name           String
+  url            String            @unique // slug usado em /[storeUrl]
+  description    String?
+  logoUrl        String?
+  bannerUrl      String?
+  whatsapp       String? // formato E.164, ex: 5511999999999
+  theme          StoreThemeSegment @default(TECHNOLOGY)
+  primaryColor   String? // override opcional do tema
+  secondaryColor String?
+  ownerId        String            @unique
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@index([url])
+  @@map("stores")
+}
+
+// Product: itens do catálogo pertencentes a uma Store.
+// `category` fica como String (não enum) para permitir que cada
+// loja use suas próprias categorias sem alterar o schema.
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  imageUrl    String?
+  category    String?
+  storeId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+  @@index([category])
+  @@map("products")
+}
