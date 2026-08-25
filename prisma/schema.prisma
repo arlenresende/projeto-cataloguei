@@ -44,7 +44,7 @@ enum StoreThemeSegment {
 
 // User: preparado para a Fase 3 com Better Auth.
 // Campos seguem o padrão esperado pelo Better Auth (name, email, image),
-// mas sem as tabelas de Account/Session/Verification — adicionadas depois.
+// e os relacionamentos `accounts` e `sessions` completam a integração.
 model User {
   id            String   @id @default(cuid())
   name          String
@@ -54,9 +54,71 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  store Store?
+  store    Store?
+  accounts Account[]
+  sessions Session[]
 
   @@map("users")
+}
+
+// Account: contas de autenticação do Better Auth.
+// `issuer` (1.7+) é o namespace de identidade (ex: "local:credential",
+// "https://accounts.google.com"). Para email/senha sempre é "local:credential".
+// `accountId` é o identificador atribuído pelo provider. Para email/senha
+// é o próprio `userId`. A chave única (issuer, accountId) evita colisão
+// entre providers.
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  issuer                String    @default("local:credential")
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([issuer, accountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+// Session: sessões ativas no DB. O cookie só guarda o `token`.
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+// Verification: tokens de verificação (email, reset de senha, etc.).
+// `identifier` é geralmente o email do usuário; `value` é o token.
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verifications")
 }
 
 // Store: representa uma loja/catálogo.
