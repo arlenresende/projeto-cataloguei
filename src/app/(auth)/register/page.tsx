@@ -1,19 +1,28 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, UserPlus } from "lucide-react";
-import { signUp } from "@/lib/auth-client";
+import {
+  buildAuthPageHref,
+  getAuthErrorMessage,
+  resolveAuthRedirect,
+  signUp,
+} from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { GoogleButton } from "@/components/auth/google-button";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const redirectTarget = resolveAuthRedirect(searchParams.get("redirect"));
+  const loginHref = buildAuthPageHref("/login", searchParams.get("redirect"));
+  const displayError = error ?? getAuthErrorMessage(searchParams.get("error"));
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: Parameters<NonNullable<React.ComponentProps<"form">["onSubmit"]>>[0]) {
     e.preventDefault();
     setError(null);
 
@@ -43,7 +52,7 @@ export default function RegisterPage() {
         return;
       }
 
-      router.push("/admin/dashboard");
+      router.push(redirectTarget);
       router.refresh();
     });
   }
@@ -60,7 +69,12 @@ export default function RegisterPage() {
       </div>
 
       <div className="space-y-4">
-        <GoogleButton mode="signup" />
+        <GoogleButton
+          mode="signup"
+          callbackURL={redirectTarget}
+          errorCallbackURL={buildAuthPageHref("/register", searchParams.get("redirect"))}
+          disabled={isPending}
+        />
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
@@ -145,12 +159,12 @@ export default function RegisterPage() {
           />
         </div>
 
-        {error && (
+        {displayError && (
           <div
             role="alert"
             className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
           >
-            {error}
+            {displayError}
           </div>
         )}
 
@@ -178,7 +192,7 @@ export default function RegisterPage() {
       <p className="mt-6 text-center text-sm text-zinc-500">
         Já tem conta?{" "}
         <Link
-          href="/login"
+          href={loginHref}
           className="font-medium text-violet-600 hover:text-violet-700 hover:underline"
         >
           Entrar

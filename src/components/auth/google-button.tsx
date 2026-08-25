@@ -26,24 +26,30 @@ interface GoogleButtonProps {
   mode?: "signin" | "signup";
   /** URL para onde o usuário volta após o Google autenticar com sucesso. */
   callbackURL?: string;
+  /** URL para onde o usuário volta se o provedor retornar erro. */
+  errorCallbackURL?: string;
+  disabled?: boolean;
 }
 
 export function GoogleButton({
   mode = "signin",
   callbackURL = "/admin/dashboard",
+  errorCallbackURL = "/login",
+  disabled = false,
 }: GoogleButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isDisabled = disabled || isLoading;
 
   async function handleClick() {
-    if (isLoading) return;
+    if (isDisabled) return;
     setIsLoading(true);
     setError(null);
 
     const { error: authError } = await signIn.social({
       provider: "google",
       callbackURL,
-      errorCallbackURL: "/login",
+      errorCallbackURL,
     });
 
     // Se chegou aqui com erro, o redirect não foi disparado.
@@ -67,7 +73,7 @@ export function GoogleButton({
         size="lg"
         className="w-full"
         onClick={handleClick}
-        disabled={isLoading}
+        disabled={isDisabled}
       >
         {isLoading ? (
           <>

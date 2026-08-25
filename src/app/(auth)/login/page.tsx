@@ -1,19 +1,28 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, LogIn } from "lucide-react";
-import { signIn } from "@/lib/auth-client";
+import {
+  buildAuthPageHref,
+  getAuthErrorMessage,
+  resolveAuthRedirect,
+  signIn,
+} from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { GoogleButton } from "@/components/auth/google-button";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const redirectTarget = resolveAuthRedirect(searchParams.get("redirect"));
+  const registerHref = buildAuthPageHref("/register", searchParams.get("redirect"));
+  const displayError = error ?? getAuthErrorMessage(searchParams.get("error"));
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: Parameters<NonNullable<React.ComponentProps<"form">["onSubmit"]>>[0]) {
     e.preventDefault();
     setError(null);
 
@@ -35,7 +44,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/admin/dashboard");
+      router.push(redirectTarget);
       router.refresh();
     });
   }
@@ -52,7 +61,12 @@ export default function LoginPage() {
       </div>
 
       <div className="space-y-4">
-        <GoogleButton mode="signin" />
+        <GoogleButton
+          mode="signin"
+          callbackURL={redirectTarget}
+          errorCallbackURL={buildAuthPageHref("/login", searchParams.get("redirect"))}
+          disabled={isPending}
+        />
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
@@ -104,12 +118,12 @@ export default function LoginPage() {
           />
         </div>
 
-        {error && (
+        {displayError && (
           <div
             role="alert"
             className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
           >
-            {error}
+            {displayError}
           </div>
         )}
 
@@ -137,7 +151,7 @@ export default function LoginPage() {
       <p className="mt-6 text-center text-sm text-zinc-500">
         Ainda não tem conta?{" "}
         <Link
-          href="/register"
+          href={registerHref}
           className="font-medium text-violet-600 hover:text-violet-700 hover:underline"
         >
           Criar conta
