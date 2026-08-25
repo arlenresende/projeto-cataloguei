@@ -21,7 +21,7 @@ CREATE TABLE "users" (
 CREATE TABLE "stores" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "url" TEXT NOT NULL,
+    "slug" TEXT NOT NULL,
     "description" TEXT,
     "logoUrl" TEXT,
     "bannerUrl" TEXT,
@@ -44,6 +44,8 @@ CREATE TABLE "products" (
     "price" DECIMAL(10,2) NOT NULL,
     "imageUrl" TEXT,
     "category" TEXT,
+    "active" BOOLEAN NOT NULL DEFAULT true,
+    "position" INTEGER NOT NULL DEFAULT 0,
     "storeId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -55,22 +57,16 @@ CREATE TABLE "products" (
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
-CREATE INDEX "users_email_idx" ON "users"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "stores_url_key" ON "stores"("url");
+CREATE UNIQUE INDEX "stores_slug_key" ON "stores"("slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "stores_ownerId_key" ON "stores"("ownerId");
 
 -- CreateIndex
-CREATE INDEX "stores_url_idx" ON "stores"("url");
+CREATE INDEX "products_storeId_active_idx" ON "products"("storeId", "active");
 
 -- CreateIndex
-CREATE INDEX "products_storeId_idx" ON "products"("storeId");
-
--- CreateIndex
-CREATE INDEX "products_category_idx" ON "products"("category");
+CREATE INDEX "products_storeId_category_idx" ON "products"("storeId", "category");
 
 -- AddForeignKey
 ALTER TABLE "stores" ADD CONSTRAINT "stores_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

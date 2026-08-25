@@ -56,7 +56,6 @@ model User {
 
   store Store?
 
-  @@index([email])
   @@map("users")
 }
 
@@ -66,11 +65,11 @@ model User {
 model Store {
   id             String            @id @default(cuid())
   name           String
-  url            String            @unique // slug usado em /[storeUrl]
+  slug           String            @unique // identificador da loja, usado em /[slug]
   description    String?
   logoUrl        String?
   bannerUrl      String?
-  whatsapp       String? // formato E.164, ex: 5511999999999
+  whatsapp       String? // formato livre; validação fica na camada da aplicação
   theme          StoreThemeSegment @default(TECHNOLOGY)
   primaryColor   String? // override opcional do tema
   secondaryColor String?
@@ -81,13 +80,15 @@ model Store {
   owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   products Product[]
 
-  @@index([url])
   @@map("stores")
 }
 
 // Product: itens do catálogo pertencentes a uma Store.
 // `category` fica como String (não enum) para permitir que cada
 // loja use suas próprias categorias sem alterar o schema.
+// `active` permite desativar sem excluir; `position` controla a
+// ordenação no catálogo. `price` em Decimal(10,2) para evitar
+// erros de ponto flutuante em moeda.
 model Product {
   id          String   @id @default(cuid())
   name        String
@@ -95,13 +96,14 @@ model Product {
   price       Decimal  @db.Decimal(10, 2)
   imageUrl    String?
   category    String?
+  active      Boolean  @default(true)
+  position    Int      @default(0)
   storeId     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
-  @@index([storeId])
-  @@index([category])
+  @@index([storeId, category])
   @@map("products")
 }

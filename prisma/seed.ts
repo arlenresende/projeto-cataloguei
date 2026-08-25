@@ -49,11 +49,11 @@ async function main() {
 
   // Store
   const store = await prisma.store.upsert({
-    where: { url: "techstore" },
+    where: { slug: "techstore" },
     update: {},
     create: {
       name: "TechStore",
-      url: "techstore",
+      slug: "techstore",
       description:
         "Sua loja de tecnologia com os melhores produtos e preços do mercado.",
       logoUrl: "/placeholder-logo.svg",
@@ -63,7 +63,7 @@ async function main() {
       ownerId: owner.id,
     },
   });
-  console.log(`✓ Store: ${store.name} (/${store.url})`);
+  console.log(`✓ Store: ${store.name} (/${store.slug})`);
 
   // Produtos — usa upsert por (storeId, name) não é trivial,
   // então primeiro remove os existentes e recria para manter
