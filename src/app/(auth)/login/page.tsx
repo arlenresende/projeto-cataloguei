@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { Suspense, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, LogIn } from "lucide-react";
 import {
   buildAuthPageHref,
+  buildEmailVerificationPageHref,
+  getAuthErrorCode,
   getAuthErrorMessage,
   resolveAuthRedirect,
   signIn,
@@ -13,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { GoogleButton } from "@/components/auth/google-button";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -21,6 +23,10 @@ export default function LoginPage() {
   const redirectTarget = resolveAuthRedirect(searchParams.get("redirect"));
   const registerHref = buildAuthPageHref("/register", searchParams.get("redirect"));
   const displayError = error ?? getAuthErrorMessage(searchParams.get("error"));
+  const verifiedNotice =
+    searchParams.get("verified") === "1"
+      ? "E-mail verificado com sucesso. Agora voce ja pode entrar na sua conta."
+      : null;
 
   function handleSubmit(e: Parameters<NonNullable<React.ComponentProps<"form">["onSubmit"]>>[0]) {
     e.preventDefault();
@@ -37,6 +43,20 @@ export default function LoginPage() {
       });
 
       if (authError) {
+        const authErrorCode = getAuthErrorCode(authError);
+
+        if (authErrorCode === "EMAIL_NOT_VERIFIED") {
+          router.push(
+            buildEmailVerificationPageHref({
+              email,
+              redirect: redirectTarget,
+              source: "signin",
+            })
+          );
+          router.refresh();
+          return;
+        }
+
         setError(
           authError.message ||
             "Não foi possível entrar. Verifique seus dados e tente novamente."
@@ -93,6 +113,7 @@ export default function LoginPage() {
             autoComplete="email"
             required
             disabled={isPending}
+            defaultValue={searchParams.get("email") ?? ""}
             placeholder="seu@email.com"
             className="block w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 transition-colors focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-600/20 disabled:opacity-50"
           />
@@ -127,6 +148,12 @@ export default function LoginPage() {
           </div>
         )}
 
+        {verifiedNotice && (
+          <div className="rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-sm text-violet-700">
+            {verifiedNotice}
+          </div>
+        )}
+
         <Button
           type="submit"
           variant="default"
@@ -157,6 +184,25 @@ export default function LoginPage() {
           Criar conta
         </Link>
       </p>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<AuthPageFallback />}>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+
+function AuthPageFallback() {
+  return (
+    <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <div className="flex items-center justify-center gap-2 text-sm text-zinc-500">
+        <Loader2 className="size-4 animate-spin" />
+        Carregando...
+      </div>
     </div>
   );
 }

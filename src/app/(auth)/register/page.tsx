@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { Suspense, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, UserPlus } from "lucide-react";
 import {
   buildAuthPageHref,
+  buildEmailVerificationCallbackURL,
+  buildEmailVerificationPageHref,
   getAuthErrorMessage,
   resolveAuthRedirect,
   signUp,
@@ -13,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { GoogleButton } from "@/components/auth/google-button";
 
-export default function RegisterPage() {
+function RegisterPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -42,6 +44,10 @@ export default function RegisterPage() {
         name,
         email,
         password,
+        callbackURL: buildEmailVerificationCallbackURL({
+          email,
+          redirect: redirectTarget,
+        }),
       });
 
       if (authError) {
@@ -52,7 +58,13 @@ export default function RegisterPage() {
         return;
       }
 
-      router.push(redirectTarget);
+      router.push(
+        buildEmailVerificationPageHref({
+          email,
+          redirect: redirectTarget,
+          source: "signup",
+        })
+      );
       router.refresh();
     });
   }
@@ -198,6 +210,25 @@ export default function RegisterPage() {
           Entrar
         </Link>
       </p>
+    </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<AuthPageFallback />}>
+      <RegisterPageContent />
+    </Suspense>
+  );
+}
+
+function AuthPageFallback() {
+  return (
+    <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <div className="flex items-center justify-center gap-2 text-sm text-zinc-500">
+        <Loader2 className="size-4 animate-spin" />
+        Carregando...
+      </div>
     </div>
   );
 }
