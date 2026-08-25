@@ -16,10 +16,11 @@ import { NextResponse, type NextRequest } from "next/server";
  *   /admin  → redireciona para /login
  *
  * Se já estiver logado:
- *   /login, /register → redireciona para /admin
+ *   /login, /register → redireciona para /admin/dashboard
  */
 const protectedPrefixes = ["/admin"];
 const authOnlyPrefixes = ["/login", "/register"];
+const authenticatedRedirect = "/admin/dashboard";
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -42,7 +43,7 @@ export function proxy(request: NextRequest) {
   }
 
   if (isAuthOnly && session) {
-    return NextResponse.redirect(new URL("/admin", request.url));
+    return NextResponse.redirect(new URL(authenticatedRedirect, request.url));
   }
 
   return NextResponse.next();
