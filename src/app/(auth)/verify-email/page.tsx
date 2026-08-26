@@ -12,7 +12,6 @@ import {
   getAuthErrorMessage,
   resolveAuthRedirect,
 } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
 
 function VerifyEmailPageContent() {
   const searchParams = useSearchParams();
@@ -62,87 +61,87 @@ function VerifyEmailPageContent() {
   }
 
   return (
-    <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <div className="mb-6 text-center">
-        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-violet-50 text-violet-600">
-          <MailCheck className="size-6" />
+    <section className="flex flex-1 flex-col px-8 pb-8 sm:px-10 lg:px-12">
+      <div className="mx-auto flex w-full max-w-[360px] flex-1 flex-col justify-center py-10 lg:py-16">
+        <div className="flex flex-col items-center text-center">
+          <div className="mb-4 flex size-10 items-center justify-center rounded-full bg-accent text-accent-foreground">
+            <MailCheck className="size-5" />
+          </div>
+
+          <h1 className="text-balance text-2xl font-bold tracking-tight sm:text-[25px]">
+            {source === "signin" ? "Confirme seu e-mail" : "Cadastro realizado!"}
+          </h1>
+
+          <p className="mt-2 text-sm text-muted-foreground">
+            {source === "signin"
+              ? "Sua conta ainda nao foi ativada. Verifique sua caixa de entrada para continuar."
+              : "Enviamos um e-mail para o endereco informado. Verifique sua caixa de entrada para ativar sua conta."}
+          </p>
         </div>
 
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-          {source === "signin" ? "Confirme seu e-mail" : "Cadastro realizado!"}
-        </h1>
-
-        <p className="mt-2 text-sm text-zinc-500">
-          {source === "signin"
-            ? "Sua conta ainda nao foi ativada. Verifique sua caixa de entrada para continuar."
-            : "Enviamos um e-mail para o endereco informado. Verifique sua caixa de entrada para ativar sua conta."}
-        </p>
-      </div>
-
-      <div className="space-y-4">
-        {email && (
-          <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
-            E-mail: <span className="font-medium">{email}</span>
-          </div>
-        )}
-
-        {displayError && (
-          <div
-            role="alert"
-            className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-          >
-            {displayError}
-          </div>
-        )}
-
-        {notice && (
-          <div className="rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-sm text-violet-700">
-            {notice}
-          </div>
-        )}
-
-        <Button
-          type="button"
-          variant="default"
-          size="lg"
-          className="w-full"
-          onClick={handleResend}
-          disabled={isPending}
-        >
-          {isPending ? (
-            <>
-              <Loader2 className="size-4 animate-spin" />
-              Reenviando...
-            </>
-          ) : (
-            <>
-              <RotateCw className="size-4" />
-              Reenviar e-mail
-            </>
+        <div className="mt-7 flex flex-col gap-4">
+          {email && (
+            <div className="rounded-md border-b border-foreground/80 px-1 py-2 text-sm font-semibold text-foreground">
+              {email}
+            </div>
           )}
-        </Button>
+
+          {displayError && (
+            <div
+              role="alert"
+              className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+            >
+              {displayError}
+            </div>
+          )}
+
+          {notice && (
+            <div className="rounded-md border border-violet-200 bg-violet-50 px-3 py-2 text-sm text-violet-700">
+              {notice}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={isPending}
+            className="inline-flex h-10 w-fit items-center gap-1.5 rounded-md border border-foreground bg-[#ffd400] px-5 text-sm font-bold text-foreground shadow-[3px_3px_0_var(--foreground)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--foreground)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0_var(--foreground)] disabled:pointer-events-none disabled:opacity-50"
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="size-3 animate-spin" />
+                Reenviando...
+              </>
+            ) : (
+              <>
+                <RotateCw className="size-3" />
+                Reenviar e-mail
+              </>
+            )}
+          </button>
+
+          <p className="text-sm text-muted-foreground">
+            Ja verificou?{" "}
+            <Link
+              href={loginHref}
+              className="font-bold text-foreground hover:underline"
+            >
+              Entrar
+            </Link>
+          </p>
+
+          <p className="text-sm text-muted-foreground">
+            Ainda nao criou conta?{" "}
+            <Link
+              href={registerHref}
+              className="font-bold text-foreground hover:underline"
+            >
+              Cadastrar
+            </Link>
+          </p>
+        </div>
       </div>
-
-      <p className="mt-6 text-center text-sm text-zinc-500">
-        Ja verificou?{" "}
-        <Link
-          href={loginHref}
-          className="font-medium text-violet-600 hover:text-violet-700 hover:underline"
-        >
-          Entrar
-        </Link>
-      </p>
-
-      <p className="mt-2 text-center text-sm text-zinc-500">
-        Ainda nao criou conta?{" "}
-        <Link
-          href={registerHref}
-          className="font-medium text-violet-600 hover:text-violet-700 hover:underline"
-        >
-          Cadastrar
-        </Link>
-      </p>
-    </div>
+    </section>
   );
 }
 
@@ -156,11 +155,11 @@ export default function VerifyEmailPage() {
 
 function AuthPageFallback() {
   return (
-    <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <div className="flex items-center justify-center gap-2 text-sm text-zinc-500">
-        <Loader2 className="size-4 animate-spin" />
-        Carregando...
+    <section className="flex flex-1 flex-col px-8 pb-8 sm:px-10 lg:px-12">
+      <div className="mx-auto flex w-full max-w-[360px] flex-1 flex-col items-center justify-center py-10 lg:py-16">
+        <Loader2 className="size-5 animate-spin text-muted-foreground" />
+        <p className="mt-2 text-[10px] text-muted-foreground">Carregando...</p>
       </div>
-    </div>
+    </section>
   );
 }

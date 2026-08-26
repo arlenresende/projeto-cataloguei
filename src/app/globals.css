@@ -129,6 +129,16 @@
   }
 }
 
+@utility bg-page {
+  background-color: var(--background);
+}
+
+@utility bg-pattern {
+  background-color: var(--muted);
+  background-image: radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
 @layer utilities {
   .animate-float-1 {
     animation: float-1 5s ease-in-out infinite;

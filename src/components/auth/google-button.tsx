@@ -3,30 +3,10 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
 
-/**
- * Botão "Entrar/Continuar com Google".
- *
- * Dispara `signIn.social({ provider: "google" })` do Better Auth, que
- * redireciona o navegador para a tela de consentimento do Google. Ao
- * voltar, o callback é tratado em `/api/auth/callback/google` e o
- * Better Auth cria a sessão automaticamente (e o usuário, se for
- * o primeiro acesso).
- *
- * O componente gerencia seu próprio estado de loading/erro porque a
- * chamada não passa pelo mesmo `useTransition` do form de e-mail/senha
- * — quando o redirect acontece, o componente é desmontado.
- */
 interface GoogleButtonProps {
-  /**
-   * "signin" → "Entrar com Google"
-   * "signup" → "Continuar com Google"
-   */
   mode?: "signin" | "signup";
-  /** URL para onde o usuário volta após o Google autenticar com sucesso. */
   callbackURL?: string;
-  /** URL para onde o usuário volta se o provedor retornar erro. */
   errorCallbackURL?: string;
   disabled?: boolean;
 }
@@ -52,8 +32,6 @@ export function GoogleButton({
       errorCallbackURL,
     });
 
-    // Se chegou aqui com erro, o redirect não foi disparado.
-    // Em caso de sucesso, o navegador já está navegando para o Google.
     if (authError) {
       setError(
         authError.message ||
@@ -66,18 +44,16 @@ export function GoogleButton({
   const label = mode === "signup" ? "Continuar com Google" : "Entrar com Google";
 
   return (
-    <div className="space-y-2">
-      <Button
+    <div>
+      <button
         type="button"
-        variant="outline"
-        size="lg"
-        className="w-full"
         onClick={handleClick}
         disabled={isDisabled}
+        className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md border border-[#0a0a0a] bg-[#0a0a0a] px-3 text-sm font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50"
       >
         {isLoading ? (
           <>
-            <Loader2 className="size-4 animate-spin" />
+            <Loader2 className="size-3 animate-spin" />
             Redirecionando...
           </>
         ) : (
@@ -86,12 +62,12 @@ export function GoogleButton({
             {label}
           </>
         )}
-      </Button>
+      </button>
 
       {error && (
         <div
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          className="mt-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
         >
           {error}
         </div>
@@ -100,10 +76,6 @@ export function GoogleButton({
   );
 }
 
-/**
- * Logo "G" colorido oficial do Google (4 cores oficiais).
- * Renderizado inline (sem asset) para evitar request extra.
- */
 function GoogleIcon({ className }: { className?: string }) {
   return (
     <svg
