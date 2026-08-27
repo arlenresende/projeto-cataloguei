@@ -129,9 +129,10 @@ export function ContactSection() {
                   <select
                     id="contact-subject"
                     name="subject"
+                    defaultValue=""
                     className="mt-1.5 block w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                   >
-                    <option value="" disabled selected>
+                    <option value="" disabled>
                       Selecione um assunto
                     </option>
                     {SUBJECTS.map((subject) => (

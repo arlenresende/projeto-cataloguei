@@ -8,10 +8,10 @@ interface HeaderProps {
 
 export function Header({ onOpenMenu }: HeaderProps) {
   return (
-    <header className="flex items-center gap-4 border-b border-border px-5 py-4 lg:px-8">
+    <header className="flex items-center gap-4 border-b border-[var(--brand-border)] bg-white px-6 py-3.5 lg:px-8">
       <button
         onClick={onOpenMenu}
-        className="lg:hidden"
+        className="rounded-lg p-1 hover:bg-[var(--brand-tertiary)] lg:hidden"
         aria-label="Abrir navegação"
       >
         <Menu size={20} />
@@ -23,16 +23,16 @@ export function Header({ onOpenMenu }: HeaderProps) {
           size={16}
         />
         <input
-          className="h-9 w-full rounded-full border border-border bg-card pl-10 pr-4 text-xs outline-none focus:border-foreground"
-          placeholder='Buscar produtos, configurações...'
+          className="h-9 w-full rounded-lg border border-[var(--brand-border)] bg-[var(--brand-tertiary)] pl-10 pr-4 text-sm outline-none transition-colors focus:border-[var(--brand-black)] focus:bg-white"
+          placeholder="Buscar produtos, configurações..."
         />
       </div>
 
-      <button className="hidden text-xs text-muted-foreground sm:block">
-        <CircleHelp size={17} />
+      <button className="hidden rounded-lg p-2 text-muted-foreground transition-colors hover:bg-[var(--brand-tertiary)] hover:text-[var(--brand-black)] sm:block">
+        <CircleHelp size={18} />
       </button>
 
-      <span className="hidden size-8 items-center justify-center rounded-full bg-accent text-xs font-bold sm:flex">
+      <span className="hidden size-8 items-center justify-center rounded-lg bg-[var(--brand-yellow)] text-xs font-bold text-[var(--brand-black)] sm:flex">
         CA
       </span>
     </header>

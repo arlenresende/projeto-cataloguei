@@ -1,116 +1,108 @@
 import { THEME_SEGMENTS, THEME_CONFIGS } from "@/lib/themes";
+import { Card } from "@/components/ui/card";
+import { Input, Textarea } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default function SettingsPage() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">Configurações</h1>
+      <PageHeader
+        title="Configurações"
+        subtitle="Gerencie as configurações da sua loja"
+      />
 
       <div className="space-y-6">
-        {/* Store Info */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <Card>
+          <h2 className="text-base font-semibold text-[var(--brand-black)]">
             Informações da Loja
           </h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nome da Loja
-              </label>
-              <input
-                type="text"
-                defaultValue="Minha Loja"
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Descrição
-              </label>
-              <textarea
-                defaultValue="Descrição da minha loja"
-                rows={3}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                WhatsApp
-              </label>
-              <input
-                type="text"
-                defaultValue="5511999999999"
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
-            </div>
+          <div className="mt-5 space-y-4">
+            <Input
+              label="Nome da Loja"
+              defaultValue="Minha Loja"
+            />
+            <Textarea
+              label="Descrição"
+              defaultValue="Descrição da minha loja"
+              rows={3}
+            />
+            <Input
+              label="WhatsApp"
+              defaultValue="5511999999999"
+            />
           </div>
-        </div>
+          <div className="mt-6 flex justify-end">
+            <Button>Salvar alterações</Button>
+          </div>
+        </Card>
 
-        {/* Theme Selection */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Tema</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+        <Card>
+          <h2 className="text-base font-semibold text-[var(--brand-black)]">
+            Tema
+          </h2>
+          <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {THEME_SEGMENTS.map((segment) => {
               const theme = THEME_CONFIGS[segment];
               return (
                 <button
                   key={segment}
-                  className="p-3 rounded-lg border border-gray-200 text-center hover:border-indigo-500 hover:ring-1 hover:ring-indigo-500 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="flex flex-col items-center gap-2 rounded-lg border border-[var(--brand-border)] p-3 text-center transition-all hover:border-[var(--brand-black)] hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-black)]/10"
                 >
                   <div
-                    className="size-8 rounded-full mx-auto mb-2"
+                    className="size-8 rounded-full"
                     style={{ backgroundColor: theme.colors.primary }}
                   />
-                  <span className="text-xs font-medium text-gray-700">
+                  <span className="text-xs font-medium text-[var(--brand-black)]">
                     {theme.name}
                   </span>
                 </button>
               );
             })}
           </div>
-        </div>
+        </Card>
 
-        {/* Custom Colors */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <Card>
+          <h2 className="text-base font-semibold text-[var(--brand-black)]">
             Cores Personalizadas
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="mb-1.5 block text-sm font-medium text-[var(--brand-black)]">
                 Cor Primária
               </label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
                   defaultValue="#2563EB"
-                  className="size-10 rounded border border-gray-200 cursor-pointer"
+                  className="size-10 cursor-pointer rounded-lg border border-[var(--brand-border)]"
                 />
                 <input
                   type="text"
                   defaultValue="#2563EB"
-                  className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="h-10 flex-1 rounded-lg border border-[var(--brand-border)] px-3.5 font-mono text-sm text-[var(--brand-black)] transition-colors focus:border-[var(--brand-black)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-black)]/10"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="mb-1.5 block text-sm font-medium text-[var(--brand-black)]">
                 Cor Secundária
               </label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
                   defaultValue="#1E293B"
-                  className="size-10 rounded border border-gray-200 cursor-pointer"
+                  className="size-10 cursor-pointer rounded-lg border border-[var(--brand-border)]"
                 />
                 <input
                   type="text"
                   defaultValue="#1E293B"
-                  className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="h-10 flex-1 rounded-lg border border-[var(--brand-border)] px-3.5 font-mono text-sm text-[var(--brand-black)] transition-colors focus:border-[var(--brand-black)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-black)]/10"
                 />
               </div>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

@@ -13,13 +13,13 @@ interface StatsGridProps {
 
 export function StatsGrid({ stats }: StatsGridProps) {
   return (
-    <section className="mt-5 grid gap-4 sm:grid-cols-3">
+    <section className="mt-6 grid gap-4 sm:grid-cols-3">
       {stats.map((stat) => (
         <StatCard key={stat.title} title={stat.title} dark={stat.dark}>
-          <p className="mt-5 text-xl font-bold">{stat.value}</p>
+          <p className="mt-4 text-2xl font-bold">{stat.value}</p>
           <p
-            className={`mt-1 text-[11px] ${
-              stat.dark ? "text-background/70" : "text-muted-foreground"
+            className={`mt-1 text-xs ${
+              stat.dark ? "text-white/60" : "text-muted-foreground"
             }`}
           >
             {stat.subtitle}

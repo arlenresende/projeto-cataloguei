@@ -81,6 +81,23 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Brand colors */
+  --brand-yellow: #FFD400;
+  --brand-yellow-hover: #E6BF00;
+  --brand-yellow-active: #CCAA00;
+  --brand-yellow-light: #FFF9DB;
+  --brand-black: #0A0A0A;
+  --brand-black-hover: #1A1A1A;
+  --brand-tertiary: #F5F5F0;
+  --brand-tertiary-hover: #EBEBE5;
+  --brand-border: #E8E8E3;
+  --brand-success: #16A34A;
+  --brand-success-light: #DCFCE7;
+  --brand-error: #DC2626;
+  --brand-error-light: #FEE2E2;
+  --brand-warning: #F59E0B;
+  --brand-warning-light: #FEF3C7;
 }
 
 .dark {

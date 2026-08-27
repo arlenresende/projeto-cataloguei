@@ -1,5 +1,8 @@
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 
 const mockProducts = [
   { id: "1", name: "Fone Bluetooth Pro", price: 299.9, category: "Eletrônicos", status: "Ativo" },
@@ -10,39 +13,41 @@ const mockProducts = [
 export default function ProductsPage() {
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Produtos</h1>
-        <Button>
-          <Plus className="size-4 mr-2" />
-          Novo Produto
-        </Button>
-      </div>
+      <PageHeader
+        title="Produtos"
+        action={
+          <Button>
+            <Plus className="size-4" />
+            Novo Produto
+          </Button>
+        }
+      />
 
-      <div className="bg-white rounded-xl border border-gray-200">
-        <div className="p-4 border-b border-gray-200">
+      <Card noPadding>
+        <div className="border-b border-[var(--brand-border)] p-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Buscar produtos..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="h-10 w-full rounded-lg border border-[var(--brand-border)] bg-[var(--brand-tertiary)] pl-10 pr-4 text-sm outline-none transition-colors focus:border-[var(--brand-black)] focus:bg-white"
             />
           </div>
         </div>
 
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-left text-sm font-medium text-gray-500 px-6 py-3">
+            <tr className="border-b border-[var(--brand-border)]">
+              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Nome
               </th>
-              <th className="text-left text-sm font-medium text-gray-500 px-6 py-3">
+              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Categoria
               </th>
-              <th className="text-left text-sm font-medium text-gray-500 px-6 py-3">
+              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Preço
               </th>
-              <th className="text-left text-sm font-medium text-gray-500 px-6 py-3">
+              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Status
               </th>
             </tr>
@@ -51,30 +56,28 @@ export default function ProductsPage() {
             {mockProducts.map((product) => (
               <tr
                 key={product.id}
-                className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors"
+                className="border-b border-[var(--brand-border)] last:border-0 transition-colors hover:bg-[var(--brand-tertiary)]"
               >
-                <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                <td className="px-5 py-3.5 text-sm font-medium text-[var(--brand-black)]">
                   {product.name}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-600">
+                <td className="px-5 py-3.5 text-sm text-muted-foreground">
                   {product.category}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
+                <td className="px-5 py-3.5 text-sm text-[var(--brand-black)]">
                   {product.price.toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL",
                   })}
                 </td>
-                <td className="px-6 py-4">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    {product.status}
-                  </span>
+                <td className="px-5 py-3.5">
+                  <Badge variant="success">{product.status}</Badge>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </Card>
     </div>
   );
 }
