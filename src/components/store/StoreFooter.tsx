@@ -17,20 +17,21 @@ export function StoreFooter({ name, storeUrl, description, whatsapp }: StoreFoot
     <footer
       className="border-t"
       style={{
-        borderColor: resolvedColors.border,
-        backgroundColor: resolvedColors.cardBg,
+        borderColor: resolvedColors.secondary + "15",
+        backgroundColor: resolvedColors.secondary,
+        color: resolvedColors.cardBg,
       }}
     >
-      <div className="mx-auto max-w-6xl px-4 py-10">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+      <div className="mx-auto max-w-6xl px-4 py-12 md:py-16">
+        <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
           <div className="col-span-2 md:col-span-1">
             <Link
               href={`/${storeUrl}`}
-              className="flex items-center gap-2.5"
+              className="flex items-center gap-3"
               aria-label={`${name} - Página inicial`}
             >
               <span
-                className="flex size-8 items-center justify-center rounded-lg text-sm font-bold"
+                className="flex size-10 items-center justify-center rounded-xl text-base font-extrabold"
                 style={{
                   backgroundColor: resolvedColors.primary,
                   color: resolvedColors.secondary,
@@ -38,29 +39,20 @@ export function StoreFooter({ name, storeUrl, description, whatsapp }: StoreFoot
               >
                 {name.charAt(0)}
               </span>
-              <span
-                className="text-base font-bold"
-                style={{ color: resolvedColors.text }}
-              >
+              <span className="text-xl font-extrabold tracking-tight">
                 {name}
               </span>
             </Link>
-            <p
-              className="mt-3 text-sm"
-              style={{ color: resolvedColors.text, opacity: 0.6 }}
-            >
+            <p className="mt-4 max-w-xs text-sm font-medium opacity-60">
               {description}
             </p>
           </div>
 
           <div>
-            <p
-              className="text-sm font-semibold"
-              style={{ color: resolvedColors.text }}
-            >
+            <p className="text-sm font-bold">
               Navegação
             </p>
-            <ul className="mt-4 space-y-2.5">
+            <ul className="mt-4 space-y-3">
               {[
                 { label: "Produtos", href: `/${storeUrl}` },
                 { label: "Contato", href: `/${storeUrl}#contato` },
@@ -68,8 +60,8 @@ export function StoreFooter({ name, storeUrl, description, whatsapp }: StoreFoot
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm transition-colors"
-                    style={{ color: resolvedColors.text, opacity: 0.6 }}
+                    className="text-sm font-medium transition-colors hover:opacity-100"
+                    style={{ opacity: 0.6 }}
                   >
                     {link.label}
                   </Link>
@@ -79,31 +71,25 @@ export function StoreFooter({ name, storeUrl, description, whatsapp }: StoreFoot
           </div>
 
           <div>
-            <p
-              className="text-sm font-semibold"
-              style={{ color: resolvedColors.text }}
-            >
+            <p className="text-sm font-bold">
               Contato
             </p>
-            <ul className="mt-4 space-y-2.5">
+            <ul className="mt-4 space-y-3">
               {whatsapp && (
                 <li>
                   <a
                     href={`https://wa.me/${whatsapp}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm transition-colors"
-                    style={{ color: resolvedColors.text, opacity: 0.6 }}
+                    className="text-sm font-medium transition-colors hover:opacity-100"
+                    style={{ opacity: 0.6 }}
                   >
                     WhatsApp
                   </a>
                 </li>
               )}
               <li>
-                <span
-                  className="text-sm"
-                  style={{ color: resolvedColors.text, opacity: 0.6 }}
-                >
+                <span className="text-sm font-medium opacity-60">
                   Suporte online
                 </span>
               </li>
@@ -111,20 +97,14 @@ export function StoreFooter({ name, storeUrl, description, whatsapp }: StoreFoot
           </div>
 
           <div>
-            <p
-              className="text-sm font-semibold"
-              style={{ color: resolvedColors.text }}
-            >
+            <p className="text-sm font-bold">
               Informações
             </p>
-            <ul className="mt-4 space-y-2.5">
+            <ul className="mt-4 space-y-3">
               {["Sobre nós", "Política de privacidade", "Termos de uso"].map(
                 (label) => (
                   <li key={label}>
-                    <span
-                      className="text-sm"
-                      style={{ color: resolvedColors.text, opacity: 0.6 }}
-                    >
+                    <span className="text-sm font-medium opacity-60">
                       {label}
                     </span>
                   </li>
@@ -135,13 +115,10 @@ export function StoreFooter({ name, storeUrl, description, whatsapp }: StoreFoot
         </div>
 
         <div
-          className="mt-10 border-t pt-6"
-          style={{ borderColor: resolvedColors.border }}
+          className="mt-12 border-t pt-8"
+          style={{ borderColor: resolvedColors.cardBg + "15" }}
         >
-          <p
-            className="text-center text-xs"
-            style={{ color: resolvedColors.text, opacity: 0.4 }}
-          >
+          <p className="text-center text-xs font-medium opacity-40">
             &copy; {new Date().getFullYear()} {name}. Todos os direitos
             reservados.
           </p>

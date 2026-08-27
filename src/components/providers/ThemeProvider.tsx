@@ -49,6 +49,7 @@ export function ThemeProvider({
           "--theme-border": value.resolvedColors.border,
           background: value.config.background,
           color: value.resolvedColors.text,
+          fontFamily: "var(--font-manrope), system-ui, sans-serif",
         } as React.CSSProperties}
         className="min-h-screen"
       >

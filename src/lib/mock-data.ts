@@ -6,7 +6,9 @@ export const mockProducts: Product[] = [
     name: "Fone Bluetooth Pro",
     description: "Fone de ouvido sem fio com cancelamento de ruído ativo e bateria de 30h.",
     price: 299.9,
+    originalPrice: 399.9,
     imageUrl: "/placeholder-product.svg",
+    images: ["/placeholder-product.svg", "/placeholder-product.svg", "/placeholder-product.svg"],
     category: "Eletrônicos",
   },
   {
@@ -22,7 +24,9 @@ export const mockProducts: Product[] = [
     name: "Carregador Turbo 65W",
     description: "Carregador rápido compatível com múltiplos dispositivos.",
     price: 129.9,
+    originalPrice: 179.9,
     imageUrl: "/placeholder-product.svg",
+    images: ["/placeholder-product.svg", "/placeholder-product.svg"],
     category: "Eletrônicos",
   },
   {
@@ -39,6 +43,7 @@ export const mockProducts: Product[] = [
     description: "Mouse ergonômico com sensor de alta precisão e bateria recarregável.",
     price: 159.9,
     imageUrl: "/placeholder-product.svg",
+    images: ["/placeholder-product.svg", "/placeholder-product.svg"],
     category: "Periféricos",
   },
   {
@@ -46,7 +51,9 @@ export const mockProducts: Product[] = [
     name: "Teclado Mecânico RGB",
     description: "Teclado mecânico com switches hot-swappable e iluminação RGB personalizável.",
     price: 349.9,
+    originalPrice: 449.9,
     imageUrl: "/placeholder-product.svg",
+    images: ["/placeholder-product.svg", "/placeholder-product.svg", "/placeholder-product.svg"],
     category: "Periféricos",
   },
 ];
@@ -59,6 +66,25 @@ export const mockStores: Store[] = [
     description: "Sua loja de tecnologia com os melhores produtos e preços.",
     logoUrl: "/placeholder-logo.svg",
     bannerUrl: "/placeholder-banner.svg",
+    banners: [
+      {
+        image: "/placeholder-banner.svg",
+        title: "Nova Coleção de Tecnologia",
+        description: "Os melhores produtos com os melhores preços. Confira as novidades.",
+        buttonText: "Ver produtos",
+        buttonLink: "#produtos",
+      },
+      {
+        image: "/placeholder-banner.svg",
+        title: "Frete Grátis",
+        description: "Em todos os pedidos acima de R$ 199,90. Aproveite!",
+        buttonText: "Comprar agora",
+        buttonLink: "#produtos",
+      },
+      {
+        image: "/placeholder-banner.svg",
+      },
+    ],
     whatsapp: "5511999999999",
     theme: "DEFAULT",
     products: mockProducts,

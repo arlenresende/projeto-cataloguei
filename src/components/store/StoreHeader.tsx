@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingBag, Menu, X, ChevronRight } from "lucide-react";
+import { Search, ShoppingBag, Menu, X, ChevronRight, User } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "@/components/providers/ThemeProvider";
-import { cn } from "@/lib/utils";
 
 interface StoreHeaderProps {
   name: string;
@@ -18,21 +17,22 @@ export function StoreHeader({ name, storeUrl, categories = [] }: StoreHeaderProp
 
   return (
     <header
-      className="sticky top-0 z-50 border-b backdrop-blur-md"
+      className="sticky top-0 z-50 border-b shadow-sm backdrop-blur-lg"
       style={{
         borderColor: resolvedColors.border,
-        backgroundColor: resolvedColors.cardBg + "E6",
+        backgroundColor: resolvedColors.cardBg + "F5",
       }}
     >
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:h-16">
+      {/* Top bar */}
+      <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between px-4 md:h-[76px]">
         {/* Logo */}
         <Link
           href={`/${storeUrl}`}
-          className="flex items-center gap-2.5"
+          className="flex items-center gap-3"
           aria-label={`${name} - Página inicial`}
         >
           <span
-            className="flex size-8 items-center justify-center rounded-lg text-sm font-bold"
+            className="flex size-10 items-center justify-center rounded-xl text-base font-extrabold"
             style={{
               backgroundColor: resolvedColors.primary,
               color: resolvedColors.secondary,
@@ -41,7 +41,7 @@ export function StoreHeader({ name, storeUrl, categories = [] }: StoreHeaderProp
             {name.charAt(0)}
           </span>
           <span
-            className="text-base font-bold"
+            className="text-xl font-extrabold tracking-tight"
             style={{ color: resolvedColors.text }}
           >
             {name}
@@ -49,34 +49,45 @@ export function StoreHeader({ name, storeUrl, categories = [] }: StoreHeaderProp
         </Link>
 
         {/* Search - desktop */}
-        <div className="hidden flex-1 justify-center md:flex">
-          <div className="relative w-full max-w-sm">
+        <div className="hidden flex-1 justify-center px-10 md:flex">
+          <div className="relative w-full max-w-lg">
             <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 size-4"
-              style={{ color: resolvedColors.text, opacity: 0.4 }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 size-[18px]"
+              style={{ color: resolvedColors.text, opacity: 0.3 }}
             />
             <input
-              className="h-9 w-full rounded-lg border pl-10 pr-4 text-sm outline-none transition-colors"
+              className="h-11 w-full rounded-xl border pl-12 pr-4 text-sm font-medium outline-none transition-all focus:shadow-sm"
               style={{
                 borderColor: resolvedColors.border,
                 backgroundColor: resolvedColors.background,
                 color: resolvedColors.text,
               }}
-              placeholder="Buscar produtos..."
+              placeholder="O que você procura?"
             />
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
-            className="relative rounded-lg p-2 transition-colors"
+            className="hidden rounded-xl p-2.5 transition-colors sm:block"
+            style={{ color: resolvedColors.text, opacity: 0.7 }}
+            aria-label="Minha conta"
+          >
+            <User size={22} />
+          </button>
+          <div
+            className="mx-1 hidden h-5 w-px sm:block"
+            style={{ backgroundColor: resolvedColors.border }}
+          />
+          <button
+            className="relative rounded-xl p-2.5 transition-colors"
             style={{ color: resolvedColors.text }}
             aria-label="Carrinho"
           >
-            <ShoppingBag size={20} />
+            <ShoppingBag size={22} strokeWidth={2} />
             <span
-              className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full text-[10px] font-bold"
+              className="absolute right-0.5 top-0.5 flex size-[18px] items-center justify-center rounded-full text-[10px] font-bold"
               style={{
                 backgroundColor: resolvedColors.primary,
                 color: resolvedColors.secondary,
@@ -87,11 +98,11 @@ export function StoreHeader({ name, storeUrl, categories = [] }: StoreHeaderProp
           </button>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="rounded-lg p-2 md:hidden"
+            className="rounded-xl p-2.5 md:hidden"
             style={{ color: resolvedColors.text }}
             aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
           >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
@@ -100,15 +111,26 @@ export function StoreHeader({ name, storeUrl, categories = [] }: StoreHeaderProp
       {categories.length > 0 && (
         <div
           className="hidden border-t md:block"
-          style={{ borderColor: resolvedColors.border }}
+          style={{
+            borderColor: resolvedColors.border,
+            backgroundColor: resolvedColors.secondary,
+          }}
         >
-          <div className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-2">
+          <div className="mx-auto flex max-w-6xl items-center gap-0 px-4">
             {categories.map((cat) => (
               <Link
                 key={cat}
                 href={`/${storeUrl}?category=${encodeURIComponent(cat)}`}
-                className="text-xs font-medium transition-colors hover:opacity-100"
-                style={{ color: resolvedColors.text, opacity: 0.6 }}
+                className="px-5 py-3 text-sm font-semibold transition-colors"
+                style={{ color: resolvedColors.cardBg + "CC" }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.color = resolvedColors.primary;
+                  (e.target as HTMLElement).style.backgroundColor = resolvedColors.secondary;
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.color = resolvedColors.cardBg + "CC";
+                  (e.target as HTMLElement).style.backgroundColor = "transparent";
+                }}
               >
                 {cat}
               </Link>
@@ -121,22 +143,25 @@ export function StoreHeader({ name, storeUrl, categories = [] }: StoreHeaderProp
       {mobileOpen && (
         <div
           className="border-t md:hidden"
-          style={{ borderColor: resolvedColors.border }}
+          style={{
+            borderColor: resolvedColors.border,
+            backgroundColor: resolvedColors.cardBg,
+          }}
         >
-          <div className="px-4 py-3">
-            <div className="relative mb-3">
+          <div className="px-4 py-5">
+            <div className="relative mb-5">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 size-4"
-                style={{ color: resolvedColors.text, opacity: 0.4 }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 size-[18px]"
+                style={{ color: resolvedColors.text, opacity: 0.3 }}
               />
               <input
-                className="h-9 w-full rounded-lg border pl-10 pr-4 text-sm outline-none"
+                className="h-11 w-full rounded-xl border pl-12 pr-4 text-sm font-medium outline-none"
                 style={{
                   borderColor: resolvedColors.border,
                   backgroundColor: resolvedColors.background,
                   color: resolvedColors.text,
                 }}
-                placeholder="Buscar produtos..."
+                placeholder="O que você procura?"
               />
             </div>
             {categories.length > 0 && (
@@ -146,11 +171,14 @@ export function StoreHeader({ name, storeUrl, categories = [] }: StoreHeaderProp
                     key={cat}
                     href={`/${storeUrl}?category=${encodeURIComponent(cat)}`}
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
-                    style={{ color: resolvedColors.text }}
+                    className="flex items-center justify-between rounded-xl px-4 py-3.5 text-sm font-semibold transition-colors"
+                    style={{
+                      color: resolvedColors.text,
+                      backgroundColor: resolvedColors.background,
+                    }}
                   >
                     {cat}
-                    <ChevronRight size={16} style={{ opacity: 0.4 }} />
+                    <ChevronRight size={16} style={{ opacity: 0.3 }} />
                   </Link>
                 ))}
               </nav>

@@ -6,7 +6,17 @@ export interface Product {
   description: string;
   price: number;
   imageUrl: string;
+  images?: string[];
   category: string;
+  originalPrice?: number;
+}
+
+export interface StoreBanner {
+  image: string;
+  title?: string;
+  description?: string;
+  buttonText?: string;
+  buttonLink?: string;
 }
 
 export interface Store {
@@ -16,6 +26,7 @@ export interface Store {
   description: string;
   logoUrl: string;
   bannerUrl: string;
+  banners?: StoreBanner[];
   whatsapp: string;
   theme: ThemeSegment;
   primaryColor?: string;
