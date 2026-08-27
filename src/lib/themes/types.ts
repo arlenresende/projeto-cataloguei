@@ -1,4 +1,5 @@
 export const THEME_SEGMENTS = [
+  "DEFAULT",
   "TECHNOLOGY",
   "FOOD",
   "FASHION",

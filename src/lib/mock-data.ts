@@ -60,7 +60,7 @@ export const mockStores: Store[] = [
     logoUrl: "/placeholder-logo.svg",
     bannerUrl: "/placeholder-banner.svg",
     whatsapp: "5511999999999",
-    theme: "TECHNOLOGY",
+    theme: "DEFAULT",
     products: mockProducts,
   },
   {

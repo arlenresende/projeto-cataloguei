@@ -1,6 +1,30 @@
 import type { ThemeConfig, ThemeSegment } from "./types";
 
 export const THEME_CONFIGS: Record<ThemeSegment, ThemeConfig> = {
+  DEFAULT: {
+    name: "Padrão",
+    icon: "Store",
+    colors: {
+      primary: "#FFD400",
+      secondary: "#0A0A0A",
+      background: "#FFFFFF",
+      text: "#0A0A0A",
+      accent: "#FFD400",
+      cardBg: "#FFFFFF",
+      border: "#E8E8E3",
+    },
+    fonts: {
+      heading: "Inter, sans-serif",
+      body: "Inter, sans-serif",
+    },
+    components: {
+      button: "rounded-lg font-semibold transition-colors",
+      card: "rounded-xl border",
+      productCard: "rounded-xl border overflow-hidden",
+    },
+    background: "#FFFFFF",
+  },
+
   TECHNOLOGY: {
     name: "Tecnologia",
     icon: "Cpu",
