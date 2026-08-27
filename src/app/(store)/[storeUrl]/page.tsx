@@ -53,6 +53,7 @@ export default async function StorePage({ params, searchParams }: StorePageProps
       <StoreHeader
         name={store.name}
         storeUrl={store.url}
+        whatsapp={store.whatsapp}
         categories={categories}
       />
 

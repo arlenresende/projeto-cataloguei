@@ -1,17 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingBag, Menu, X, ChevronRight, User } from "lucide-react";
+import { Search, ShoppingBag, Menu, X, ChevronRight, Phone } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { CartDrawer } from "./CartDrawer";
 
 interface StoreHeaderProps {
   name: string;
   storeUrl: string;
+  whatsapp?: string;
   categories?: string[];
 }
 
-export function StoreHeader({ name, storeUrl, categories = [] }: StoreHeaderProps) {
+export function StoreHeader({ name, storeUrl, whatsapp, categories = [] }: StoreHeaderProps) {
   const { resolvedColors } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -69,33 +71,41 @@ export function StoreHeader({ name, storeUrl, categories = [] }: StoreHeaderProp
 
         {/* Actions */}
         <div className="flex items-center gap-1.5">
-          <button
-            className="hidden rounded-xl p-2.5 transition-colors sm:block"
-            style={{ color: resolvedColors.text, opacity: 0.7 }}
-            aria-label="Minha conta"
-          >
-            <User size={22} />
-          </button>
+          {whatsapp && (
+            <a
+              href={`https://wa.me/${whatsapp}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden rounded-xl p-2.5 transition-colors sm:block"
+              style={{ color: resolvedColors.text, opacity: 0.7 }}
+              aria-label="Fale conosco"
+              title="Fale conosco"
+            >
+              <Phone size={22} />
+            </a>
+          )}
           <div
             className="mx-1 hidden h-5 w-px sm:block"
             style={{ backgroundColor: resolvedColors.border }}
           />
-          <button
-            className="relative rounded-xl p-2.5 transition-colors"
-            style={{ color: resolvedColors.text }}
-            aria-label="Carrinho"
-          >
-            <ShoppingBag size={22} strokeWidth={2} />
-            <span
-              className="absolute right-0.5 top-0.5 flex size-[18px] items-center justify-center rounded-full text-[10px] font-bold"
-              style={{
-                backgroundColor: resolvedColors.primary,
-                color: resolvedColors.secondary,
-              }}
+          <CartDrawer whatsapp={whatsapp || ""} storeName={name}>
+            <button
+              className="relative rounded-xl p-2.5 transition-colors"
+              style={{ color: resolvedColors.text }}
+              aria-label="Carrinho"
             >
-              0
-            </span>
-          </button>
+              <ShoppingBag size={22} strokeWidth={2} />
+              <span
+                className="absolute right-0.5 top-0.5 flex size-[18px] items-center justify-center rounded-full text-[10px] font-bold"
+                style={{
+                  backgroundColor: resolvedColors.primary,
+                  color: resolvedColors.secondary,
+                }}
+              >
+                2
+              </span>
+            </button>
+          </CartDrawer>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="rounded-xl p-2.5 md:hidden"

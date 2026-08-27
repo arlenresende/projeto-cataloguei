@@ -46,6 +46,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <StoreHeader
         name={store.name}
         storeUrl={store.url}
+        whatsapp={store.whatsapp}
         categories={categories}
       />
 
