@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
+import { Badge } from "@/components/ui/badge";
 
 export function ProductShowcase() {
   return (
     <section
-      className="bg-zinc-50 py-20 md:py-28"
+      className="bg-[var(--brand-tertiary)] py-20 md:py-28"
       aria-labelledby="showcase-title"
     >
       <div className="mx-auto max-w-6xl px-4">
@@ -16,8 +17,8 @@ export function ProductShowcase() {
 
         <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Painel admin */}
-          <article className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <div className="border-b border-zinc-200 bg-zinc-50 px-5 py-3">
+          <article className="overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-white shadow-sm">
+            <div className="border-b border-[var(--brand-border)] bg-[var(--brand-tertiary)] px-5 py-3">
               <div className="flex items-center gap-2">
                 <span className="size-2.5 rounded-full bg-red-400" />
                 <span className="size-2.5 rounded-full bg-yellow-400" />
@@ -26,12 +27,10 @@ export function ProductShowcase() {
             </div>
             <div className="p-6">
               <div className="mb-4 flex items-center justify-between">
-                <p className="text-sm font-semibold text-zinc-900">
+                <p className="text-sm font-semibold text-[var(--brand-black)]">
                   Painel administrativo
                 </p>
-                <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-medium text-violet-700">
-                  Online
-                </span>
+                <Badge variant="success">Online</Badge>
               </div>
 
               <div className="space-y-3">
@@ -42,33 +41,33 @@ export function ProductShowcase() {
                 ].map((item) => (
                   <div
                     key={item.name}
-                    className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50/50 px-3 py-2.5"
+                    className="flex items-center justify-between rounded-lg border border-[var(--brand-border)] bg-[var(--brand-tertiary)] px-3 py-2.5"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="size-9 rounded-md bg-violet-100" />
+                      <div className="size-9 rounded-md bg-[var(--brand-yellow-light)]" />
                       <div>
-                        <p className="text-xs font-medium text-zinc-900">
+                        <p className="text-xs font-medium text-[var(--brand-black)]">
                           {item.name}
                         </p>
-                        <p className="text-[10px] text-zinc-500">
+                        <p className="text-[10px] text-muted-foreground">
                           Estoque: {item.stock}
                         </p>
                       </div>
                     </div>
-                    <span className="text-xs font-semibold text-violet-600">
+                    <span className="text-xs font-semibold text-[var(--brand-black)]">
                       {item.price}
                     </span>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-4 flex items-center justify-between border-t border-zinc-200 pt-4">
-                <span className="text-[11px] text-zinc-500">
+              <div className="mt-4 flex items-center justify-between border-t border-[var(--brand-border)] pt-4">
+                <span className="text-xs text-muted-foreground">
                   3 de 24 produtos
                 </span>
                 <Link
                   href="#"
-                  className="inline-flex items-center text-xs font-medium text-violet-600 hover:text-violet-700 hover:underline"
+                  className="inline-flex items-center text-xs font-medium text-[var(--brand-black)] hover:underline"
                 >
                   Ver todos
                   <ArrowRight className="ml-1 size-3" />
@@ -78,22 +77,22 @@ export function ProductShowcase() {
           </article>
 
           {/* Loja pública */}
-          <article className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <div className="border-b border-zinc-200 bg-zinc-50 px-5 py-3">
+          <article className="overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-white shadow-sm">
+            <div className="border-b border-[var(--brand-border)] bg-[var(--brand-tertiary)] px-5 py-3">
               <div className="flex items-center gap-2">
                 <span className="size-2.5 rounded-full bg-red-400" />
                 <span className="size-2.5 rounded-full bg-yellow-400" />
                 <span className="size-2.5 rounded-full bg-green-400" />
               </div>
             </div>
-            <div className="bg-gradient-to-b from-violet-50/40 to-white p-6">
+            <div className="bg-gradient-to-b from-[var(--brand-tertiary)] to-white p-6">
               <div className="mb-5 flex items-center gap-3">
-                <div className="size-10 rounded-lg bg-violet-600" />
+                <div className="size-10 rounded-lg bg-[var(--brand-yellow)]" />
                 <div>
-                  <p className="text-sm font-semibold text-zinc-900">
+                  <p className="text-sm font-semibold text-[var(--brand-black)]">
                     TechStore
                   </p>
-                  <p className="text-[10px] text-zinc-500">
+                  <p className="text-[10px] text-muted-foreground">
                     Tecnologia com os melhores preços
                   </p>
                 </div>
@@ -101,21 +100,21 @@ export function ProductShowcase() {
 
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { name: "Fone Pro", price: "R$ 299", tone: "from-violet-100 to-violet-50" },
-                  { name: "Mouse Gamer", price: "R$ 159", tone: "from-zinc-200 to-zinc-100" },
+                  { name: "Fone Pro", price: "R$ 299", tone: "from-[var(--brand-yellow-light)] to-[var(--brand-tertiary)]" },
+                  { name: "Mouse Gamer", price: "R$ 159", tone: "from-[var(--brand-tertiary)] to-white" },
                 ].map((item) => (
                   <div
                     key={item.name}
-                    className="overflow-hidden rounded-lg border border-zinc-200 bg-white"
+                    className="overflow-hidden rounded-lg border border-[var(--brand-border)] bg-white"
                   >
                     <div
                       className={`aspect-square bg-gradient-to-br ${item.tone}`}
                     />
                     <div className="p-2.5">
-                      <p className="text-[11px] font-medium text-zinc-900">
+                      <p className="text-[11px] font-medium text-[var(--brand-black)]">
                         {item.name}
                       </p>
-                      <p className="text-[11px] font-semibold text-violet-600">
+                      <p className="text-[11px] font-semibold text-[var(--brand-black)]">
                         {item.price}
                       </p>
                     </div>
@@ -123,7 +122,7 @@ export function ProductShowcase() {
                 ))}
               </div>
 
-              <div className="mt-4 rounded-lg bg-violet-600 px-3 py-2 text-center text-xs font-semibold text-white">
+              <div className="mt-4 rounded-lg bg-[var(--brand-yellow)] px-3 py-2 text-center text-xs font-semibold text-[var(--brand-black)]">
                 Comprar pelo WhatsApp
               </div>
             </div>

@@ -63,11 +63,11 @@ export function FeatureTabs() {
         <div className="mx-auto max-w-3xl text-center">
           <h2
             id="tabs-title"
-            className="text-3xl font-bold tracking-tight text-gray-900 md:text-4xl lg:text-5xl"
+            className="text-3xl font-bold tracking-tight text-[var(--brand-black)] md:text-4xl lg:text-5xl"
           >
             Gerencie seu catálogo de forma simples
           </h2>
-          <p className="mt-4 text-base text-gray-600 md:text-lg">
+          <p className="mt-4 text-base text-muted-foreground md:text-lg">
             Em poucos passos você coloca sua loja no ar e começa a vender.
           </p>
         </div>
@@ -90,11 +90,11 @@ export function FeatureTabs() {
                 id={`tab-${tab.id}`}
                 onClick={() => setActive(tab.id)}
                 className={cn(
-                "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "border-zinc-900 bg-zinc-900 text-white"
-                  : "border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 hover:text-zinc-900"
-              )}
+                  "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "border-[var(--brand-black)] bg-[var(--brand-black)] text-white"
+                    : "border-[var(--brand-border)] bg-white text-muted-foreground hover:border-[var(--brand-black)]/30 hover:text-[var(--brand-black)]"
+                )}
               >
                 <TabIcon className="size-4" />
                 {tab.label}
@@ -107,27 +107,27 @@ export function FeatureTabs() {
           role="tabpanel"
           id={`panel-${current.id}`}
           aria-labelledby={`tab-${current.id}`}
-          className="mt-10 grid grid-cols-1 items-center gap-10 rounded-2xl border border-zinc-200 bg-zinc-50/50 p-8 md:grid-cols-2 md:p-12"
+          className="mt-10 grid grid-cols-1 items-center gap-10 rounded-2xl border border-[var(--brand-border)] bg-[var(--brand-tertiary)] p-8 md:grid-cols-2 md:p-12"
         >
           <div>
             <span
-              className="flex size-12 items-center justify-center rounded-full bg-violet-100 text-violet-600"
+              className="flex size-12 items-center justify-center rounded-full bg-[var(--brand-yellow)] text-[var(--brand-black)]"
               aria-hidden="true"
             >
               <Icon className="size-5" />
             </span>
-            <h3 className="mt-5 text-2xl font-bold tracking-tight text-zinc-900 md:text-3xl">
+            <h3 className="mt-5 text-2xl font-bold tracking-tight text-[var(--brand-black)] md:text-3xl">
               {current.title}
             </h3>
-            <p className="mt-3 text-base text-zinc-500">{current.description}</p>
+            <p className="mt-3 text-base text-muted-foreground">{current.description}</p>
             <ul className="mt-6 space-y-3">
               {current.bullets.map((bullet) => (
                 <li
                   key={bullet}
-                  className="flex items-start gap-3 text-sm text-zinc-700"
+                  className="flex items-start gap-3 text-sm text-[var(--brand-black)]"
                 >
                   <span
-                    className="mt-1 size-1.5 shrink-0 rounded-full bg-violet-600"
+                    className="mt-1 size-1.5 shrink-0 rounded-full bg-[var(--brand-yellow)]"
                     aria-hidden="true"
                   />
                   {bullet}
@@ -146,10 +146,10 @@ export function FeatureTabs() {
 function FeaturePreview({ tab }: { tab: TabId }) {
   if (tab === "catalog") {
     return (
-      <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+      <div className="rounded-xl border border-[var(--brand-border)] bg-white p-4 shadow-sm">
         <div className="mb-3 flex items-center justify-between">
-          <p className="text-xs font-semibold text-zinc-900">Meus produtos</p>
-          <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-medium text-violet-700">
+          <p className="text-xs font-semibold text-[var(--brand-black)]">Meus produtos</p>
+          <span className="rounded-full bg-[var(--brand-yellow-light)] px-2 py-0.5 text-[10px] font-medium text-[var(--brand-black)]">
             24 itens
           </span>
         </div>
@@ -157,12 +157,12 @@ function FeaturePreview({ tab }: { tab: TabId }) {
           {["Camiseta", "Tênis", "Bolsa", "Relógio"].map((item) => (
             <div
               key={item}
-              className="overflow-hidden rounded-lg border border-zinc-200"
+              className="overflow-hidden rounded-lg border border-[var(--brand-border)]"
             >
-              <div className="aspect-square bg-gradient-to-br from-violet-100 to-violet-50" />
+              <div className="aspect-square bg-gradient-to-br from-[var(--brand-yellow-light)] to-[var(--brand-tertiary)]" />
               <div className="p-2">
-                <p className="text-[10px] font-medium text-zinc-900">{item}</p>
-                <p className="text-[10px] font-semibold text-violet-600">
+                <p className="text-[10px] font-medium text-[var(--brand-black)]">{item}</p>
+                <p className="text-[10px] font-semibold text-[var(--brand-black)]">
                   R$ 99
                 </p>
               </div>
@@ -175,28 +175,28 @@ function FeaturePreview({ tab }: { tab: TabId }) {
 
   if (tab === "themes") {
     const swatches = [
-      { from: "from-violet-500", to: "to-indigo-500", label: "Moda" },
+      { from: "from-[var(--brand-yellow)]", to: "to-amber-400", label: "Moda" },
       { from: "from-rose-500", to: "to-pink-500", label: "Beleza" },
       { from: "from-emerald-500", to: "to-teal-500", label: "Food" },
-      { from: "from-zinc-700", to: "to-zinc-500", label: "Tech" },
+      { from: "from-[var(--brand-black)]", to: "to-zinc-700", label: "Tech" },
     ];
     return (
       <div className="grid grid-cols-2 gap-3">
         {swatches.map((s) => (
           <div
             key={s.label}
-            className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm"
+            className="overflow-hidden rounded-xl border border-[var(--brand-border)] bg-white shadow-sm"
           >
             <div
               className={`flex h-20 items-end bg-gradient-to-br ${s.from} ${s.to} p-3`}
             >
-              <span className="rounded-md bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-zinc-900">
+              <span className="rounded-md bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-[var(--brand-black)]">
                 {s.label}
               </span>
             </div>
             <div className="p-3">
-              <div className="h-1.5 w-3/4 rounded-full bg-zinc-100" />
-              <div className="mt-2 h-1.5 w-1/2 rounded-full bg-zinc-100" />
+              <div className="h-1.5 w-3/4 rounded-full bg-[var(--brand-tertiary)]" />
+              <div className="mt-2 h-1.5 w-1/2 rounded-full bg-[var(--brand-tertiary)]" />
             </div>
           </div>
         ))}
@@ -205,17 +205,17 @@ function FeaturePreview({ tab }: { tab: TabId }) {
   }
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <div className="flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2">
-        <Share2 className="size-4 text-zinc-500" />
-        <span className="text-xs text-zinc-500">cataloguei.com.br/</span>
-        <span className="text-xs font-semibold text-zinc-900">sualoja</span>
+    <div className="rounded-xl border border-[var(--brand-border)] bg-white p-6 shadow-sm">
+      <div className="flex items-center gap-2 rounded-lg bg-[var(--brand-tertiary)] px-3 py-2">
+        <Share2 className="size-4 text-muted-foreground" />
+        <span className="text-xs text-muted-foreground">cataloguei.com.br/</span>
+        <span className="text-xs font-semibold text-[var(--brand-black)]">sualoja</span>
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
         {["Instagram", "WhatsApp", "TikTok", "Facebook"].map((social) => (
           <span
             key={social}
-            className="rounded-full border border-zinc-200 px-3 py-1 text-xs font-medium text-zinc-600"
+            className="rounded-full border border-[var(--brand-border)] px-3 py-1 text-xs font-medium text-muted-foreground"
           >
             Compartilhar no {social}
           </span>
@@ -229,10 +229,10 @@ function FeaturePreview({ tab }: { tab: TabId }) {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="rounded-lg bg-zinc-50 p-2"
+            className="rounded-lg bg-[var(--brand-tertiary)] p-2"
           >
-            <p className="text-base font-bold text-zinc-900">{stat.value}</p>
-            <p className="text-[10px] text-zinc-500">{stat.label}</p>
+            <p className="text-base font-bold text-[var(--brand-black)]">{stat.value}</p>
+            <p className="text-[10px] text-muted-foreground">{stat.label}</p>
           </div>
         ))}
       </div>

@@ -48,29 +48,29 @@ const CHANNELS = [
 export function IntegrationsList() {
   return (
     <section
-      className="bg-zinc-50 py-20 md:py-28"
+      className="bg-[var(--brand-tertiary)] py-20 md:py-28"
       aria-labelledby="divulgacao-title"
     >
       <div className="mx-auto max-w-6xl px-4">
         <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
           <div>
-            <p className="mb-3 text-sm font-medium uppercase tracking-wider text-violet-600">
+            <p className="mb-3 text-sm font-medium uppercase tracking-wider text-[var(--brand-black)]">
               DIVULGAÇÃO
             </p>
             <h2
               id="divulgacao-title"
-              className="text-3xl font-bold tracking-tight text-zinc-900 md:text-4xl"
+              className="text-3xl font-bold tracking-tight text-[var(--brand-black)] md:text-4xl"
             >
               Leve sua página para onde seus clientes estão
             </h2>
-            <p className="mt-4 text-base text-zinc-500 md:text-lg">
+            <p className="mt-4 text-base text-muted-foreground md:text-lg">
               Compartilhe seu catálogo em poucos cliques e facilite o contato
               com quem quer comprar ou pedir um orçamento.
             </p>
-            <p className="mt-6 text-sm font-medium text-zinc-700">
+            <p className="mt-6 text-sm font-semibold text-[var(--brand-black)]">
               Feito para pequenos negócios
             </p>
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Uma página profissional para divulgar seu trabalho onde seus
               clientes já estão.
             </p>
@@ -80,17 +80,17 @@ export function IntegrationsList() {
             {CHANNELS.map(({ icon: Icon, name, description }) => (
               <li
                 key={name}
-                className="flex items-start gap-4 rounded-xl border border-zinc-200 bg-white p-4 transition-shadow hover:shadow-sm"
+                className="flex items-start gap-4 rounded-xl border border-[var(--brand-border)] bg-white p-4 transition-shadow hover:shadow-sm"
               >
                 <span
-                  className="flex size-10 shrink-0 items-center justify-center rounded-full bg-violet-50 text-violet-600"
+                  className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--brand-yellow-light)] text-[var(--brand-black)]"
                   aria-hidden="true"
                 >
                   <Icon className="size-5" />
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-zinc-900">{name}</p>
-                  <p className="mt-0.5 text-sm text-zinc-500">{description}</p>
+                  <p className="text-sm font-semibold text-[var(--brand-black)]">{name}</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
                 </div>
               </li>
             ))}

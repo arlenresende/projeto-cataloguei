@@ -11,12 +11,12 @@ import {
 export function HeroVisual() {
   return (
     <div
-      className="relative mx-auto mt-24 w-full max-w-4xl"
+      className="relative mx-auto mt-16 w-full max-w-4xl md:mt-24"
       aria-hidden="true"
     >
       {/* Glow background */}
       <div
-        className="absolute inset-0 -z-10 mx-auto h-full w-3/4 rounded-[40%] bg-gradient-to-tr from-violet-200/40 via-violet-100/30 to-transparent blur-3xl"
+        className="absolute inset-0 -z-10 mx-auto h-full w-3/4 rounded-[40%] bg-gradient-to-tr from-[var(--brand-yellow)]/20 via-[var(--brand-yellow)]/10 to-transparent blur-3xl"
         aria-hidden="true"
       />
 
@@ -25,7 +25,7 @@ export function HeroVisual() {
         {/* Left side */}
         <OrbitIcon
           className="left-0 top-8"
-          color="bg-violet-100 text-violet-600"
+          color="bg-[var(--brand-yellow-light)] text-[var(--brand-black)]"
           shape="rounded-2xl"
           label="Shopify"
           icon={<Box className="size-6" />}
@@ -34,7 +34,7 @@ export function HeroVisual() {
         />
         <OrbitIcon
           className="left-4 top-1/2 -translate-y-1/2"
-          color="bg-violet-200 text-violet-700"
+          color="bg-[var(--brand-yellow)] text-[var(--brand-black)]"
           shape="rounded-2xl"
           label="Instagram"
           icon={<Camera className="size-6" />}
@@ -43,7 +43,7 @@ export function HeroVisual() {
         />
         <OrbitIcon
           className="left-0 bottom-8"
-          color="bg-violet-50 text-violet-600"
+          color="bg-[var(--brand-tertiary)] text-[var(--brand-black)]"
           shape="rounded-2xl"
           label="Loja"
           icon={<ShoppingBag className="size-6" />}
@@ -53,7 +53,7 @@ export function HeroVisual() {
         {/* Right side */}
         <OrbitIcon
           className="right-0 top-8"
-          color="bg-violet-100 text-violet-700"
+          color="bg-[var(--brand-yellow-light)] text-[var(--brand-black)]"
           shape="rounded-full"
           label="WhatsApp"
           icon={<MessageCircle className="size-6" />}
@@ -62,7 +62,7 @@ export function HeroVisual() {
         />
         <OrbitIcon
           className="right-4 top-1/2 -translate-y-1/2"
-          color="bg-violet-200 text-violet-600"
+          color="bg-[var(--brand-yellow)] text-[var(--brand-black)]"
           shape="rounded-2xl"
           label="Pix"
           icon={<Heart className="size-6" />}
@@ -71,7 +71,7 @@ export function HeroVisual() {
         />
         <OrbitIcon
           className="right-0 bottom-8"
-          color="bg-violet-50 text-violet-700"
+          color="bg-[var(--brand-tertiary)] text-[var(--brand-black)]"
           shape="rounded-full"
           label="Google"
           icon={<Search className="size-6" />}
@@ -83,27 +83,27 @@ export function HeroVisual() {
       {/* Central mockup: catálogo + notificação */}
       <div className="relative mx-auto flex max-w-2xl items-center justify-center">
         {/* Catalog card */}
-        <div className="w-full overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl shadow-violet-100/60">
-          <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-3">
+        <div className="w-full overflow-hidden rounded-2xl border border-[var(--brand-border)] bg-white shadow-2xl shadow-black/5">
+          <div className="flex items-center justify-between border-b border-[var(--brand-border)] px-5 py-3">
             <div className="flex items-center gap-2">
               <span className="size-2.5 rounded-full bg-red-400" />
               <span className="size-2.5 rounded-full bg-yellow-400" />
               <span className="size-2.5 rounded-full bg-green-400" />
             </div>
             <div className="flex-1 px-6">
-              <div className="mx-auto h-6 max-w-xs rounded-md bg-zinc-50 text-center text-[10px] leading-6 text-zinc-500">
+              <div className="mx-auto h-6 max-w-xs rounded-md bg-[var(--brand-tertiary)] text-center text-[10px] leading-6 text-muted-foreground">
                 cataloguei.com.br/techstore
               </div>
             </div>
             <div className="size-6" />
           </div>
 
-          <div className="bg-gradient-to-b from-violet-50/40 to-white px-6 py-6">
+          <div className="bg-gradient-to-b from-[var(--brand-tertiary)] to-white px-6 py-6">
             <div className="mb-4 flex items-center gap-3">
-              <div className="size-10 rounded-lg bg-violet-600" />
+              <div className="size-10 rounded-lg bg-[var(--brand-yellow)]" />
               <div>
-                <p className="text-sm font-semibold text-zinc-900">TechStore</p>
-                <p className="text-[11px] text-zinc-500">
+                <p className="text-sm font-semibold text-[var(--brand-black)]">TechStore</p>
+                <p className="text-[11px] text-muted-foreground">
                   Os melhores produtos de tecnologia
                 </p>
               </div>
@@ -111,20 +111,20 @@ export function HeroVisual() {
 
             <div className="grid grid-cols-3 gap-3">
               {[
-                { name: "Fone Pro", price: "R$ 299", tone: "bg-violet-50" },
-                { name: "Capa Premium", price: "R$ 49", tone: "bg-violet-100" },
-                { name: "Carregador 65W", price: "R$ 129", tone: "bg-zinc-100" },
+                { name: "Fone Pro", price: "R$ 299", tone: "bg-[var(--brand-yellow-light)]" },
+                { name: "Capa Premium", price: "R$ 49", tone: "bg-[var(--brand-tertiary)]" },
+                { name: "Carregador 65W", price: "R$ 129", tone: "bg-[var(--brand-tertiary)]" },
               ].map((item) => (
                 <div
                   key={item.name}
-                  className="overflow-hidden rounded-lg border border-zinc-200 bg-white"
+                  className="overflow-hidden rounded-lg border border-[var(--brand-border)] bg-white"
                 >
                   <div className={`aspect-square ${item.tone}`} />
                   <div className="p-2">
-                    <p className="text-[10px] font-medium text-zinc-900">
+                    <p className="text-[10px] font-medium text-[var(--brand-black)]">
                       {item.name}
                     </p>
-                    <p className="text-[10px] font-semibold text-violet-600">
+                    <p className="text-[10px] font-semibold text-[var(--brand-black)]">
                       {item.price}
                     </p>
                   </div>
@@ -136,28 +136,28 @@ export function HeroVisual() {
 
         {/* Floating notification card */}
         <div
-          className="absolute -bottom-6 left-4 w-56 rounded-xl border border-zinc-200 bg-white p-3 shadow-xl shadow-violet-100 md:-bottom-8 md:left-8 animate-float-1"
+          className="absolute -bottom-6 left-4 w-56 rounded-xl border border-[var(--brand-border)] bg-white p-3 shadow-xl shadow-black/5 md:-bottom-8 md:left-8 animate-float-1"
           style={{ animationDelay: "-0.4s" }}
         >
           <div className="flex items-start gap-2">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-600">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--brand-yellow-light)] text-[var(--brand-black)]">
               <MessageCircle className="size-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-semibold text-zinc-900">
+              <p className="text-[11px] font-semibold text-[var(--brand-black)]">
                 Novo pedido recebido
               </p>
-              <p className="truncate text-[10px] text-zinc-500">
+              <p className="truncate text-[10px] text-muted-foreground">
                 Maria comprou 1x Fone Pro
               </p>
-              <p className="mt-1 text-[10px] text-violet-600">há 2 min</p>
+              <p className="mt-1 text-[10px] text-[var(--brand-black)]/60">há 2 min</p>
             </div>
           </div>
         </div>
 
         {/* Floating rating card */}
         <div
-          className="absolute -top-4 right-4 hidden rounded-xl border border-zinc-200 bg-white p-3 shadow-xl shadow-violet-100 md:right-12 md:block animate-float-2"
+          className="absolute -top-4 right-4 hidden rounded-xl border border-[var(--brand-border)] bg-white p-3 shadow-xl shadow-black/5 md:right-12 md:block animate-float-2"
           style={{ animationDelay: "-1.5s" }}
         >
           <div className="flex items-center gap-2">
@@ -165,15 +165,15 @@ export function HeroVisual() {
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
-                  className="size-3.5 fill-yellow-400 text-yellow-400"
+                  className="size-3.5 fill-[var(--brand-yellow)] text-[var(--brand-yellow)]"
                 />
               ))}
             </div>
-            <span className="text-[11px] font-semibold text-zinc-900">
+            <span className="text-[11px] font-semibold text-[var(--brand-black)]">
               4.9/5
             </span>
           </div>
-          <p className="mt-1 text-[10px] text-zinc-500">
+          <p className="mt-1 text-[10px] text-muted-foreground">
             +1.200 lojistas ativos
           </p>
         </div>

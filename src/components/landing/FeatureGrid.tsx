@@ -64,23 +64,23 @@ export function FeatureGrid() {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12 md:gap-8">
           {/* Heading column */}
           <div className="md:col-span-5 md:pt-2">
-            <p className="text-sm font-medium uppercase tracking-wider text-violet-600">
+            <p className="text-sm font-medium uppercase tracking-wider text-[var(--brand-black)]">
               RECURSOS
             </p>
             <h2
               id="features-title"
-              className="mt-3 text-3xl font-bold leading-tight tracking-tight text-zinc-900 md:text-4xl lg:text-5xl"
+              className="mt-3 text-3xl font-bold leading-tight tracking-tight text-[var(--brand-black)] md:text-4xl lg:text-5xl"
             >
               Tudo que você precisa para{" "}
               <span className="relative inline-block">
                 <span className="relative z-10">vender seu negócio online</span>
                 <span
-                  className="absolute inset-x-0 bottom-1 -z-0 h-3 rounded bg-violet-200 md:bottom-2 md:h-4"
+                  className="absolute inset-x-0 bottom-1 -z-0 h-3 rounded bg-[var(--brand-yellow)]/40 md:bottom-2 md:h-4"
                   aria-hidden="true"
                 />
               </span>
             </h2>
-            <p className="mt-4 max-w-md text-base text-zinc-500 md:text-lg">
+            <p className="mt-4 max-w-md text-base text-muted-foreground md:text-lg">
               Crie uma página profissional para apresentar seus produtos ou
               serviços e receba pedidos e orçamentos direto pelo WhatsApp.
             </p>
@@ -93,28 +93,28 @@ export function FeatureGrid() {
               return (
                 <li
                   key={feature.title}
-                  className="group flex h-full flex-col justify-between rounded-2xl border border-zinc-200 bg-white p-6 transition-all hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md"
+                  className="group flex h-full flex-col justify-between rounded-2xl border border-[var(--brand-border)] bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <div>
                     <span
-                      className="inline-flex size-10 items-center justify-center rounded-lg bg-violet-50 text-violet-600 transition-colors group-hover:bg-violet-100"
+                      className="inline-flex size-10 items-center justify-center rounded-lg bg-[var(--brand-yellow-light)] text-[var(--brand-black)] transition-colors group-hover:bg-[var(--brand-yellow)]"
                       aria-hidden="true"
                     >
                       <Icon className="size-5" />
                     </span>
-                    <h3 className="mt-5 text-base font-semibold leading-snug text-zinc-900 md:text-lg">
+                    <h3 className="mt-4 text-base font-semibold leading-snug text-[var(--brand-black)]">
                       {feature.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                       {feature.description}
                     </p>
                   </div>
-                  <div className="mt-6 flex items-center justify-between">
-                    <span className="text-sm text-zinc-500">
+                  <div className="mt-5 flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
                       {feature.category}
                     </span>
                     <span
-                      className="inline-flex size-8 items-center justify-center rounded-full border border-zinc-200 text-zinc-700 transition-all group-hover:border-zinc-900 group-hover:bg-zinc-900 group-hover:text-white"
+                      className="inline-flex size-8 items-center justify-center rounded-full border border-[var(--brand-border)] text-muted-foreground transition-all group-hover:border-[var(--brand-black)] group-hover:bg-[var(--brand-black)] group-hover:text-white"
                       aria-hidden="true"
                     >
                       <ArrowUpRight className="size-4" />
