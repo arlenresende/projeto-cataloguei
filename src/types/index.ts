@@ -3,11 +3,17 @@ import type { ThemeSegment } from "@/lib/themes";
 export interface Product {
   id: string;
   name: string;
+  slug?: string;
   description: string;
   price: number;
+  compareAtPrice?: number | null;
   imageUrl: string;
   images?: string[];
   category: string;
+  categoryId?: string | null;
+  brand?: string;
+  stock?: number;
+  featured?: boolean;
   originalPrice?: number;
 }
 

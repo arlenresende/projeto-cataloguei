@@ -13,6 +13,10 @@ export async function getPublicStoreBySlug(slug: string) {
       products: {
         where: { active: true },
         orderBy: { position: "asc" },
+        include: {
+          images: { orderBy: { position: "asc" } },
+          categoryRel: { select: { id: true, name: true, slug: true } },
+        },
       },
       heroes: {
         where: { isActive: true },
@@ -69,10 +73,17 @@ export async function getPublicStoreBySlug(slug: string) {
     products: store.products.map((p) => ({
       id: p.id,
       name: p.name,
-      description: p.description || "",
+      slug: p.slug,
+      description: p.descriptionHtml || "",
       price: Number(p.price),
+      compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
       imageUrl: p.imageUrl || "/placeholder-product.svg",
-      category: p.category || "Sem categoria",
+      images: p.images.map((img) => img.url),
+      category: p.categoryRel?.name || p.category || "Sem categoria",
+      categoryId: p.categoryId,
+      brand: p.brand || "",
+      stock: p.stock,
+      featured: p.featured,
     })),
   };
 }

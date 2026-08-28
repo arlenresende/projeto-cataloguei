@@ -18,10 +18,11 @@ export function ProductCard({ product, storeUrl, whatsapp }: ProductCardProps) {
   const images = product.images?.length ? product.images : [product.imageUrl];
   const [imgIndex, setImgIndex] = useState(0);
   const hasMultiple = images.length > 1;
+  const comparePrice = product.compareAtPrice || product.originalPrice;
   const discount =
-    product.originalPrice && product.originalPrice > product.price
+    comparePrice && comparePrice > product.price
       ? Math.round(
-          ((product.originalPrice - product.price) / product.originalPrice) * 100
+          ((comparePrice - product.price) / comparePrice) * 100
         )
       : null;
 
@@ -57,7 +58,7 @@ export function ProductCard({ product, storeUrl, whatsapp }: ProductCardProps) {
     >
       {/* Image — clickable */}
       <Link
-        href={`/${storeUrl}/product/${product.id}`}
+        href={`/${storeUrl}/product/${product.slug || product.id}`}
         className="relative block aspect-[4/3] w-full overflow-hidden"
       >
         <Image
@@ -133,12 +134,12 @@ export function ProductCard({ product, storeUrl, whatsapp }: ProductCardProps) {
         </h3>
 
         <div className="mt-3 flex items-baseline gap-2">
-          {product.originalPrice && product.originalPrice > product.price && (
+          {comparePrice && comparePrice > product.price && (
             <span
               className="text-xs font-medium line-through"
               style={{ color: resolvedColors.text, opacity: 0.35 }}
             >
-              {product.originalPrice.toLocaleString("pt-BR", {
+              {comparePrice.toLocaleString("pt-BR", {
                 style: "currency",
                 currency: "BRL",
               })}
@@ -158,7 +159,7 @@ export function ProductCard({ product, storeUrl, whatsapp }: ProductCardProps) {
         {/* Action buttons */}
         <div className="mt-4 flex flex-col gap-2">
           <Link
-            href={`/${storeUrl}/product/${product.id}`}
+            href={`/${storeUrl}/product/${product.slug || product.id}`}
             className="flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold transition-all hover:shadow-md"
             style={{
               backgroundColor: resolvedColors.primary,

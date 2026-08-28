@@ -140,25 +140,57 @@ model Store {
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  price       Decimal  @db.Decimal(10, 2)
-  imageUrl    String?
-  category    String?
-  categoryId  String?
-  active      Boolean  @default(true)
-  position    Int      @default(0)
-  storeId     String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String    @id @default(cuid())
+  storeId         String
+  categoryId      String?
+  name            String
+  slug            String
+  description     Json?
+  descriptionHtml String?
+  sku             String?
+  barcode         String?
+  brand           String?
+  price           Decimal   @db.Decimal(10, 2)
+  compareAtPrice  Decimal?  @db.Decimal(10, 2)
+  stock           Int       @default(0)
+  minStock        Int?
+  weight          Decimal?  @db.Decimal(10, 3)
+  imageUrl        String?
+  category        String?
+  active          Boolean   @default(true)
+  featured        Boolean   @default(false)
+  position        Int       @default(0)
+  seoTitle        String?
+  seoDescription  String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  store    Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  categoryRel Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  store       Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  categoryRel Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  images      ProductImage[]
 
-  @@index([storeId, category])
+  @@unique([storeId, slug])
+  @@unique([storeId, sku])
+  @@index([storeId])
   @@index([categoryId])
+  @@index([storeId, active])
+  @@index([storeId, category])
   @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  url       String
+  alt       String?
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([productId, position])
+  @@map("product_images")
 }
 
 model Category {

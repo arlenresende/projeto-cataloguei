@@ -72,6 +72,7 @@ async function main() {
   const productsData = [
     {
       name: "Fone Bluetooth Pro",
+      slug: "fone-bluetooth-pro",
       description:
         "Fone de ouvido sem fio com cancelamento de ruído ativo e bateria de 30h.",
       price: "299.90",
@@ -80,6 +81,7 @@ async function main() {
     },
     {
       name: "Capa Silicone Premium",
+      slug: "capa-silicone-premium",
       description:
         "Capa de silicone de alta qualidade com proteção contra quedas.",
       price: "49.90",
@@ -88,6 +90,7 @@ async function main() {
     },
     {
       name: "Carregador Turbo 65W",
+      slug: "carregador-turbo-65w",
       description:
         "Carregador rápido compatível com múltiplos dispositivos USB-C.",
       price: "129.90",
@@ -96,6 +99,7 @@ async function main() {
     },
     {
       name: "Suporte para Notebook",
+      slug: "suporte-para-notebook",
       description:
         "Suporte ergonômico em alumínio ajustável para notebooks de até 17 polegadas.",
       price: "189.90",
@@ -104,6 +108,7 @@ async function main() {
     },
     {
       name: "Mouse Sem Fio Ergonômico",
+      slug: "mouse-sem-fio-ergonomico",
       description:
         "Mouse ergonômico com sensor de alta precisão e bateria recarregável.",
       price: "159.90",
@@ -112,6 +117,7 @@ async function main() {
     },
     {
       name: "Teclado Mecânico RGB",
+      slug: "teclado-mecanico-rgb",
       description:
         "Teclado mecânico com switches hot-swappable e iluminação RGB personalizável.",
       price: "349.90",

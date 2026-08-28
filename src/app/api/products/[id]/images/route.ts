@@ -1,0 +1,131 @@
+import { NextResponse } from "next/server";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+// POST /api/products/[id]/images — add image to product
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  }
+
+  const { id } = await params;
+
+  const store = await prisma.store.findUnique({
+    where: { userId: session.user.id },
+    select: { id: true },
+  });
+
+  if (!store) {
+    return NextResponse.json({ error: "Loja não encontrada." }, { status: 404 });
+  }
+
+  const product = await prisma.product.findFirst({
+    where: { id, storeId: store.id },
+    select: { id: true },
+  });
+
+  if (!product) {
+    return NextResponse.json({ error: "Produto não encontrado." }, { status: 404 });
+  }
+
+  const body = await request.json();
+  const { url, alt } = body;
+
+  if (!url || typeof url !== "string") {
+    return NextResponse.json({ error: "URL da imagem é obrigatória." }, { status: 400 });
+  }
+
+  // Get max position
+  const maxPos = await prisma.productImage.aggregate({
+    where: { productId: id },
+    _max: { position: true },
+  });
+
+  const image = await prisma.productImage.create({
+    data: {
+      productId: id,
+      url: url.trim(),
+      alt: alt?.trim() || null,
+      position: (maxPos._max.position ?? -1) + 1,
+    },
+  });
+
+  // Update product imageUrl if it's the first image
+  const imageCount = await prisma.productImage.count({ where: { productId: id } });
+  if (imageCount === 1) {
+    await prisma.product.update({
+      where: { id },
+      data: { imageUrl: url.trim() },
+    });
+  }
+
+  return NextResponse.json({ image }, { status: 201 });
+}
+
+// PATCH /api/products/[id]/images — reorder images
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  }
+
+  const { id } = await params;
+
+  const store = await prisma.store.findUnique({
+    where: { userId: session.user.id },
+    select: { id: true },
+  });
+
+  if (!store) {
+    return NextResponse.json({ error: "Loja não encontrada." }, { status: 404 });
+  }
+
+  const product = await prisma.product.findFirst({
+    where: { id, storeId: store.id },
+    select: { id: true },
+  });
+
+  if (!product) {
+    return NextResponse.json({ error: "Produto não encontrado." }, { status: 404 });
+  }
+
+  const body = await request.json();
+  const { images } = body;
+
+  if (!Array.isArray(images)) {
+    return NextResponse.json({ error: "Formato inválido." }, { status: 400 });
+  }
+
+  await prisma.$transaction(
+    images.map((img: { id: string; position: number }) =>
+      prisma.productImage.update({
+        where: { id: img.id, productId: id },
+        data: { position: img.position },
+      })
+    )
+  );
+
+  // Update product imageUrl to first image
+  const firstImage = await prisma.productImage.findFirst({
+    where: { productId: id },
+    orderBy: { position: "asc" },
+    select: { url: true },
+  });
+
+  if (firstImage) {
+    await prisma.product.update({
+      where: { id },
+      data: { imageUrl: firstImage.url },
+    });
+  }
+
+  return NextResponse.json({ success: true });
+}

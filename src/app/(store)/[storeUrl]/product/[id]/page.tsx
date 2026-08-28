@@ -21,7 +21,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const product = store.products.find((p) => p.id === id);
+  const product = store.products.find((p) => p.id === id || p.slug === id);
 
   if (!product) {
     notFound();
@@ -36,7 +36,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     .filter((p) => p.id !== product.id)
     .slice(0, 4);
 
-  const images = [product.imageUrl];
+  const images = product.images?.length ? product.images : [product.imageUrl];
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -77,14 +77,26 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 {product.name}
               </h1>
 
-              <p
-                className="mt-5 text-base font-medium leading-relaxed"
-                style={{ color: "var(--theme-text)", opacity: 0.7 }}
-              >
-                {product.description}
-              </p>
+              {product.description ? (
+                <div
+                  className="prose prose-sm mt-5 max-w-none text-base leading-relaxed"
+                  style={{ color: "var(--theme-text)", opacity: 0.7 }}
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
+              ) : null}
 
               <div className="mt-8 flex items-baseline gap-3">
+                {product.compareAtPrice && product.compareAtPrice > product.price && (
+                  <span
+                    className="text-lg font-medium line-through"
+                    style={{ color: "var(--theme-text)", opacity: 0.35 }}
+                  >
+                    {product.compareAtPrice.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
+                  </span>
+                )}
                 <span
                   className="text-4xl font-extrabold"
                   style={{ color: "var(--theme-text)" }}
@@ -95,6 +107,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   })}
                 </span>
               </div>
+
+              {product.brand && (
+                <p
+                  className="mt-2 text-sm font-medium"
+                  style={{ color: "var(--theme-text)", opacity: 0.5 }}
+                >
+                  Marca: {product.brand}
+                </p>
+              )}
+
+              {product.stock !== undefined && product.stock === 0 && (
+                <p className="mt-2 text-sm font-bold text-red-500">
+                  Produto indisponível
+                </p>
+              )}
 
               <div className="mt-8 flex flex-col gap-3">
                 {store.whatsapp && (

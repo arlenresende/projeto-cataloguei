@@ -1,83 +1,25 @@
-import { Plus, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { PageHeader } from "@/components/ui/page-header";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { ProductsContent } from "./products-content";
 
-const mockProducts = [
-  { id: "1", name: "Fone Bluetooth Pro", price: 299.9, category: "Eletrônicos", status: "Ativo" },
-  { id: "2", name: "Capa Silicone Premium", price: 49.9, category: "Acessórios", status: "Ativo" },
-  { id: "3", name: "Carregador Turbo 65W", price: 129.9, category: "Eletrônicos", status: "Ativo" },
-];
+export default async function ProductsPage() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) redirect("/login");
 
-export default function ProductsPage() {
-  return (
-    <div>
-      <PageHeader
-        title="Produtos"
-        action={
-          <Button>
-            <Plus className="size-4" />
-            Novo Produto
-          </Button>
-        }
-      />
+  const store = await prisma.store.findUnique({
+    where: { userId: session.user.id },
+    select: { id: true },
+  });
 
-      <Card noPadding>
-        <div className="border-b border-[var(--brand-border)] p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Buscar produtos..."
-              className="h-10 w-full rounded-lg border border-[var(--brand-border)] bg-[var(--brand-tertiary)] pl-10 pr-4 text-sm outline-none transition-colors focus:border-[var(--brand-black)] focus:bg-white"
-            />
-          </div>
-        </div>
+  if (!store) redirect("/admin/stores");
 
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-[var(--brand-border)]">
-              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Nome
-              </th>
-              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Categoria
-              </th>
-              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Preço
-              </th>
-              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Status
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {mockProducts.map((product) => (
-              <tr
-                key={product.id}
-                className="border-b border-[var(--brand-border)] last:border-0 transition-colors hover:bg-[var(--brand-tertiary)]"
-              >
-                <td className="px-5 py-3.5 text-sm font-medium text-[var(--brand-black)]">
-                  {product.name}
-                </td>
-                <td className="px-5 py-3.5 text-sm text-muted-foreground">
-                  {product.category}
-                </td>
-                <td className="px-5 py-3.5 text-sm text-[var(--brand-black)]">
-                  {product.price.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-                </td>
-                <td className="px-5 py-3.5">
-                  <Badge variant="success">{product.status}</Badge>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
-    </div>
-  );
+  const categories = await prisma.category.findMany({
+    where: { storeId: store.id },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  });
+
+  return <ProductsContent storeId={store.id} categories={categories} />;
 }
