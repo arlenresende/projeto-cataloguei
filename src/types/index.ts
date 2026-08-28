@@ -17,6 +17,7 @@ export interface StoreBanner {
   description?: string;
   buttonText?: string;
   buttonLink?: string;
+  bgColor?: string;
 }
 
 export interface Store {

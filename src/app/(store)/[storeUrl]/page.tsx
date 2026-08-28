@@ -6,7 +6,6 @@ import { ProductFilters } from "@/components/store/ProductFilters";
 import { ProductGrid } from "@/components/store/ProductGrid";
 import { StoreFooter } from "@/components/store/StoreFooter";
 import { FloatingWhatsApp } from "@/components/store/FloatingWhatsApp";
-import { StoreCtaBanner } from "@/components/store/StoreCtaBanner";
 import { getPublicStoreBySlug } from "@/lib/store-data";
 
 interface StorePageProps {
@@ -54,33 +53,36 @@ export default async function StorePage({ params, searchParams }: StorePageProps
       />
 
       <main className="flex-1">
-        {/* Banner */}
+        {/* Banner / Heroes */}
         <BannerCarousel
-          banners={[
-            {
-              image: store.logo,
-              title: store.name,
-              description: store.description || "Confira nossos produtos e faça seu pedido pelo WhatsApp.",
-              buttonText: "Ver produtos",
-              buttonLink: "#produtos",
-            },
-          ]}
+          banners={
+            store.heroes.length > 0
+              ? store.heroes.map((h) => ({
+                  image: h.image || "",
+                  title: h.title,
+                  description: h.description || undefined,
+                  buttonText: h.buttonText || undefined,
+                  buttonLink: h.buttonUrl || undefined,
+                  bgColor: h.bgColor || undefined,
+                }))
+              : store.description
+                ? [
+                    {
+                      image: store.logo,
+                      title: store.name,
+                      description: store.description,
+                      buttonText: "Ver produtos",
+                      buttonLink: "#produtos",
+                    },
+                  ]
+                : []
+          }
         />
 
         {/* Filters */}
         <Suspense>
           <ProductFilters categories={categories} storeUrl={store.slug} />
         </Suspense>
-
-        {/* CTA Banner — only when no filters active */}
-        {!hasActiveFilters && (
-          <StoreCtaBanner
-            title="Frete grátis em pedidos acima de R$ 199"
-            description="Aproveite nossas condições especiais de entrega para todo o Brasil."
-            buttonText="Ver condições"
-            buttonLink="#"
-          />
-        )}
 
         {/* Products */}
         <section id="produtos" className="py-8 md:py-12">

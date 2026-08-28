@@ -41,24 +41,32 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
   const hasContent = banner.title || banner.description || banner.buttonText;
 
   return (
-    <section className="relative overflow-hidden bg-[var(--theme-background)]">
+    <section
+      className="relative overflow-hidden"
+      style={{ backgroundColor: banner.bgColor || "var(--theme-background)" }}
+    >
       <div className="mx-auto max-w-6xl px-4 pt-6 pb-8 md:pt-8 md:pb-12">
         <div className="relative overflow-hidden rounded-2xl shadow-lg md:rounded-3xl">
-          {/* Image */}
-          <div className="relative aspect-[16/8] w-full md:aspect-[16/5.5]">
-            <Image
-              src={banner.image}
-              alt={banner.title || "Banner"}
-              fill
-              className="object-cover transition-transform duration-700"
-              style={{
-                transform: transitioning ? "scale(1.02)" : "scale(1)",
-              }}
-              priority
-              sizes="100vw"
-            />
+          {/* Image or colored background */}
+          <div
+            className="relative aspect-[16/8] w-full md:aspect-[16/5.5]"
+            style={!banner.image ? { backgroundColor: banner.bgColor || resolvedColors.primary + "20" } : undefined}
+          >
+            {banner.image && (
+              <Image
+                src={banner.image}
+                alt={banner.title || "Banner"}
+                fill
+                className="object-cover transition-transform duration-700"
+                style={{
+                  transform: transitioning ? "scale(1.02)" : "scale(1)",
+                }}
+                priority
+                sizes="100vw"
+              />
+            )}
             {/* Overlay */}
-            {hasContent && (
+            {hasContent && banner.image && (
               <div
                 className="absolute inset-0"
                 style={{
@@ -67,7 +75,7 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
               />
             )}
             {/* Bottom fade for image-only banners */}
-            {!hasContent && (
+            {!hasContent && banner.image && (
               <div
                 className="absolute inset-x-0 bottom-0 h-24"
                 style={{

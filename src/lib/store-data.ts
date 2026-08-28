@@ -2,8 +2,9 @@ import { prisma } from "@/lib/prisma";
 import type { StoreThemeSegment } from "@prisma/client";
 
 /**
- * Fetches a store by its slug with products, adapted to the format
- * the store components expect. Returns null if not found or inactive.
+ * Fetches a store by its slug with products and active heroes, adapted
+ * to the format the store components expect. Returns null if not found
+ * or inactive.
  */
 export async function getPublicStoreBySlug(slug: string) {
   const store = await prisma.store.findUnique({
@@ -11,6 +12,10 @@ export async function getPublicStoreBySlug(slug: string) {
     include: {
       products: {
         where: { active: true },
+        orderBy: { position: "asc" },
+      },
+      heroes: {
+        where: { isActive: true },
         orderBy: { position: "asc" },
       },
     },
@@ -40,6 +45,15 @@ export async function getPublicStoreBySlug(slug: string) {
     websiteUrl: store.websiteUrl,
     instagramUrl: store.instagramUrl,
     facebookUrl: store.facebookUrl,
+    heroes: store.heroes.map((h) => ({
+      id: h.id,
+      title: h.title,
+      description: h.description || "",
+      image: h.image || "",
+      bgColor: h.bgColor || "",
+      buttonText: h.buttonText || "",
+      buttonUrl: h.buttonUrl || "",
+    })),
     products: store.products.map((p) => ({
       id: p.id,
       name: p.name,
@@ -53,3 +67,4 @@ export async function getPublicStoreBySlug(slug: string) {
 
 export type PublicStore = NonNullable<Awaited<ReturnType<typeof getPublicStoreBySlug>>>;
 export type PublicProduct = PublicStore["products"][number];
+export type PublicHero = PublicStore["heroes"][number];

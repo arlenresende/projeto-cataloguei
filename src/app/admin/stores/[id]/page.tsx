@@ -90,6 +90,12 @@ export default function ViewStorePage() {
               Visualizar
             </Link>
             <Link
+              href={`/admin/stores/${store.id}/heroes`}
+              className="flex items-center gap-2 rounded-xl border border-[var(--brand-border)] px-4 py-2.5 text-sm font-bold text-[var(--brand-black)] transition-colors hover:bg-[var(--brand-tertiary)]"
+            >
+              Heroes
+            </Link>
+            <Link
               href={`/admin/stores/${store.id}/edit`}
               className="flex items-center gap-2 rounded-xl bg-[var(--brand-yellow)] px-4 py-2.5 text-sm font-bold text-[var(--brand-black)] transition-all hover:shadow-md"
             >
