@@ -8,41 +8,18 @@ const DialogTrigger = DialogPrimitive.Trigger
 
 const DialogClose = DialogPrimitive.Close
 
-function DialogPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal {...props} />
-}
-
-function DialogOverlay({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Backdrop>) {
-  return (
-    <DialogPrimitive.Backdrop
-      className={cn(
-        "fixed inset-0 z-50 bg-black/40 backdrop-blur-sm",
-        "data-[open]:animate-in data-[open]:fade-in-0 data-[open]:duration-200",
-        "data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:duration-150",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
 function DialogContent({
   className,
   children,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Popup>) {
   return (
-    <DialogPortal>
-      <DialogOverlay />
+    <DialogPrimitive.Portal>
+      <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <DialogPrimitive.Popup
           className={cn(
             "relative w-full max-w-lg rounded-2xl border bg-white p-0 shadow-xl outline-none",
-            "data-[open]:animate-in data-[open]:fade-in-0 data-[open]:zoom-in-95 data-[open]:duration-200",
-            "data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95 data-[closed]:duration-150",
             className
           )}
           {...props}
@@ -56,7 +33,7 @@ function DialogContent({
           </DialogPrimitive.Close>
         </DialogPrimitive.Popup>
       </div>
-    </DialogPortal>
+    </DialogPrimitive.Portal>
   )
 }
 

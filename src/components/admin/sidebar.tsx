@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Package,
   Settings,
+  Store,
   X,
   LogOut,
 } from "lucide-react";
@@ -17,6 +18,7 @@ interface SidebarProps {
 
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/stores", label: "Minha loja", icon: Store },
   { href: "/admin/products", label: "Produtos", icon: Package },
   { href: "/admin/settings", label: "Configurações", icon: Settings },
 ];

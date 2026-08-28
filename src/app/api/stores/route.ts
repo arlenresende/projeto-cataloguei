@@ -2,27 +2,31 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
+import { storeSchema } from "@/lib/schemas/store";
 
-const createStoreSchema = z.object({
-  name: z
-    .string()
-    .min(2, "O nome deve ter pelo menos 2 caracteres.")
-    .max(50, "O nome deve ter no máximo 50 caracteres."),
-  slug: z
-    .string()
-    .min(2, "O endereço deve ter pelo menos 2 caracteres.")
-    .max(40, "O endereço deve ter no máximo 40 caracteres.")
-    .regex(
-      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-      "Use apenas letras minúsculas, números e hífens."
-    ),
-  description: z
-    .string()
-    .min(10, "A descrição deve ter pelo menos 10 caracteres.")
-    .max(200, "A descrição deve ter no máximo 200 caracteres."),
-});
+// GET /api/stores — get the authenticated user's store
+export async function GET() {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
 
+    if (!session) {
+      return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+    }
+
+    const store = await prisma.store.findUnique({
+      where: { userId: session.user.id },
+    });
+
+    return NextResponse.json({ store });
+  } catch (error) {
+    console.error("Error fetching store:", error);
+    return NextResponse.json({ error: "Erro ao buscar loja." }, { status: 500 });
+  }
+}
+
+// POST /api/stores — create a store (only if user doesn't have one)
 export async function POST(request: Request) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -32,8 +36,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
+  // Check if user already has a store
+  const existingStore = await prisma.store.findUnique({
+    where: { userId: session.user.id },
+    select: { id: true },
+  });
+
+  if (existingStore) {
+    return NextResponse.json(
+      { error: "Você já possui uma loja cadastrada." },
+      { status: 409 }
+    );
+  }
+
   const body = await request.json();
-  const parsed = createStoreSchema.safeParse(body);
+  const parsed = storeSchema.safeParse(body);
 
   if (!parsed.success) {
     return NextResponse.json(
@@ -42,23 +59,11 @@ export async function POST(request: Request) {
     );
   }
 
-  const { name, slug, description } = parsed.data;
-
-  // Check if user already has a store
-  const existingStore = await prisma.store.findUnique({
-    where: { ownerId: session.user.id },
-  });
-
-  if (existingStore) {
-    return NextResponse.json(
-      { error: "Você já possui uma loja." },
-      { status: 409 }
-    );
-  }
+  const data = parsed.data;
 
   // Check if slug is taken
   const slugTaken = await prisma.store.findUnique({
-    where: { slug },
+    where: { slug: data.slug },
   });
 
   if (slugTaken) {
@@ -71,16 +76,31 @@ export async function POST(request: Request) {
   try {
     const store = await prisma.store.create({
       data: {
-        name,
-        slug,
-        description,
-        theme: "DEFAULT",
-        ownerId: session.user.id,
+        name: data.name,
+        slug: data.slug,
+        description: data.description || null,
+        address: data.address || null,
+        city: data.city || null,
+        state: data.state || null,
+        postalCode: data.postalCode || null,
+        country: data.country || null,
+        email: data.email || null,
+        logo: data.logo || null,
+        websiteUrl: data.websiteUrl || null,
+        whatsappUrl: data.whatsappUrl || null,
+        instagramUrl: data.instagramUrl || null,
+        facebookUrl: data.facebookUrl || null,
+        phoneNumber: data.phoneNumber || null,
+        cellPhone: data.cellPhone || null,
+        themeStore: (data.themeStore as any) || "DEFAULT",
+        isActive: data.isActive ?? true,
+        userId: session.user.id,
       },
     });
 
     return NextResponse.json({ store }, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error("Error creating store:", error);
     return NextResponse.json(
       { error: "Erro ao criar a loja. Tente novamente." },
       { status: 500 }

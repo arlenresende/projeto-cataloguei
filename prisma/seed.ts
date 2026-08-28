@@ -56,11 +56,10 @@ async function main() {
       slug: "techstore",
       description:
         "Sua loja de tecnologia com os melhores produtos e preços do mercado.",
-      logoUrl: "/placeholder-logo.svg",
-      bannerUrl: "/placeholder-banner.svg",
-      whatsapp: "5511999999999",
-      theme: "TECHNOLOGY",
-      ownerId: owner.id,
+      logo: "/placeholder-logo.svg",
+      whatsappUrl: "https://wa.me/5511999999999",
+      themeStore: "TECHNOLOGY",
+      userId: owner.id,
     },
   });
   console.log(`✓ Store: ${store.name} (/${store.slug})`);

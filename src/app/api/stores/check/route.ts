@@ -4,18 +4,26 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
 
-  if (!session) {
-    return NextResponse.json({ hasStore: false });
+    if (!session) {
+      return NextResponse.json({ hasStore: false });
+    }
+
+    const store = await prisma.store.findFirst({
+      where: { userId: session.user.id },
+      select: { id: true },
+    });
+
+    return NextResponse.json({ hasStore: !!store });
+  } catch (error) {
+    console.error("Error in /api/stores/check:", error);
+    return NextResponse.json(
+      { error: "Erro interno.", hasStore: false },
+      { status: 500 }
+    );
   }
-
-  const store = await prisma.store.findUnique({
-    where: { ownerId: session.user.id },
-    select: { id: true },
-  });
-
-  return NextResponse.json({ hasStore: !!store });
 }

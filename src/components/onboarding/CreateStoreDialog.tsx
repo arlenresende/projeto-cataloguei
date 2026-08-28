@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Confetti } from "@/components/ui/confetti";
 import { Input, Textarea } from "@/components/ui/input";
-import { createStoreSchema, generateSlug, type CreateStoreFormData } from "./schema";
+import { onboardingSchema, generateSlug, type OnboardingFormData } from "./schema";
 
 interface CreateStoreDialogProps {
   open: boolean;
@@ -32,8 +32,8 @@ export function CreateStoreDialog({ open, onStoreCreated }: CreateStoreDialogPro
     setValue,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<CreateStoreFormData>({
-    resolver: zodResolver(createStoreSchema),
+  } = useForm<OnboardingFormData>({
+    resolver: zodResolver(onboardingSchema),
     defaultValues: {
       name: "",
       slug: "",
@@ -62,7 +62,7 @@ export function CreateStoreDialog({ open, onStoreCreated }: CreateStoreDialogPro
     [setValue]
   );
 
-  const onSubmit = async (data: CreateStoreFormData) => {
+  const onSubmit = async (data: OnboardingFormData) => {
     setServerError(null);
 
     try {
@@ -79,11 +79,9 @@ export function CreateStoreDialog({ open, onStoreCreated }: CreateStoreDialogPro
         return;
       }
 
-      // Success! Show celebration
       setShowSuccess(true);
       setShowConfetti(true);
 
-      // Redirect after celebration
       setTimeout(() => {
         onStoreCreated();
       }, 3000);
@@ -99,7 +97,6 @@ export function CreateStoreDialog({ open, onStoreCreated }: CreateStoreDialogPro
       <Dialog open={open}>
         <DialogContent>
           {showSuccess ? (
-            /* Success state */
             <div className="flex flex-col items-center px-6 py-10 text-center">
               <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-[var(--brand-yellow)]">
                 <PartyPopper size={32} className="text-[var(--brand-black)]" />
@@ -117,7 +114,6 @@ export function CreateStoreDialog({ open, onStoreCreated }: CreateStoreDialogPro
               </div>
             </div>
           ) : (
-            /* Form state */
             <>
               <DialogHeader>
                 <div className="mb-3 flex items-center gap-3">

@@ -17,9 +17,6 @@ datasource db {
 // Enums
 // ============================================================
 
-// Segmento/tema visual da loja. Mantém coerência com THEME_SEGMENTS
-// em src/lib/themes/types.ts — qualquer adição precisa ser refletida
-// nos dois lugares até a Fase 3 unificar a fonte da verdade.
 enum StoreThemeSegment {
   DEFAULT
   TECHNOLOGY
@@ -43,9 +40,6 @@ enum StoreThemeSegment {
 // Models
 // ============================================================
 
-// User: preparado para a Fase 3 com Better Auth.
-// Campos seguem o padrão esperado pelo Better Auth (name, email, image),
-// e os relacionamentos `accounts` e `sessions` completam a integração.
 model User {
   id            String   @id @default(cuid())
   name          String
@@ -62,12 +56,6 @@ model User {
   @@map("users")
 }
 
-// Account: contas de autenticação do Better Auth.
-// `issuer` (1.7+) é o namespace de identidade (ex: "local:credential",
-// "https://accounts.google.com"). Para email/senha sempre é "local:credential".
-// `accountId` é o identificador atribuído pelo provider. Para email/senha
-// é o próprio `userId`. A chave única (issuer, accountId) evita colisão
-// entre providers.
 model Account {
   id                    String    @id @default(cuid())
   accountId             String
@@ -91,7 +79,6 @@ model Account {
   @@map("accounts")
 }
 
-// Session: sessões ativas no DB. O cookie só guarda o `token`.
 model Session {
   id        String   @id @default(cuid())
   expiresAt DateTime
@@ -108,8 +95,6 @@ model Session {
   @@map("sessions")
 }
 
-// Verification: tokens de verificação (email, reset de senha, etc.).
-// `identifier` é geralmente o email do usuário; `value` é o token.
 model Verification {
   id         String   @id @default(cuid())
   identifier String
@@ -122,36 +107,36 @@ model Verification {
   @@map("verifications")
 }
 
-// Store: representa uma loja/catálogo.
-// 1 User → 1 Store no MVP; o relacionamento 1:N pode ser ativado
-// depois trocando `store Store?` por `stores Store[]` no User.
 model Store {
   id             String            @id @default(cuid())
   name           String
-  slug           String            @unique // identificador da loja, usado em /[slug]
+  slug           String            @unique
   description    String?
-  logoUrl        String?
-  bannerUrl      String?
-  whatsapp       String? // formato livre; validação fica na camada da aplicação
-  theme          StoreThemeSegment @default(TECHNOLOGY)
-  primaryColor   String? // override opcional do tema
-  secondaryColor String?
-  ownerId        String            @unique
+  address        String?
+  city           String?
+  state          String?
+  postalCode     String?
+  country        String?
+  email          String?
+  logo           String?
+  websiteUrl     String?
+  whatsappUrl    String?
+  instagramUrl   String?
+  facebookUrl    String?
+  phoneNumber    String?
+  cellPhone      String?
+  themeStore     StoreThemeSegment @default(DEFAULT)
+  isActive       Boolean           @default(true)
+  userId         String            @unique
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
-  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   products Product[]
 
   @@map("stores")
 }
 
-// Product: itens do catálogo pertencentes a uma Store.
-// `category` fica como String (não enum) para permitir que cada
-// loja use suas próprias categorias sem alterar o schema.
-// `active` permite desativar sem excluir; `position` controla a
-// ordenação no catálogo. `price` em Decimal(10,2) para evitar
-// erros de ponto flutuante em moeda.
 model Product {
   id          String   @id @default(cuid())
   name        String
