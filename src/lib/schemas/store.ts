@@ -1,48 +1,33 @@
+import { StoreThemeSegment } from "@prisma/client";
 import { z } from "zod";
 
-export const storeSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Informe o nome da sua loja.")
-    .max(50, "O nome deve ter no máximo 50 caracteres."),
-  slug: z
-    .string()
-    .min(2, "Escolha um endereço válido para sua loja.")
-    .max(40, "O endereço deve ter no máximo 40 caracteres.")
-    .regex(
-      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-      "Use apenas letras minúsculas, números e hífens."
-    ),
-  description: z
-    .string()
-    .max(500, "A descrição deve ter no máximo 500 caracteres.")
-    .optional()
-    .or(z.literal("")),
-  address: z.string().max(200).optional().or(z.literal("")),
-  city: z.string().max(100).optional().or(z.literal("")),
-  state: z.string().max(100).optional().or(z.literal("")),
-  postalCode: z.string().max(20).optional().or(z.literal("")),
-  country: z.string().max(100).optional().or(z.literal("")),
-  email: z
-    .string()
-    .email("Informe um email válido.")
-    .optional()
-    .or(z.literal("")),
-  logo: z.string().url("Informe uma URL válida.").optional().or(z.literal("")),
-  websiteUrl: z.string().url("Informe uma URL válida.").optional().or(z.literal("")),
-  whatsappUrl: z.string().url("Informe uma URL válida.").optional().or(z.literal("")),
-  instagramUrl: z.string().url("Informe uma URL válida.").optional().or(z.literal("")),
-  facebookUrl: z.string().url("Informe uma URL válida.").optional().or(z.literal("")),
-  phoneNumber: z.string().max(20).optional().or(z.literal("")),
-  cellPhone: z.string().max(20).optional().or(z.literal("")),
-  themeStore: z.string().optional(),
-  isActive: z.boolean().optional(),
-});
+function trimString(value: unknown) {
+  return typeof value === "string" ? value.trim() : value;
+}
 
-export type StoreFormData = z.infer<typeof storeSchema>;
+function optionalText(max: number) {
+  return z.preprocess(
+    trimString,
+    z.string().max(max).optional().or(z.literal(""))
+  );
+}
 
-export function generateSlug(name: string): string {
-  return name
+function optionalUrl() {
+  return z.preprocess(
+    trimString,
+    z.string().url("Informe uma URL válida.").optional().or(z.literal(""))
+  );
+}
+
+function optionalEmail() {
+  return z.preprocess(
+    trimString,
+    z.string().email("Informe um email válido.").optional().or(z.literal(""))
+  );
+}
+
+export function normalizeStoreSlug(value: string): string {
+  return value
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -50,4 +35,61 @@ export function generateSlug(name: string): string {
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+const storeThemeSchema = z.nativeEnum(StoreThemeSegment);
+
+const baseStoreSchema = z.object({
+  name: z.preprocess(
+    trimString,
+    z
+      .string()
+      .min(2, "Informe o nome da sua loja.")
+      .max(50, "O nome deve ter no máximo 50 caracteres.")
+  ),
+  slug: z.preprocess(
+    (value) =>
+      typeof value === "string" ? normalizeStoreSlug(value) : value,
+    z
+      .string()
+      .min(2, "Escolha um endereço válido para sua loja.")
+      .max(40, "O endereço deve ter no máximo 40 caracteres.")
+      .regex(
+        /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+        "Use apenas letras minúsculas, números e hífens."
+      )
+  ),
+  description: optionalText(500),
+  address: optionalText(200),
+  city: optionalText(100),
+  state: optionalText(100),
+  postalCode: optionalText(20),
+  country: optionalText(100),
+  email: optionalEmail(),
+  logo: optionalUrl(),
+  websiteUrl: optionalUrl(),
+  whatsappUrl: optionalUrl(),
+  instagramUrl: optionalUrl(),
+  facebookUrl: optionalUrl(),
+  phoneNumber: optionalText(20),
+  cellPhone: optionalText(20),
+  themeStore: storeThemeSchema.optional(),
+  isActive: z.boolean().optional(),
+});
+
+export const storeSchema = baseStoreSchema;
+
+export const storeCreateSchema = baseStoreSchema
+  .omit({ isActive: true })
+  .strict();
+
+export const storeUpdateSchema = baseStoreSchema.partial().strict();
+
+export type StoreFormInput = z.input<typeof storeSchema>;
+export type StoreFormData = z.output<typeof storeSchema>;
+export type StoreCreateInput = z.output<typeof storeCreateSchema>;
+export type StoreUpdateInput = z.output<typeof storeUpdateSchema>;
+
+export function generateSlug(name: string): string {
+  return normalizeStoreSlug(name);
 }

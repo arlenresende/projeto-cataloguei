@@ -10,10 +10,17 @@ export async function GET() {
     });
 
     if (!session) {
-      return NextResponse.json({ hasStore: false });
+      return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
     }
 
-    const store = await prisma.store.findFirst({
+    if (!session.user.emailVerified) {
+      return NextResponse.json(
+        { error: "Verifique seu e-mail para acessar esta área.", hasStore: false },
+        { status: 403 }
+      );
+    }
+
+    const store = await prisma.store.findUnique({
       where: { userId: session.user.id },
       select: { id: true },
     });

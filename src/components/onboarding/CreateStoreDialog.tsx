@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Store, ArrowRight, Loader2, PartyPopper } from "lucide-react";
 import {
@@ -13,7 +13,12 @@ import {
 } from "@/components/ui/dialog";
 import { Confetti } from "@/components/ui/confetti";
 import { Input, Textarea } from "@/components/ui/input";
-import { onboardingSchema, generateSlug, type OnboardingFormData } from "./schema";
+import {
+  onboardingSchema,
+  generateSlug,
+  type OnboardingFormData,
+  type OnboardingFormInput,
+} from "./schema";
 
 interface CreateStoreDialogProps {
   open: boolean;
@@ -30,9 +35,9 @@ export function CreateStoreDialog({ open, onStoreCreated }: CreateStoreDialogPro
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     formState: { errors, isSubmitting },
-  } = useForm<OnboardingFormData>({
+  } = useForm<OnboardingFormInput, unknown, OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
     defaultValues: {
       name: "",
@@ -41,7 +46,7 @@ export function CreateStoreDialog({ open, onStoreCreated }: CreateStoreDialogPro
     },
   });
 
-  const slugValue = watch("slug");
+  const slugValue = String(useWatch({ control, name: "slug" }) ?? "");
 
   const handleNameChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,7 +62,7 @@ export function CreateStoreDialog({ open, onStoreCreated }: CreateStoreDialogPro
   const handleSlugChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setSlugManuallyEdited(true);
-      setValue("slug", e.target.value, { shouldValidate: true });
+      setValue("slug", generateSlug(e.target.value), { shouldValidate: true });
     },
     [setValue]
   );

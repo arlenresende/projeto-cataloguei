@@ -16,6 +16,7 @@ interface DeleteStoreDialogProps {
   onClose: () => void;
   storeName: string;
   onConfirm: () => Promise<void>;
+  error?: string | null;
 }
 
 export function DeleteStoreDialog({
@@ -23,6 +24,7 @@ export function DeleteStoreDialog({
   onClose,
   storeName,
   onConfirm,
+  error,
 }: DeleteStoreDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -48,7 +50,14 @@ export function DeleteStoreDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex gap-3 px-6 pb-6">
+        <div className="px-6 pb-6">
+          {error ? (
+            <div className="mb-3 rounded-lg bg-[var(--brand-error-light)] px-4 py-3 text-sm font-medium text-[var(--brand-error)]">
+              {error}
+            </div>
+          ) : null}
+
+          <div className="flex gap-3">
           <DialogClose
             onClick={onClose}
             className="flex-1 rounded-xl border border-[var(--brand-border)] py-2.5 text-sm font-bold text-[var(--brand-black)] transition-colors hover:bg-[var(--brand-tertiary)]"
@@ -69,6 +78,7 @@ export function DeleteStoreDialog({
               "Excluir loja"
             )}
           </button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

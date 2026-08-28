@@ -69,6 +69,7 @@ export default function EditStorePage() {
         return;
       }
 
+      router.refresh();
       router.push(`/admin/stores/${id}`);
     } catch {
       setServerError("Erro de conexão. Tente novamente.");

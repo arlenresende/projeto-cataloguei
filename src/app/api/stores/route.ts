@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { storeSchema } from "@/lib/schemas/store";
+import { storeCreateSchema } from "@/lib/schemas/store";
+import {
+  buildStoreCreateData,
+  getStoreConflictMessage,
+  storeAdminSelect,
+} from "@/lib/store";
 
 // GET /api/stores — get the authenticated user's store
 export async function GET() {
@@ -15,8 +20,16 @@ export async function GET() {
       return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
     }
 
+    if (!session.user.emailVerified) {
+      return NextResponse.json(
+        { error: "Verifique seu e-mail para acessar esta área." },
+        { status: 403 }
+      );
+    }
+
     const store = await prisma.store.findUnique({
       where: { userId: session.user.id },
+      select: storeAdminSelect,
     });
 
     return NextResponse.json({ store });
@@ -36,6 +49,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
+  if (!session.user.emailVerified) {
+    return NextResponse.json(
+      { error: "Verifique seu e-mail para acessar esta área." },
+      { status: 403 }
+    );
+  }
+
   // Check if user already has a store
   const existingStore = await prisma.store.findUnique({
     where: { userId: session.user.id },
@@ -49,8 +69,18 @@ export async function POST(request: Request) {
     );
   }
 
-  const body = await request.json();
-  const parsed = storeSchema.safeParse(body);
+  let body: unknown;
+
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Payload inválido." },
+      { status: 400 }
+    );
+  }
+
+  const parsed = storeCreateSchema.safeParse(body);
 
   if (!parsed.success) {
     return NextResponse.json(
@@ -75,31 +105,18 @@ export async function POST(request: Request) {
 
   try {
     const store = await prisma.store.create({
-      data: {
-        name: data.name,
-        slug: data.slug,
-        description: data.description || null,
-        address: data.address || null,
-        city: data.city || null,
-        state: data.state || null,
-        postalCode: data.postalCode || null,
-        country: data.country || null,
-        email: data.email || null,
-        logo: data.logo || null,
-        websiteUrl: data.websiteUrl || null,
-        whatsappUrl: data.whatsappUrl || null,
-        instagramUrl: data.instagramUrl || null,
-        facebookUrl: data.facebookUrl || null,
-        phoneNumber: data.phoneNumber || null,
-        cellPhone: data.cellPhone || null,
-        themeStore: (data.themeStore as any) || "DEFAULT",
-        isActive: data.isActive ?? true,
-        userId: session.user.id,
-      },
+      data: buildStoreCreateData(data, session.user.id),
+      select: storeAdminSelect,
     });
 
     return NextResponse.json({ store }, { status: 201 });
   } catch (error) {
+    const conflictMessage = getStoreConflictMessage(error);
+
+    if (conflictMessage) {
+      return NextResponse.json({ error: conflictMessage }, { status: 409 });
+    }
+
     console.error("Error creating store:", error);
     return NextResponse.json(
       { error: "Erro ao criar a loja. Tente novamente." },

@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { storeSchema } from "@/lib/schemas/store";
+import { storeUpdateSchema } from "@/lib/schemas/store";
+import {
+  buildStoreUpdateData,
+  getStoreConflictMessage,
+  storeAdminSelect,
+} from "@/lib/store";
 
 // GET /api/stores/[id]
 export async function GET(
@@ -17,10 +22,18 @@ export async function GET(
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
+  if (!session.user.emailVerified) {
+    return NextResponse.json(
+      { error: "Verifique seu e-mail para acessar esta área." },
+      { status: 403 }
+    );
+  }
+
   const { id } = await params;
 
   const store = await prisma.store.findFirst({
     where: { id, userId: session.user.id },
+    select: storeAdminSelect,
   });
 
   if (!store) {
@@ -43,19 +56,37 @@ export async function PATCH(
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
+  if (!session.user.emailVerified) {
+    return NextResponse.json(
+      { error: "Verifique seu e-mail para acessar esta área." },
+      { status: 403 }
+    );
+  }
+
   const { id } = await params;
 
   // Verify ownership
   const existing = await prisma.store.findFirst({
     where: { id, userId: session.user.id },
+    select: { id: true, slug: true },
   });
 
   if (!existing) {
     return NextResponse.json({ error: "Loja não encontrada." }, { status: 404 });
   }
 
-  const body = await request.json();
-  const parsed = storeSchema.partial().safeParse(body);
+  let body: unknown;
+
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Payload inválido." },
+      { status: 400 }
+    );
+  }
+
+  const parsed = storeUpdateSchema.safeParse(body);
 
   if (!parsed.success) {
     return NextResponse.json(
@@ -65,6 +96,13 @@ export async function PATCH(
   }
 
   const data = parsed.data;
+
+  if (Object.keys(data).length === 0) {
+    return NextResponse.json(
+      { error: "Nenhum campo válido foi enviado." },
+      { status: 400 }
+    );
+  }
 
   // Check slug uniqueness if changed
   if (data.slug && data.slug !== existing.slug) {
@@ -81,32 +119,29 @@ export async function PATCH(
   }
 
   try {
-    const store = await prisma.store.update({
-      where: { id },
-      data: {
-        ...(data.name !== undefined && { name: data.name }),
-        ...(data.slug !== undefined && { slug: data.slug }),
-        ...(data.description !== undefined && { description: data.description || null }),
-        ...(data.address !== undefined && { address: data.address || null }),
-        ...(data.city !== undefined && { city: data.city || null }),
-        ...(data.state !== undefined && { state: data.state || null }),
-        ...(data.postalCode !== undefined && { postalCode: data.postalCode || null }),
-        ...(data.country !== undefined && { country: data.country || null }),
-        ...(data.email !== undefined && { email: data.email || null }),
-        ...(data.logo !== undefined && { logo: data.logo || null }),
-        ...(data.websiteUrl !== undefined && { websiteUrl: data.websiteUrl || null }),
-        ...(data.whatsappUrl !== undefined && { whatsappUrl: data.whatsappUrl || null }),
-        ...(data.instagramUrl !== undefined && { instagramUrl: data.instagramUrl || null }),
-        ...(data.facebookUrl !== undefined && { facebookUrl: data.facebookUrl || null }),
-        ...(data.phoneNumber !== undefined && { phoneNumber: data.phoneNumber || null }),
-        ...(data.cellPhone !== undefined && { cellPhone: data.cellPhone || null }),
-        ...(data.themeStore !== undefined && { themeStore: data.themeStore as any }),
-        ...(data.isActive !== undefined && { isActive: data.isActive }),
-      },
+    const result = await prisma.store.updateMany({
+      where: { id, userId: session.user.id },
+      data: buildStoreUpdateData(data),
+    });
+
+    if (result.count === 0) {
+      return NextResponse.json({ error: "Loja não encontrada." }, { status: 404 });
+    }
+
+    const store = await prisma.store.findFirst({
+      where: { id, userId: session.user.id },
+      select: storeAdminSelect,
     });
 
     return NextResponse.json({ store });
-  } catch {
+  } catch (error) {
+    const conflictMessage = getStoreConflictMessage(error);
+
+    if (conflictMessage) {
+      return NextResponse.json({ error: conflictMessage }, { status: 409 });
+    }
+
+    console.error("Error updating store:", error);
     return NextResponse.json(
       { error: "Erro ao atualizar a loja." },
       { status: 500 }
@@ -127,21 +162,27 @@ export async function DELETE(
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
-  const { id } = await params;
-
-  // Verify ownership
-  const existing = await prisma.store.findFirst({
-    where: { id, userId: session.user.id },
-  });
-
-  if (!existing) {
-    return NextResponse.json({ error: "Loja não encontrada." }, { status: 404 });
+  if (!session.user.emailVerified) {
+    return NextResponse.json(
+      { error: "Verifique seu e-mail para acessar esta área." },
+      { status: 403 }
+    );
   }
 
+  const { id } = await params;
+
   try {
-    await prisma.store.delete({ where: { id } });
+    const result = await prisma.store.deleteMany({
+      where: { id, userId: session.user.id },
+    });
+
+    if (result.count === 0) {
+      return NextResponse.json({ error: "Loja não encontrada." }, { status: 404 });
+    }
+
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error("Error deleting store:", error);
     return NextResponse.json(
       { error: "Erro ao excluir a loja." },
       { status: 500 }

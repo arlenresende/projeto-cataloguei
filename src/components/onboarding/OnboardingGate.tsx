@@ -12,6 +12,11 @@ export function OnboardingGate() {
     async function checkStore() {
       try {
         const response = await fetch("/api/stores/check");
+
+        if (!response.ok) {
+          throw new Error("Falha ao verificar a loja");
+        }
+
         const data = await response.json();
         setHasStore(data.hasStore);
       } catch {

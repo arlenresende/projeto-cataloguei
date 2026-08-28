@@ -1,5 +1,3 @@
-import { Package, Eye, TrendingUp, MessageCircle } from "lucide-react";
-import { StatsGrid } from "@/components/admin/stats-grid";
 import { DashboardContent } from "./dashboard-content";
 
 const stats = [

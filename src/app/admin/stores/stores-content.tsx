@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Plus, Store, ExternalLink, Edit, Trash2, Eye } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
@@ -14,53 +14,40 @@ interface StoreData {
   description: string | null;
   isActive: boolean;
   themeStore: string;
-  createdAt: string;
+  createdAt: Date;
 }
 
-export function StoresContent() {
-  const [store, setStore] = useState<StoreData | null>(null);
-  const [loading, setLoading] = useState(true);
+interface StoresContentProps {
+  initialStore: StoreData | null;
+}
+
+export function StoresContent({ initialStore }: StoresContentProps) {
+  const [store, setStore] = useState<StoreData | null>(initialStore);
   const [showDelete, setShowDelete] = useState(false);
-
-  useEffect(() => {
-    fetchStore();
-  }, []);
-
-  async function fetchStore() {
-    try {
-      const res = await fetch("/api/stores");
-      const data = await res.json();
-      setStore(data.store || null);
-    } catch {
-      // silent
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   async function handleDelete() {
     if (!store) return;
+
+    setDeleteError(null);
 
     try {
       const res = await fetch(`/api/stores/${store.id}`, {
         method: "DELETE",
       });
 
+      const result = await res.json().catch(() => null);
+
       if (res.ok) {
         setStore(null);
         setShowDelete(false);
+        return;
       }
-    } catch {
-      // silent
-    }
-  }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="size-8 animate-spin rounded-full border-2 border-[var(--brand-yellow)] border-t-transparent" />
-      </div>
-    );
+      setDeleteError(result?.error || "Erro ao excluir a loja.");
+    } catch {
+      setDeleteError("Erro de conexão. Tente novamente.");
+    }
   }
 
   if (!store) {
@@ -177,6 +164,7 @@ export function StoresContent() {
           onClose={() => setShowDelete(false)}
           storeName={store.name}
           onConfirm={handleDelete}
+          error={deleteError}
         />
       )}
     </>

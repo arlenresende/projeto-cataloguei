@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Cpu, Headphones, Keyboard, Monitor, Mouse, Package } from "lucide-react";
+import { Cpu, Keyboard, Package } from "lucide-react";
 import { useTheme } from "@/components/providers/ThemeProvider";
 
 interface Category {

@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
-import { useForm } from "react-hook-form";
+import { useCallback } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, ArrowRight } from "lucide-react";
 import { Input, Textarea } from "@/components/ui/input";
-import { storeSchema, generateSlug, type StoreFormData } from "@/lib/schemas/store";
+import {
+  storeSchema,
+  generateSlug,
+  type StoreFormData,
+  type StoreFormInput,
+} from "@/lib/schemas/store";
 
 const THEME_OPTIONS = [
   { value: "DEFAULT", label: "Padrão" },
@@ -45,9 +50,9 @@ export function StoreForm({
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     formState: { errors },
-  } = useForm<StoreFormData>({
+  } = useForm<StoreFormInput, unknown, StoreFormData>({
     resolver: zodResolver(storeSchema),
     defaultValues: {
       name: "",
@@ -72,8 +77,8 @@ export function StoreForm({
     },
   });
 
-  const slugValue = watch("slug");
-  const isActive = watch("isActive");
+  const slugValue = String(useWatch({ control, name: "slug" }) ?? "");
+  const isActive = Boolean(useWatch({ control, name: "isActive" }));
 
   // Auto-generate slug from name (only in create mode)
   const handleNameChange = useCallback(
@@ -118,7 +123,9 @@ export function StoreForm({
                 type="text"
                 value={slugValue}
                 onChange={(e) =>
-                  setValue("slug", e.target.value, { shouldValidate: true })
+                  setValue("slug", generateSlug(e.target.value), {
+                    shouldValidate: true,
+                  })
                 }
                 placeholder="tech-store"
                 className="flex-1 bg-transparent px-3 py-2.5 text-sm font-medium text-[var(--brand-black)] outline-none"
@@ -268,31 +275,33 @@ export function StoreForm({
               ))}
             </select>
           </div>
-          <div className="flex items-end">
-            <label className="flex cursor-pointer items-center gap-3">
-              <button
-                type="button"
-                role="switch"
-                aria-checked={isActive}
-                onClick={() =>
-                  setValue("isActive", !isActive, { shouldValidate: true })
-                }
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  isActive ? "bg-[var(--brand-yellow)]" : "bg-gray-300"
-                }`}
-              >
-                <span
-                  className={`inline-block size-4 rounded-full bg-white shadow transition-transform ${
-                    isActive ? "translate-x-6" : "translate-x-1"
+          {mode === "edit" ? (
+            <div className="flex items-end">
+              <label className="flex cursor-pointer items-center gap-3">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isActive}
+                  onClick={() =>
+                    setValue("isActive", !isActive, { shouldValidate: true })
+                  }
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    isActive ? "bg-[var(--brand-yellow)]" : "bg-gray-300"
                   }`}
-                />
-              </button>
-              <span className="text-sm font-medium text-[var(--brand-black)]">
-                {isActive ? "Loja ativa" : "Loja inativa"}
-              </span>
-            </label>
-            <input type="hidden" {...register("isActive")} />
-          </div>
+                >
+                  <span
+                    className={`inline-block size-4 rounded-full bg-white shadow transition-transform ${
+                      isActive ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+                <span className="text-sm font-medium text-[var(--brand-black)]">
+                  {isActive ? "Loja ativa" : "Loja inativa"}
+                </span>
+              </label>
+              <input type="hidden" {...register("isActive")} />
+            </div>
+          ) : null}
         </div>
       </section>
 

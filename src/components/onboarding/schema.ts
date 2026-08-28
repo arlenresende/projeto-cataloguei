@@ -11,6 +11,7 @@ export const onboardingSchema = storeSchema
       .max(200, "A descrição deve ter no máximo 200 caracteres."),
   });
 
-export type OnboardingFormData = z.infer<typeof onboardingSchema>;
+export type OnboardingFormInput = z.input<typeof onboardingSchema>;
+export type OnboardingFormData = z.output<typeof onboardingSchema>;
 
 export { generateSlug };
