@@ -1,21 +1,43 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Search, ShoppingBag, Menu, X, ChevronRight, Phone } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { CartDrawer } from "./CartDrawer";
+
+interface StoreHeaderCategory {
+  name: string;
+  slug: string;
+}
 
 interface StoreHeaderProps {
   name: string;
   storeUrl: string;
   whatsapp?: string;
-  categories?: string[];
+  categories?: (string | StoreHeaderCategory)[];
 }
 
 export function StoreHeader({ name, storeUrl, whatsapp, categories = [] }: StoreHeaderProps) {
   const { resolvedColors } = useTheme();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      const q = searchQuery.trim();
+      if (q) {
+        router.push(`/${storeUrl}?q=${encodeURIComponent(q)}`);
+      } else {
+        router.push(`/${storeUrl}`);
+      }
+      setMobileOpen(false);
+    },
+    [searchQuery, storeUrl, router]
+  );
 
   return (
     <header
@@ -51,13 +73,15 @@ export function StoreHeader({ name, storeUrl, whatsapp, categories = [] }: Store
         </Link>
 
         {/* Search - desktop */}
-        <div className="hidden flex-1 justify-center px-10 md:flex">
+        <form onSubmit={handleSearch} className="hidden flex-1 justify-center px-10 md:flex">
           <div className="relative w-full max-w-lg">
             <Search
               className="absolute left-4 top-1/2 -translate-y-1/2 size-[18px]"
               style={{ color: resolvedColors.text, opacity: 0.3 }}
             />
             <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="h-11 w-full rounded-xl border pl-12 pr-4 text-sm font-medium outline-none transition-all focus:shadow-sm"
               style={{
                 borderColor: resolvedColors.border,
@@ -67,7 +91,7 @@ export function StoreHeader({ name, storeUrl, whatsapp, categories = [] }: Store
               placeholder="O que você procura?"
             />
           </div>
-        </div>
+        </form>
 
         {/* Actions */}
         <div className="flex items-center gap-1.5">
@@ -126,25 +150,32 @@ export function StoreHeader({ name, storeUrl, whatsapp, categories = [] }: Store
             backgroundColor: resolvedColors.secondary,
           }}
         >
-          <div className="mx-auto flex max-w-6xl items-center gap-0 px-4">
-            {categories.map((cat) => (
-              <Link
-                key={cat}
-                href={`/${storeUrl}?category=${encodeURIComponent(cat)}`}
-                className="px-5 py-3 text-sm font-semibold transition-colors"
-                style={{ color: resolvedColors.cardBg + "CC" }}
-                onMouseEnter={(e) => {
-                  (e.target as HTMLElement).style.color = resolvedColors.primary;
-                  (e.target as HTMLElement).style.backgroundColor = resolvedColors.secondary;
-                }}
-                onMouseLeave={(e) => {
-                  (e.target as HTMLElement).style.color = resolvedColors.cardBg + "CC";
-                  (e.target as HTMLElement).style.backgroundColor = "transparent";
-                }}
-              >
-                {cat}
-              </Link>
-            ))}
+          <div className="mx-auto flex max-w-6xl items-center gap-0 overflow-x-auto px-4">
+            {categories.map((cat) => {
+              const name = typeof cat === "string" ? cat : cat.name;
+              const slug = typeof cat === "string" ? null : cat.slug;
+              const href = slug
+                ? `/${storeUrl}/categoria/${slug}`
+                : `/${storeUrl}?category=${encodeURIComponent(name)}`;
+              return (
+                <Link
+                  key={name}
+                  href={href}
+                  className="shrink-0 px-5 py-3 text-sm font-semibold transition-colors"
+                  style={{ color: resolvedColors.cardBg + "CC" }}
+                  onMouseEnter={(e) => {
+                    (e.target as HTMLElement).style.color = resolvedColors.primary;
+                    (e.target as HTMLElement).style.backgroundColor = resolvedColors.secondary;
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.target as HTMLElement).style.color = resolvedColors.cardBg + "CC";
+                    (e.target as HTMLElement).style.backgroundColor = "transparent";
+                  }}
+                >
+                  {name}
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}
@@ -159,12 +190,14 @@ export function StoreHeader({ name, storeUrl, whatsapp, categories = [] }: Store
           }}
         >
           <div className="px-4 py-5">
-            <div className="relative mb-5">
+            <form onSubmit={handleSearch} className="relative mb-5">
               <Search
                 className="absolute left-4 top-1/2 -translate-y-1/2 size-[18px]"
                 style={{ color: resolvedColors.text, opacity: 0.3 }}
               />
               <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-11 w-full rounded-xl border pl-12 pr-4 text-sm font-medium outline-none"
                 style={{
                   borderColor: resolvedColors.border,
@@ -173,24 +206,31 @@ export function StoreHeader({ name, storeUrl, whatsapp, categories = [] }: Store
                 }}
                 placeholder="O que você procura?"
               />
-            </div>
+            </form>
             {categories.length > 0 && (
               <nav className="flex flex-col gap-1">
-                {categories.map((cat) => (
-                  <Link
-                    key={cat}
-                    href={`/${storeUrl}?category=${encodeURIComponent(cat)}`}
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-between rounded-xl px-4 py-3.5 text-sm font-semibold transition-colors"
-                    style={{
-                      color: resolvedColors.text,
-                      backgroundColor: resolvedColors.background,
-                    }}
-                  >
-                    {cat}
-                    <ChevronRight size={16} style={{ opacity: 0.3 }} />
-                  </Link>
-                ))}
+                {categories.map((cat) => {
+                  const name = typeof cat === "string" ? cat : cat.name;
+                  const slug = typeof cat === "string" ? null : cat.slug;
+                  const href = slug
+                    ? `/${storeUrl}/categoria/${slug}`
+                    : `/${storeUrl}?category=${encodeURIComponent(name)}`;
+                  return (
+                    <Link
+                      key={name}
+                      href={href}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center justify-between rounded-xl px-4 py-3.5 text-sm font-semibold transition-colors"
+                      style={{
+                        color: resolvedColors.text,
+                        backgroundColor: resolvedColors.background,
+                      }}
+                    >
+                      {name}
+                      <ChevronRight size={16} style={{ opacity: 0.3 }} />
+                    </Link>
+                  );
+                })}
               </nav>
             )}
           </div>

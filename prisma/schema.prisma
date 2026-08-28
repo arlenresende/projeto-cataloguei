@@ -131,9 +131,10 @@ model Store {
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
-  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  products Product[]
-  heroes   StoreHero[]
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products   Product[]
+  heroes     StoreHero[]
+  categories Category[]
 
   @@map("stores")
 }
@@ -145,16 +146,38 @@ model Product {
   price       Decimal  @db.Decimal(10, 2)
   imageUrl    String?
   category    String?
+  categoryId  String?
   active      Boolean  @default(true)
   position    Int      @default(0)
   storeId     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  store    Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  categoryRel Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   @@index([storeId, category])
+  @@index([categoryId])
   @@map("products")
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  storeId     String
+  name        String
+  description String?
+  slug        String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  store    Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@unique([storeId, slug])
+  @@index([storeId])
+  @@index([storeId, isActive])
+  @@map("categories")
 }
 
 enum HeroAlignment {

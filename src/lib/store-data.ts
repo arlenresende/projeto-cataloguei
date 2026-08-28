@@ -18,6 +18,10 @@ export async function getPublicStoreBySlug(slug: string) {
         where: { isActive: true },
         orderBy: { position: "asc" },
       },
+      categories: {
+        where: { isActive: true },
+        orderBy: { name: "asc" },
+      },
     },
   });
 
@@ -55,6 +59,12 @@ export async function getPublicStoreBySlug(slug: string) {
       alignment: h.alignment,
       buttonText: h.buttonText || "",
       buttonUrl: h.buttonUrl || "",
+    })),
+    categories: store.categories.map((c) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      description: c.description || "",
     })),
     products: store.products.map((p) => ({
       id: p.id,

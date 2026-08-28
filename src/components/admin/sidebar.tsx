@@ -8,6 +8,7 @@ import {
   Settings,
   Store,
   Image,
+  Tags,
   X,
   LogOut,
 } from "lucide-react";
@@ -21,6 +22,7 @@ const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/stores", label: "Minha loja", icon: Store },
   { href: "/admin/products", label: "Produtos", icon: Package },
+  { href: "/admin/categories", label: "Categorias", icon: Tags },
   { href: "/admin/banners", label: "Banners", icon: Image },
   { href: "/admin/settings", label: "Configurações", icon: Settings },
 ];

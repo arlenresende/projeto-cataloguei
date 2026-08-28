@@ -10,21 +10,23 @@ import { getPublicStoreBySlug } from "@/lib/store-data";
 
 interface StorePageProps {
   params: Promise<{ storeUrl: string }>;
-  searchParams: Promise<{ category?: string; min?: string; max?: string }>;
+  searchParams: Promise<{ category?: string; min?: string; max?: string; q?: string }>;
 }
 
 export default async function StorePage({ params, searchParams }: StorePageProps) {
   const { storeUrl } = await params;
-  const { category, min, max } = await searchParams;
+  const { category, min, max, q } = await searchParams;
   const store = await getPublicStoreBySlug(storeUrl);
 
   if (!store) {
     notFound();
   }
 
-  const categories = Array.from(
-    new Set(store.products.map((p) => p.category))
-  );
+  // Use real categories from DB, fallback to derived from products
+  const categories =
+    store.categories.length > 0
+      ? store.categories.map((c) => c.name)
+      : Array.from(new Set(store.products.map((p) => p.category)));
 
   // Filter products
   let filteredProducts = store.products;
@@ -41,7 +43,16 @@ export default async function StorePage({ params, searchParams }: StorePageProps
     filteredProducts = filteredProducts.filter((p) => p.price <= Number(max));
   }
 
-  const hasActiveFilters = category || min || max;
+  if (q) {
+    const query = q.toLowerCase();
+    filteredProducts = filteredProducts.filter(
+      (p) =>
+        p.name.toLowerCase().includes(query) ||
+        p.description.toLowerCase().includes(query)
+    );
+  }
+
+  const hasActiveFilters = category || min || max || q;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -49,7 +60,11 @@ export default async function StorePage({ params, searchParams }: StorePageProps
         name={store.name}
         storeUrl={store.slug}
         whatsapp={store.whatsapp}
-        categories={categories}
+        categories={
+          store.categories.length > 0
+            ? store.categories.map((c) => ({ name: c.name, slug: c.slug }))
+            : categories
+        }
       />
 
       <main className="flex-1">
@@ -95,7 +110,11 @@ export default async function StorePage({ params, searchParams }: StorePageProps
                   className="text-xs font-bold uppercase tracking-widest"
                   style={{ color: "var(--theme-primary)" }}
                 >
-                  {hasActiveFilters ? "Resultado da busca" : "Catálogo completo"}
+                  {q
+                    ? `Resultado para "${q}"`
+                    : hasActiveFilters
+                      ? "Resultado da busca"
+                      : "Catálogo completo"}
                 </span>
                 <h2
                   className="mt-1 text-xl font-extrabold tracking-tight md:text-2xl"

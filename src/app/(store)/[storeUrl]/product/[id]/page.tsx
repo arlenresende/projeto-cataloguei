@@ -27,9 +27,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const categories = Array.from(
-    new Set(store.products.map((p) => p.category))
-  );
+  const categories =
+    store.categories.length > 0
+      ? store.categories.map((c) => ({ name: c.name, slug: c.slug }))
+      : Array.from(new Set(store.products.map((p) => p.category)));
 
   const relatedProducts = store.products
     .filter((p) => p.id !== product.id)
