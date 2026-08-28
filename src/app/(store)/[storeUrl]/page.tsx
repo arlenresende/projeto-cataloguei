@@ -70,30 +70,16 @@ export default async function StorePage({ params, searchParams }: StorePageProps
       <main className="flex-1">
         {/* Banner / Heroes */}
         <BannerCarousel
-          banners={
-            store.heroes.length > 0
-              ? store.heroes.map((h) => ({
-                  image: h.image || "",
-                  title: h.title,
-                  description: h.description || undefined,
-                  buttonText: h.buttonText || undefined,
-                  buttonLink: h.buttonUrl || undefined,
-                  bgColor: h.bgColor || undefined,
-                  textColor: h.textColor || undefined,
-                  alignment: h.alignment,
-                }))
-              : store.description
-                ? [
-                    {
-                      image: store.logo,
-                      title: store.name,
-                      description: store.description,
-                      buttonText: "Ver produtos",
-                      buttonLink: "#produtos",
-                    },
-                  ]
-                : []
-          }
+          banners={store.heroes.map((h) => ({
+            image: h.image || "",
+            title: h.title,
+            description: h.description || undefined,
+            buttonText: h.buttonText || undefined,
+            buttonLink: h.buttonUrl || undefined,
+            bgColor: h.bgColor || undefined,
+            textColor: h.textColor || undefined,
+            alignment: h.alignment,
+          }))}
         />
 
         {/* Filters */}
