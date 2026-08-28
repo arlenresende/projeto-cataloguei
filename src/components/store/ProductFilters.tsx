@@ -61,6 +61,9 @@ export function ProductFilters({ categories, storeUrl }: ProductFiltersProps) {
     (r) => r.min === currentMin && r.max === currentMax
   );
 
+  const categoryLabel = currentCategory || "Todas as categorias";
+  const priceLabel = currentPriceIdx >= 0 ? PRICE_RANGES[currentPriceIdx].label : "Todos os preços";
+
   const triggerStyle = {
     borderColor: resolvedColors.border,
     backgroundColor: resolvedColors.cardBg,
@@ -103,7 +106,7 @@ export function ProductFilters({ categories, storeUrl }: ProductFiltersProps) {
               </label>
               <Select value={currentCategory || "__all__"} onValueChange={handleCategoryChange}>
                 <SelectTrigger style={triggerStyle}>
-                  <SelectValue placeholder="Todas as categorias" />
+                  <span>{categoryLabel}</span>
                 </SelectTrigger>
                 <SelectContent
                   style={{
@@ -134,7 +137,7 @@ export function ProductFilters({ categories, storeUrl }: ProductFiltersProps) {
                 onValueChange={handlePriceChange}
               >
                 <SelectTrigger style={triggerStyle}>
-                  <SelectValue placeholder="Todos os preços" />
+                  <span>{priceLabel}</span>
                 </SelectTrigger>
                 <SelectContent
                   style={{
