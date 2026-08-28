@@ -1,7 +1,58 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
+
+// ── Helpers ──────────────────────────────────────────────
+
+/** Remove tudo que não é dígito */
+function onlyDigits(s: string) {
+  return s.replace(/\D/g, "");
+}
+
+/** Formata string de dígitos puros para BRL: 1234567 → "1.234.567" */
+function formatDigitsToBRL(digits: string): string {
+  if (!digits) return "";
+  // adiciona pontos a cada 3 dígitos da direita para esquerda
+  let result = "";
+  let count = 0;
+  for (let i = digits.length - 1; i >= 0; i--) {
+    if (count > 0 && count % 3 === 0) result = "." + result;
+    result = digits[i] + result;
+    count++;
+  }
+  return result;
+}
+
+/** Formata número para exibição: 1299.90 → "1.299,90" */
+function formatBRL(value: number | null | undefined): string {
+  if (value === null || value === undefined || value === 0) return "";
+  const fixed = value.toFixed(2); // "1299.90"
+  const [intPart, decPart] = fixed.split(".");
+  return formatDigitsToBRL(intPart) + "," + decPart;
+}
+
+/** Parse display string → number: "1.299,90" → 1299.90 */
+function parseBRL(input: string): number | null {
+  const digits = onlyDigits(input);
+  if (!digits) return null;
+  // os últimos 2 dígitos são centavos
+  const intPart = digits.slice(0, -2) || "0";
+  const decPart = digits.slice(-2);
+  return parseFloat(intPart + "." + decPart);
+}
+
+/** Formata string de dígitos puros como moeda durante a digitação: "129990" → "1.299,90" */
+function maskCurrency(digits: string): string {
+  if (!digits) return "";
+  // garante pelo menos 3 dígitos (0 + centavos)
+  while (digits.length < 3) digits = "0" + digits;
+  const intPart = digits.slice(0, -2);
+  const decPart = digits.slice(-2);
+  return formatDigitsToBRL(intPart) + "," + decPart;
+}
+
+// ── CurrencyInput ────────────────────────────────────────
 
 interface CurrencyInputProps {
   label?: string;
@@ -12,20 +63,6 @@ interface CurrencyInputProps {
   disabled?: boolean;
 }
 
-function formatBRL(value: number | null | undefined): string {
-  if (value === null || value === undefined || value === 0) return "";
-  return value.toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
-
-function parseBRL(input: string): number | null {
-  const cleaned = input.replace(/[^\d,]/g, "").replace(",", ".");
-  const num = parseFloat(cleaned);
-  return isNaN(num) ? null : num;
-}
-
 export function CurrencyInput({
   label,
   value,
@@ -34,10 +71,17 @@ export function CurrencyInput({
   placeholder = "0,00",
   disabled,
 }: CurrencyInputProps) {
-  const [displayValue, setDisplayValue] = useState(formatBRL(value));
+  const [displayValue, setDisplayValue] = useState("");
   const [focused, setFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const skipNextSync = useRef(false);
 
+  // Sync external value → display (only when not focused)
   useEffect(() => {
+    if (skipNextSync.current) {
+      skipNextSync.current = false;
+      return;
+    }
     if (!focused) {
       setDisplayValue(formatBRL(value));
     }
@@ -45,47 +89,46 @@ export function CurrencyInput({
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      let raw = e.target.value;
+      const raw = e.target.value;
+      const digits = onlyDigits(raw);
 
-      // Allow only digits, comma, dot
-      raw = raw.replace(/[^\d,.]/g, "");
-
-      // Normalize: keep only last comma
-      const parts = raw.split(",");
-      if (parts.length > 2) {
-        raw = parts[0] + "," + parts.slice(1).join("");
+      if (!digits) {
+        setDisplayValue("");
+        skipNextSync.current = true;
+        onChange?.(null);
+        return;
       }
 
-      // Limit decimals to 2
-      if (parts.length === 2 && parts[1].length > 2) {
-        raw = parts[0] + "," + parts[1].slice(0, 2);
-      }
-
-      setDisplayValue(raw);
-      const parsed = parseBRL(raw);
-      onChange?.(parsed);
+      const masked = maskCurrency(digits);
+      setDisplayValue(masked);
+      skipNextSync.current = true;
+      onChange?.(parseBRL(masked));
     },
     [onChange]
   );
 
   const handleFocus = useCallback(() => {
     setFocused(true);
-    // Show raw number for editing
-    if (value) {
-      setDisplayValue(value.toFixed(2).replace(".", ","));
+    // Ao focar, mostra só dígitos + vírgula para facilitar edição
+    if (value && value > 0) {
+      const digits = onlyDigits(value.toFixed(2));
+      setDisplayValue(maskCurrency(digits));
     }
+    // seleciona tudo
+    setTimeout(() => inputRef.current?.select(), 0);
   }, [value]);
 
   const handleBlur = useCallback(() => {
     setFocused(false);
-    // Format back to BRL
     const parsed = parseBRL(displayValue);
-    if (parsed !== null) {
+    if (parsed !== null && parsed > 0) {
+      skipNextSync.current = true;
       onChange?.(parsed);
       setDisplayValue(formatBRL(parsed));
     } else {
-      setDisplayValue("");
+      skipNextSync.current = true;
       onChange?.(null);
+      setDisplayValue("");
     }
   }, [displayValue, onChange]);
 
@@ -101,8 +144,9 @@ export function CurrencyInput({
           R$
         </span>
         <input
+          ref={inputRef}
           type="text"
-          inputMode="decimal"
+          inputMode="numeric"
           value={displayValue}
           onChange={handleChange}
           onFocus={handleFocus}
@@ -121,6 +165,8 @@ export function CurrencyInput({
   );
 }
 
+// ── WeightInput ──────────────────────────────────────────
+
 interface WeightInputProps {
   label?: string;
   value?: number | null;
@@ -130,18 +176,29 @@ interface WeightInputProps {
   disabled?: boolean;
 }
 
+/** Formata número para exibição: 0.85 → "0,850" */
 function formatWeight(value: number | null | undefined): string {
   if (value === null || value === undefined || value === 0) return "";
-  return value.toLocaleString("pt-BR", {
-    minimumFractionDigits: 3,
-    maximumFractionDigits: 3,
-  });
+  const fixed = value.toFixed(3); // "0.850"
+  const [intPart, decPart] = fixed.split(".");
+  return formatDigitsToBRL(intPart) + "," + decPart;
+}
+
+/** Formata string de dígitos puros como peso durante a digitação: "850" → "0,850" */
+function maskWeight(digits: string): string {
+  if (!digits) return "";
+  while (digits.length < 4) digits = "0" + digits;
+  const intPart = digits.slice(0, -3);
+  const decPart = digits.slice(-3);
+  return formatDigitsToBRL(intPart) + "," + decPart;
 }
 
 function parseWeight(input: string): number | null {
-  const cleaned = input.replace(/[^\d,]/g, "").replace(",", ".");
-  const num = parseFloat(cleaned);
-  return isNaN(num) ? null : num;
+  const digits = onlyDigits(input);
+  if (!digits) return null;
+  const intPart = digits.slice(0, -3) || "0";
+  const decPart = digits.slice(-3);
+  return parseFloat(intPart + "." + decPart);
 }
 
 export function WeightInput({
@@ -152,10 +209,16 @@ export function WeightInput({
   placeholder = "0,000",
   disabled,
 }: WeightInputProps) {
-  const [displayValue, setDisplayValue] = useState(formatWeight(value));
+  const [displayValue, setDisplayValue] = useState("");
   const [focused, setFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const skipNextSync = useRef(false);
 
   useEffect(() => {
+    if (skipNextSync.current) {
+      skipNextSync.current = false;
+      return;
+    }
     if (!focused) {
       setDisplayValue(formatWeight(value));
     }
@@ -163,38 +226,44 @@ export function WeightInput({
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      let raw = e.target.value;
-      raw = raw.replace(/[^\d,.]/g, "");
-      const parts = raw.split(",");
-      if (parts.length > 2) {
-        raw = parts[0] + "," + parts.slice(1).join("");
+      const raw = e.target.value;
+      const digits = onlyDigits(raw);
+
+      if (!digits) {
+        setDisplayValue("");
+        skipNextSync.current = true;
+        onChange?.(null);
+        return;
       }
-      if (parts.length === 2 && parts[1].length > 3) {
-        raw = parts[0] + "," + parts[1].slice(0, 3);
-      }
-      setDisplayValue(raw);
-      const parsed = parseWeight(raw);
-      onChange?.(parsed);
+
+      const masked = maskWeight(digits);
+      setDisplayValue(masked);
+      skipNextSync.current = true;
+      onChange?.(parseWeight(masked));
     },
     [onChange]
   );
 
   const handleFocus = useCallback(() => {
     setFocused(true);
-    if (value) {
-      setDisplayValue(value.toFixed(3).replace(".", ","));
+    if (value && value > 0) {
+      const digits = onlyDigits(value.toFixed(3));
+      setDisplayValue(maskWeight(digits));
     }
+    setTimeout(() => inputRef.current?.select(), 0);
   }, [value]);
 
   const handleBlur = useCallback(() => {
     setFocused(false);
     const parsed = parseWeight(displayValue);
-    if (parsed !== null) {
+    if (parsed !== null && parsed > 0) {
+      skipNextSync.current = true;
       onChange?.(parsed);
       setDisplayValue(formatWeight(parsed));
     } else {
-      setDisplayValue("");
+      skipNextSync.current = true;
       onChange?.(null);
+      setDisplayValue("");
     }
   }, [displayValue, onChange]);
 
@@ -207,8 +276,9 @@ export function WeightInput({
       )}
       <div className="relative">
         <input
+          ref={inputRef}
           type="text"
-          inputMode="decimal"
+          inputMode="numeric"
           value={displayValue}
           onChange={handleChange}
           onFocus={handleFocus}
@@ -216,7 +286,7 @@ export function WeightInput({
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
-            "flex h-10 w-full rounded-lg border border-[var(--brand-border)] bg-white px-3.5 text-sm text-[var(--brand-black)] transition-colors placeholder:text-muted-foreground focus:border-[var(--brand-black)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-black)]/10 disabled:cursor-not-allowed disabled:opacity-50",
+            "flex h-10 w-full rounded-lg border border-[var(--brand-border)] bg-white px-3.5 pr-10 text-sm text-[var(--brand-black)] transition-colors placeholder:text-muted-foreground focus:border-[var(--brand-black)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-black)]/10 disabled:cursor-not-allowed disabled:opacity-50",
             error &&
               "border-[var(--brand-error)] focus:border-[var(--brand-error)] focus:ring-[var(--brand-error)]/10"
           )}
