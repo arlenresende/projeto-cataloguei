@@ -26,6 +26,36 @@ function optionalEmail() {
   );
 }
 
+/** Telefone BR: 10 ou 11 dígitos */
+function optionalPhone() {
+  return z.preprocess(
+    trimString,
+    z
+      .string()
+      .refine(
+        (v) => !v || /^\d{10,11}$/.test(v),
+        "Informe um telefone válido (10 ou 11 dígitos)."
+      )
+      .optional()
+      .or(z.literal(""))
+  );
+}
+
+/** CEP: 8 dígitos */
+function optionalCEP() {
+  return z.preprocess(
+    trimString,
+    z
+      .string()
+      .refine(
+        (v) => !v || /^\d{8}$/.test(v),
+        "Informe um CEP válido (8 dígitos)."
+      )
+      .optional()
+      .or(z.literal(""))
+  );
+}
+
 export function normalizeStoreSlug(value: string): string {
   return value
     .toLowerCase()
@@ -63,16 +93,16 @@ const baseStoreSchema = z.object({
   address: optionalText(200),
   city: optionalText(100),
   state: optionalText(100),
-  postalCode: optionalText(20),
+  postalCode: optionalCEP(),
   country: optionalText(100),
   email: optionalEmail(),
   logo: optionalUrl(),
   websiteUrl: optionalUrl(),
-  whatsappUrl: optionalUrl(),
+  whatsappUrl: optionalPhone(),
   instagramUrl: optionalUrl(),
   facebookUrl: optionalUrl(),
-  phoneNumber: optionalText(20),
-  cellPhone: optionalText(20),
+  phoneNumber: optionalPhone(),
+  cellPhone: optionalPhone(),
   themeStore: storeThemeSchema.optional(),
   isActive: z.boolean().optional(),
 });

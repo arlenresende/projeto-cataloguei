@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useCallback, useState, useRef, useEffect } from "react";
+import { useForm, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, ArrowRight } from "lucide-react";
+import { Loader2, ArrowRight, MapPin } from "lucide-react";
 import { Input, Textarea } from "@/components/ui/input";
 import {
   storeSchema,
@@ -11,6 +11,13 @@ import {
   type StoreFormData,
   type StoreFormInput,
 } from "@/lib/schemas/store";
+import {
+  onlyNumbers,
+  maskCEP,
+  maskPhone,
+  formatCEPDisplay,
+  formatPhoneDisplay,
+} from "@/lib/masks";
 
 const THEME_OPTIONS = [
   { value: "DEFAULT", label: "Padrão" },
@@ -79,6 +86,95 @@ export function StoreForm({
 
   const slugValue = String(useWatch({ control, name: "slug" }) ?? "");
   const isActive = Boolean(useWatch({ control, name: "isActive" }));
+
+  // ── Masked display values ──
+  const [cepDisplay, setCepDisplay] = useState(
+    formatCEPDisplay(defaultValues?.postalCode)
+  );
+  const [phoneDisplay, setPhoneDisplay] = useState(
+    formatPhoneDisplay(defaultValues?.phoneNumber)
+  );
+  const [cellDisplay, setCellDisplay] = useState(
+    formatPhoneDisplay(defaultValues?.cellPhone)
+  );
+  const [whatsappDisplay, setWhatsappDisplay] = useState(
+    formatPhoneDisplay(defaultValues?.whatsappUrl)
+  );
+
+  // ── ViaCEP ──
+  const [cepLoading, setCepLoading] = useState(false);
+  const [cepError, setCepError] = useState<string | null>(null);
+  const lastFetchedCep = useRef<string>("");
+
+  async function fetchCEP(cep: string) {
+    const digits = onlyNumbers(cep);
+    if (digits.length !== 8) return;
+    if (digits === lastFetchedCep.current) return;
+
+    lastFetchedCep.current = digits;
+    setCepLoading(true);
+    setCepError(null);
+
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+      const data = await res.json();
+
+      if (data.erro) {
+        setCepError("CEP não encontrado.");
+        return;
+      }
+
+      // Only fill if field is empty (don't overwrite user data)
+      if (data.logradouro) {
+        const currentAddress = control._formValues.address;
+        if (!currentAddress) {
+          setValue("address", data.logradouro, { shouldValidate: true });
+        }
+      }
+      if (data.bairro) {
+        // Append neighborhood to address if not already there
+        const currentAddress = control._formValues.address || "";
+        if (data.logradouro && !currentAddress.includes(data.bairro)) {
+          setValue("address", data.logradouro + ", " + data.bairro, {
+            shouldValidate: true,
+          });
+        }
+      }
+      if (data.localidade) {
+        setValue("city", data.localidade, { shouldValidate: true });
+      }
+      if (data.uf) {
+        setValue("state", data.uf, { shouldValidate: true });
+      }
+    } catch {
+      setCepError("Erro ao consultar CEP. Preencha manualmente.");
+      lastFetchedCep.current = "";
+    } finally {
+      setCepLoading(false);
+    }
+  }
+
+  function handleCepChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const masked = maskCEP(e.target.value);
+    setCepDisplay(masked);
+    const digits = onlyNumbers(masked);
+    setValue("postalCode", digits, { shouldValidate: true });
+    setCepError(null);
+
+    if (digits.length === 8) {
+      fetchCEP(digits);
+    }
+  }
+
+  function handlePhoneChange(
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: "phoneNumber" | "cellPhone" | "whatsappUrl",
+    setDisplay: (v: string) => void
+  ) {
+    const masked = maskPhone(e.target.value);
+    setDisplay(masked);
+    setValue(field, onlyNumbers(masked), { shouldValidate: true });
+  }
 
   // Auto-generate slug from name (only in create mode)
   const handleNameChange = useCallback(
@@ -155,14 +251,60 @@ export function StoreForm({
           Endereço
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* CEP */}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-[var(--brand-black)]">
+              CEP
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={cepDisplay}
+                onChange={handleCepChange}
+                placeholder="00000-000"
+                maxLength={9}
+                className={`flex h-10 w-full rounded-lg border bg-white px-3.5 pr-10 text-sm text-[var(--brand-black)] transition-colors placeholder:text-muted-foreground focus:border-[var(--brand-black)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-black)]/10 ${
+                  cepError
+                    ? "border-[var(--brand-error)]"
+                    : "border-[var(--brand-border)]"
+                }`}
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {cepLoading ? (
+                  <Loader2
+                    size={16}
+                    className="animate-spin text-muted-foreground"
+                  />
+                ) : (
+                  <MapPin size={16} className="text-muted-foreground" />
+                )}
+              </div>
+            </div>
+            {cepError && (
+              <p className="mt-1.5 text-xs text-[var(--brand-error)]">
+                {cepError}
+              </p>
+            )}
+            <input type="hidden" {...register("postalCode")} />
+          </div>
+
+          <Input
+            label="País"
+            placeholder="Brasil"
+            {...register("country")}
+            error={errors.country?.message}
+          />
+
           <div className="sm:col-span-2">
             <Input
-              label="Endereço"
-              placeholder="Rua, número, bairro"
+              label="Logradouro"
+              placeholder="Rua, avenida..."
               {...register("address")}
               error={errors.address?.message}
             />
           </div>
+
           <Input
             label="Cidade"
             placeholder="São Paulo"
@@ -174,18 +316,6 @@ export function StoreForm({
             placeholder="SP"
             {...register("state")}
             error={errors.state?.message}
-          />
-          <Input
-            label="CEP"
-            placeholder="00000-000"
-            {...register("postalCode")}
-            error={errors.postalCode?.message}
-          />
-          <Input
-            label="País"
-            placeholder="Brasil"
-            {...register("country")}
-            error={errors.country?.message}
           />
         </div>
       </section>
@@ -203,24 +333,78 @@ export function StoreForm({
             {...register("email")}
             error={errors.email?.message}
           />
-          <Input
-            label="WhatsApp"
-            placeholder="https://wa.me/5511999999999"
-            {...register("whatsappUrl")}
-            error={errors.whatsappUrl?.message}
-          />
-          <Input
-            label="Telefone"
-            placeholder="(11) 3333-4444"
-            {...register("phoneNumber")}
-            error={errors.phoneNumber?.message}
-          />
-          <Input
-            label="Celular"
-            placeholder="(11) 99999-9999"
-            {...register("cellPhone")}
-            error={errors.cellPhone?.message}
-          />
+
+          {/* WhatsApp */}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-[var(--brand-black)]">
+              WhatsApp
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={whatsappDisplay}
+              onChange={(e) =>
+                handlePhoneChange(e, "whatsappUrl", setWhatsappDisplay)
+              }
+              placeholder="(11) 99999-9999"
+              maxLength={16}
+              className="flex h-10 w-full rounded-lg border border-[var(--brand-border)] bg-white px-3.5 text-sm text-[var(--brand-black)] transition-colors placeholder:text-muted-foreground focus:border-[var(--brand-black)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-black)]/10"
+            />
+            {errors.whatsappUrl && (
+              <p className="mt-1.5 text-xs text-[var(--brand-error)]">
+                {errors.whatsappUrl.message}
+              </p>
+            )}
+            <input type="hidden" {...register("whatsappUrl")} />
+          </div>
+
+          {/* Telefone */}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-[var(--brand-black)]">
+              Telefone
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={phoneDisplay}
+              onChange={(e) =>
+                handlePhoneChange(e, "phoneNumber", setPhoneDisplay)
+              }
+              placeholder="(11) 3333-4444"
+              maxLength={16}
+              className="flex h-10 w-full rounded-lg border border-[var(--brand-border)] bg-white px-3.5 text-sm text-[var(--brand-black)] transition-colors placeholder:text-muted-foreground focus:border-[var(--brand-black)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-black)]/10"
+            />
+            {errors.phoneNumber && (
+              <p className="mt-1.5 text-xs text-[var(--brand-error)]">
+                {errors.phoneNumber.message}
+              </p>
+            )}
+            <input type="hidden" {...register("phoneNumber")} />
+          </div>
+
+          {/* Celular */}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-[var(--brand-black)]">
+              Celular
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={cellDisplay}
+              onChange={(e) =>
+                handlePhoneChange(e, "cellPhone", setCellDisplay)
+              }
+              placeholder="(11) 99999-9999"
+              maxLength={16}
+              className="flex h-10 w-full rounded-lg border border-[var(--brand-border)] bg-white px-3.5 text-sm text-[var(--brand-black)] transition-colors placeholder:text-muted-foreground focus:border-[var(--brand-black)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-black)]/10"
+            />
+            {errors.cellPhone && (
+              <p className="mt-1.5 text-xs text-[var(--brand-error)]">
+                {errors.cellPhone.message}
+              </p>
+            )}
+            <input type="hidden" {...register("cellPhone")} />
+          </div>
         </div>
       </section>
 

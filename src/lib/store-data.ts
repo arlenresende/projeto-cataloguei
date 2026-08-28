@@ -31,9 +31,10 @@ export async function getPublicStoreBySlug(slug: string) {
 
   if (!store) return null;
 
-  // Extract WhatsApp number from URL (e.g. "https://wa.me/5511999999999" → "5511999999999")
+  // WhatsApp: stored as digits, extract number for links
+  // Handles both legacy URL format and new digit-only format
   const whatsappNumber = store.whatsappUrl
-    ? store.whatsappUrl.replace(/.*wa\.me\//, "").replace(/[^0-9]/g, "")
+    ? store.whatsappUrl.replace(/[^0-9]/g, "")
     : "";
 
   return {
