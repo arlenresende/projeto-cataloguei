@@ -21,6 +21,7 @@ datasource db {
 // em src/lib/themes/types.ts — qualquer adição precisa ser refletida
 // nos dois lugares até a Fase 3 unificar a fonte da verdade.
 enum StoreThemeSegment {
+  DEFAULT
   TECHNOLOGY
   FOOD
   FASHION

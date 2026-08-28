@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
 import { auth } from "@/lib/auth";
 
 interface AdminLayoutProps {
@@ -16,5 +17,10 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
     redirect("/login");
   }
 
-  return <AdminShell>{children}</AdminShell>;
+  return (
+    <AdminShell>
+      <OnboardingGate />
+      {children}
+    </AdminShell>
+  );
 }
