@@ -25,5 +25,10 @@ export default async function StoresPage() {
     });
   }
 
-  return <StoresContent initialStore={store} />;
+  return (
+    <StoresContent
+      key={store?.id ?? "empty-store"}
+      initialStore={store}
+    />
+  );
 }

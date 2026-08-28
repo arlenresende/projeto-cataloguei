@@ -35,7 +35,7 @@ export function OnboardingGate() {
       open={true}
       onStoreCreated={() => {
         setHasStore(true);
-        router.refresh();
+        router.replace("/admin/stores?created=1");
       }}
     />
   );
