@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { productUpdateSchema } from "@/lib/schemas/product";
+import { getPrismaErrorCode, prismaTargetIncludes } from "@/lib/prisma-error";
 
 // GET /api/products/[id]
 export async function GET(
@@ -138,15 +139,14 @@ export async function PATCH(
 
     return NextResponse.json({ product });
   } catch (error) {
-    if (error instanceof Error && "code" in error && (error as any).code === "P2002") {
-      const target = (error as any).meta?.target;
-      if (target?.includes("slug")) {
+    if (getPrismaErrorCode(error) === "P2002") {
+      if (prismaTargetIncludes(error, "slug")) {
         return NextResponse.json(
           { error: "Já existe um produto com esse slug nesta loja." },
           { status: 409 }
         );
       }
-      if (target?.includes("sku")) {
+      if (prismaTargetIncludes(error, "sku")) {
         return NextResponse.json(
           { error: "Já existe um produto com esse SKU nesta loja." },
           { status: 409 }

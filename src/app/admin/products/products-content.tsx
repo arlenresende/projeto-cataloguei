@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -24,8 +24,8 @@ interface ProductData {
   id: string;
   name: string;
   slug: string;
-  price: any;
-  compareAtPrice: any | null;
+  price: number | string;
+  compareAtPrice: number | string | null;
   stock: number;
   minStock: number | null;
   active: boolean;
@@ -44,11 +44,10 @@ interface CategoryOption {
 }
 
 interface ProductsContentProps {
-  storeId: string;
   categories: CategoryOption[];
 }
 
-export function ProductsContent({ storeId, categories }: ProductsContentProps) {
+export function ProductsContent({ categories }: ProductsContentProps) {
   const [products, setProducts] = useState<ProductData[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -61,36 +60,45 @@ export function ProductsContent({ storeId, categories }: ProductsContentProps) {
   const [deleteTarget, setDeleteTarget] = useState<ProductData | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: "20",
-      });
-      if (search) params.set("search", search);
-      if (statusFilter !== "all") params.set("status", statusFilter);
-      if (categoryFilter) params.set("category", categoryFilter);
-      if (stockFilter !== "all") params.set("stock", stockFilter);
-
-      const res = await fetch(`/api/products?${params}`);
-      const data = await res.json();
-
-      if (data.products) {
-        setProducts(data.products);
-        setTotalPages(data.pagination.totalPages);
-        setTotal(data.pagination.total);
-      }
-    } catch {
-      // silent
-    } finally {
-      setLoading(false);
-    }
-  }, [page, search, statusFilter, categoryFilter, stockFilter]);
-
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    let cancelled = false;
+
+    async function loadProducts() {
+      setLoading(true);
+
+      try {
+        const params = new URLSearchParams({
+          page: String(page),
+          limit: "20",
+        });
+        if (search) params.set("search", search);
+        if (statusFilter !== "all") params.set("status", statusFilter);
+        if (categoryFilter) params.set("category", categoryFilter);
+        if (stockFilter !== "all") params.set("stock", stockFilter);
+
+        const res = await fetch(`/api/products?${params}`);
+        const data = await res.json();
+
+        if (!cancelled && data.products) {
+          setProducts(data.products);
+          setTotalPages(data.pagination.totalPages);
+          setTotal(data.pagination.total);
+        }
+      } catch {
+        // silent
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadProducts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [page, search, statusFilter, categoryFilter, stockFilter]);
 
   // Debounce search
   const [searchInput, setSearchInput] = useState("");
@@ -146,7 +154,7 @@ export function ProductsContent({ storeId, categories }: ProductsContentProps) {
     }
   }
 
-  function formatPrice(value: any) {
+  function formatPrice(value: number | string) {
     return Number(value).toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",

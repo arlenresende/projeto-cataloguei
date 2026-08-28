@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
+import type { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { productCreateSchema } from "@/lib/schemas/product";
+import { getPrismaErrorCode, prismaTargetIncludes } from "@/lib/prisma-error";
 
 // GET /api/products — list products of the user's store
 export async function GET(request: Request) {
@@ -28,7 +30,7 @@ export async function GET(request: Request) {
   const status = url.searchParams.get("status") || "";
   const stock = url.searchParams.get("stock") || "";
 
-  const where: any = { storeId: store.id };
+  const where: Prisma.ProductWhereInput = { storeId: store.id };
 
   if (search) {
     where.OR = [
@@ -170,15 +172,14 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ product }, { status: 201 });
   } catch (error) {
-    if (error instanceof Error && "code" in error && (error as any).code === "P2002") {
-      const target = (error as any).meta?.target;
-      if (target?.includes("slug")) {
+    if (getPrismaErrorCode(error) === "P2002") {
+      if (prismaTargetIncludes(error, "slug")) {
         return NextResponse.json(
           { error: "Já existe um produto com esse slug nesta loja." },
           { status: 409 }
         );
       }
-      if (target?.includes("sku")) {
+      if (prismaTargetIncludes(error, "sku")) {
         return NextResponse.json(
           { error: "Já existe um produto com esse SKU nesta loja." },
           { status: 409 }

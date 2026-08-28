@@ -66,12 +66,8 @@ export default function EditProductPage() {
         }
 
         if (categoriesData.categories) {
-          setCategories(
-            categoriesData.categories.map((c: any) => ({
-              id: c.id,
-              name: c.name,
-            }))
-          );
+          const list = categoriesData.categories as { id: string; name: string }[];
+          setCategories(list.map((c) => ({ id: c.id, name: c.name })));
         }
       } catch {
         // silent

@@ -21,5 +21,5 @@ export default async function ProductsPage() {
     select: { id: true, name: true },
   });
 
-  return <ProductsContent storeId={store.id} categories={categories} />;
+  return <ProductsContent categories={categories} />;
 }

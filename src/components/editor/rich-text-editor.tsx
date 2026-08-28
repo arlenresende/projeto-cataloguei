@@ -1,6 +1,6 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, type JSONContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Underline from "@tiptap/extension-underline";
@@ -33,7 +33,7 @@ import { useCallback, useEffect } from "react";
 
 interface RichTextEditorProps {
   value?: string | null;
-  onChange?: (html: string, json: any) => void;
+  onChange?: (html: string, json: JSONContent) => void;
   placeholder?: string;
 }
 

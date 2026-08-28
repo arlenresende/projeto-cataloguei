@@ -39,3 +39,20 @@ export const linktreeSchema = z.object({
 
 export type LinktreeFormData = z.output<typeof linktreeSchema>;
 export type LinkFormData = z.output<typeof linkSchema>;
+
+export type LinktreeLinkPayload = {
+  id: string;
+  title: string;
+  url: string;
+  linkType: string | null;
+  order: number;
+};
+
+export type LinktreePayload = {
+  id: string;
+  title: string;
+  description: string | null;
+  backgroundColor: string | null;
+  textColor: string | null;
+  links: LinktreeLinkPayload[];
+};

@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { categoryUpdateSchema } from "@/lib/schemas/category";
+import { getPrismaErrorCode } from "@/lib/prisma-error";
 
 // GET /api/categories/[id]
 export async function GET(
@@ -91,11 +92,7 @@ export async function PATCH(
 
     return NextResponse.json({ category });
   } catch (error) {
-    if (
-      error instanceof Error &&
-      "code" in error &&
-      (error as any).code === "P2002"
-    ) {
+    if (getPrismaErrorCode(error) === "P2002") {
       return NextResponse.json(
         { error: "Já existe uma categoria com esse slug nesta loja." },
         { status: 409 }

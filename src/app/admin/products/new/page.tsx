@@ -11,6 +11,12 @@ interface CategoryOption {
   name: string;
 }
 
+interface CategoryApi {
+  id: string;
+  name: string;
+  isActive?: boolean;
+}
+
 export default function NewProductPage() {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -21,12 +27,12 @@ export default function NewProductPage() {
     async function loadCategories() {
       try {
         const res = await fetch("/api/categories");
-        const data = await res.json();
+        const data: { categories?: CategoryApi[] } = await res.json();
         if (data.categories) {
           setCategories(
             data.categories
-              .filter((c: any) => c.isActive)
-              .map((c: any) => ({ id: c.id, name: c.name }))
+              .filter((c) => c.isActive ?? true)
+              .map((c) => ({ id: c.id, name: c.name }))
           );
         }
       } catch {

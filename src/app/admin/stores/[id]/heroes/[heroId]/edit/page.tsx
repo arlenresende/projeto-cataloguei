@@ -6,6 +6,20 @@ import { PageHeader } from "@/components/ui/page-header";
 import { HeroForm } from "../../components/hero-form";
 import type { StoreHeroFormData } from "@/lib/schemas/store-hero";
 
+interface HeroApiItem {
+  id: string;
+  title: string;
+  description: string | null;
+  image: string | null;
+  bgColor: string | null;
+  textColor: string | null;
+  alignment: "LEFT" | "CENTER" | "RIGHT";
+  buttonText: string | null;
+  buttonUrl: string | null;
+  position: number;
+  isActive: boolean;
+}
+
 export default function EditHeroPage() {
   const router = useRouter();
   const params = useParams();
@@ -20,8 +34,8 @@ export default function EditHeroPage() {
     async function load() {
       try {
         const res = await fetch(`/api/stores/${storeId}/heroes`);
-        const data = await res.json();
-        const found = data.heroes?.find((h: any) => h.id === heroId);
+        const data: { heroes?: HeroApiItem[] } = await res.json();
+        const found = data.heroes?.find((h) => h.id === heroId);
         if (found) {
           setHero({
             title: found.title,
