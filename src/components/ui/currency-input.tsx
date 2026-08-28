@@ -5,51 +5,86 @@ import { cn } from "@/lib/utils";
 
 // ── Helpers ──────────────────────────────────────────────
 
-/** Remove tudo que não é dígito */
-function onlyDigits(s: string) {
-  return s.replace(/\D/g, "");
-}
-
-/** Formata string de dígitos puros para BRL: 1234567 → "1.234.567" */
-function formatDigitsToBRL(digits: string): string {
-  if (!digits) return "";
-  // adiciona pontos a cada 3 dígitos da direita para esquerda
-  let result = "";
-  let count = 0;
-  for (let i = digits.length - 1; i >= 0; i--) {
-    if (count > 0 && count % 3 === 0) result = "." + result;
-    result = digits[i] + result;
-    count++;
-  }
-  return result;
-}
-
-/** Formata número para exibição: 1299.90 → "1.299,90" */
+/** Formata número para exibição BRL: 1299.9 → "1.299,90" */
 function formatBRL(value: number | null | undefined): string {
-  if (value === null || value === undefined || value === 0) return "";
-  const fixed = value.toFixed(2); // "1299.90"
-  const [intPart, decPart] = fixed.split(".");
-  return formatDigitsToBRL(intPart) + "," + decPart;
+  if (value === null || value === undefined || value <= 0) return "";
+  return value.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
-/** Parse display string → number: "1.299,90" → 1299.90 */
+/** Parse string formatada → number: "1.299,90" → 1299.90 */
 function parseBRL(input: string): number | null {
-  const digits = onlyDigits(input);
-  if (!digits) return null;
-  // os últimos 2 dígitos são centavos
-  const intPart = digits.slice(0, -2) || "0";
-  const decPart = digits.slice(-2);
-  return parseFloat(intPart + "." + decPart);
+  const cleaned = input.replace(/\./g, "").replace(",", ".");
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? null : num;
 }
 
-/** Formata string de dígitos puros como moeda durante a digitação: "129990" → "1.299,90" */
-function maskCurrency(digits: string): string {
+/** Formata número para exibição de peso: 0.85 → "0,850" */
+function formatWeight(value: number | null | undefined): string {
+  if (value === null || value === undefined || value <= 0) return "";
+  return value.toLocaleString("pt-BR", {
+    minimumFractionDigits: 3,
+    maximumFractionDigits: 3,
+  });
+}
+
+/** Parse string formatada → number para peso */
+function parseWeight(input: string): number | null {
+  const cleaned = input.replace(/\./g, "").replace(",", ".");
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? null : num;
+}
+
+/** Máscara de moeda: aplica separadores de milhar e vírgula decimal */
+function maskCurrencyInput(raw: string): string {
+  // Remove tudo que não é dígito
+  let digits = raw.replace(/\D/g, "");
   if (!digits) return "";
-  // garante pelo menos 3 dígitos (0 + centavos)
+
+  // Remove zeros à esquerda (mas mantém pelo menos 1)
+  digits = digits.replace(/^0+/, "") || "0";
+
+  // Garante pelo menos 3 dígitos (para ter centavos)
   while (digits.length < 3) digits = "0" + digits;
+
   const intPart = digits.slice(0, -2);
   const decPart = digits.slice(-2);
-  return formatDigitsToBRL(intPart) + "," + decPart;
+
+  // Adiciona pontos na parte inteira
+  let formatted = "";
+  let count = 0;
+  for (let i = intPart.length - 1; i >= 0; i--) {
+    if (count > 0 && count % 3 === 0) formatted = "." + formatted;
+    formatted = intPart[i] + formatted;
+    count++;
+  }
+
+  return formatted + "," + decPart;
+}
+
+/** Máscara de peso: aplica separadores e 3 casas decimais */
+function maskWeightInput(raw: string): string {
+  let digits = raw.replace(/\D/g, "");
+  if (!digits) return "";
+
+  digits = digits.replace(/^0+/, "") || "0";
+
+  while (digits.length < 4) digits = "0" + digits;
+
+  const intPart = digits.slice(0, -3);
+  const decPart = digits.slice(-3);
+
+  let formatted = "";
+  let count = 0;
+  for (let i = intPart.length - 1; i >= 0; i--) {
+    if (count > 0 && count % 3 === 0) formatted = "." + formatted;
+    formatted = intPart[i] + formatted;
+    count++;
+  }
+
+  return formatted + "," + decPart;
 }
 
 // ── CurrencyInput ────────────────────────────────────────
@@ -74,34 +109,22 @@ export function CurrencyInput({
   const [displayValue, setDisplayValue] = useState("");
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const skipNextSync = useRef(false);
+  const ignoreChange = useRef(false);
 
   // Sync external value → display (only when not focused)
   useEffect(() => {
-    if (skipNextSync.current) {
-      skipNextSync.current = false;
-      return;
-    }
-    if (!focused) {
+    if (!focused && !ignoreChange.current) {
       setDisplayValue(formatBRL(value));
     }
+    ignoreChange.current = false;
   }, [value, focused]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const raw = e.target.value;
-      const digits = onlyDigits(raw);
-
-      if (!digits) {
-        setDisplayValue("");
-        skipNextSync.current = true;
-        onChange?.(null);
-        return;
-      }
-
-      const masked = maskCurrency(digits);
+      const masked = maskCurrencyInput(raw);
       setDisplayValue(masked);
-      skipNextSync.current = true;
+      ignoreChange.current = true;
       onChange?.(parseBRL(masked));
     },
     [onChange]
@@ -109,24 +132,19 @@ export function CurrencyInput({
 
   const handleFocus = useCallback(() => {
     setFocused(true);
-    // Ao focar, mostra só dígitos + vírgula para facilitar edição
-    if (value && value > 0) {
-      const digits = onlyDigits(value.toFixed(2));
-      setDisplayValue(maskCurrency(digits));
-    }
-    // seleciona tudo
+    // Seleciona tudo para facilitar edição
     setTimeout(() => inputRef.current?.select(), 0);
-  }, [value]);
+  }, []);
 
   const handleBlur = useCallback(() => {
     setFocused(false);
     const parsed = parseBRL(displayValue);
     if (parsed !== null && parsed > 0) {
-      skipNextSync.current = true;
+      ignoreChange.current = true;
       onChange?.(parsed);
       setDisplayValue(formatBRL(parsed));
     } else {
-      skipNextSync.current = true;
+      ignoreChange.current = true;
       onChange?.(null);
       setDisplayValue("");
     }
@@ -176,31 +194,6 @@ interface WeightInputProps {
   disabled?: boolean;
 }
 
-/** Formata número para exibição: 0.85 → "0,850" */
-function formatWeight(value: number | null | undefined): string {
-  if (value === null || value === undefined || value === 0) return "";
-  const fixed = value.toFixed(3); // "0.850"
-  const [intPart, decPart] = fixed.split(".");
-  return formatDigitsToBRL(intPart) + "," + decPart;
-}
-
-/** Formata string de dígitos puros como peso durante a digitação: "850" → "0,850" */
-function maskWeight(digits: string): string {
-  if (!digits) return "";
-  while (digits.length < 4) digits = "0" + digits;
-  const intPart = digits.slice(0, -3);
-  const decPart = digits.slice(-3);
-  return formatDigitsToBRL(intPart) + "," + decPart;
-}
-
-function parseWeight(input: string): number | null {
-  const digits = onlyDigits(input);
-  if (!digits) return null;
-  const intPart = digits.slice(0, -3) || "0";
-  const decPart = digits.slice(-3);
-  return parseFloat(intPart + "." + decPart);
-}
-
 export function WeightInput({
   label,
   value,
@@ -212,33 +205,21 @@ export function WeightInput({
   const [displayValue, setDisplayValue] = useState("");
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const skipNextSync = useRef(false);
+  const ignoreChange = useRef(false);
 
   useEffect(() => {
-    if (skipNextSync.current) {
-      skipNextSync.current = false;
-      return;
-    }
-    if (!focused) {
+    if (!focused && !ignoreChange.current) {
       setDisplayValue(formatWeight(value));
     }
+    ignoreChange.current = false;
   }, [value, focused]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const raw = e.target.value;
-      const digits = onlyDigits(raw);
-
-      if (!digits) {
-        setDisplayValue("");
-        skipNextSync.current = true;
-        onChange?.(null);
-        return;
-      }
-
-      const masked = maskWeight(digits);
+      const masked = maskWeightInput(raw);
       setDisplayValue(masked);
-      skipNextSync.current = true;
+      ignoreChange.current = true;
       onChange?.(parseWeight(masked));
     },
     [onChange]
@@ -246,22 +227,18 @@ export function WeightInput({
 
   const handleFocus = useCallback(() => {
     setFocused(true);
-    if (value && value > 0) {
-      const digits = onlyDigits(value.toFixed(3));
-      setDisplayValue(maskWeight(digits));
-    }
     setTimeout(() => inputRef.current?.select(), 0);
-  }, [value]);
+  }, []);
 
   const handleBlur = useCallback(() => {
     setFocused(false);
     const parsed = parseWeight(displayValue);
     if (parsed !== null && parsed > 0) {
-      skipNextSync.current = true;
+      ignoreChange.current = true;
       onChange?.(parsed);
       setDisplayValue(formatWeight(parsed));
     } else {
-      skipNextSync.current = true;
+      ignoreChange.current = true;
       onChange?.(null);
       setDisplayValue("");
     }
