@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ThemeWrapper } from "@/components/store/ThemeWrapper";
-import { getStoreByUrl } from "@/lib/mock-data";
+import { getPublicStoreBySlug } from "@/lib/store-data";
 
 interface StoreLayoutProps {
   children: React.ReactNode;
@@ -12,20 +12,14 @@ export default async function StoreLayout({
   params,
 }: StoreLayoutProps) {
   const { storeUrl } = await params;
-  const store = getStoreByUrl(storeUrl);
+  const store = await getPublicStoreBySlug(storeUrl);
 
   if (!store) {
     notFound();
   }
 
   return (
-    <ThemeWrapper
-      segment={store.theme}
-      overrides={{
-        primaryColor: store.primaryColor,
-        secondaryColor: store.secondaryColor,
-      }}
-    >
+    <ThemeWrapper segment={store.theme}>
       {children}
     </ThemeWrapper>
   );

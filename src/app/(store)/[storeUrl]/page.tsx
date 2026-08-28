@@ -7,7 +7,7 @@ import { ProductGrid } from "@/components/store/ProductGrid";
 import { StoreFooter } from "@/components/store/StoreFooter";
 import { FloatingWhatsApp } from "@/components/store/FloatingWhatsApp";
 import { StoreCtaBanner } from "@/components/store/StoreCtaBanner";
-import { getStoreByUrl } from "@/lib/mock-data";
+import { getPublicStoreBySlug } from "@/lib/store-data";
 
 interface StorePageProps {
   params: Promise<{ storeUrl: string }>;
@@ -17,7 +17,7 @@ interface StorePageProps {
 export default async function StorePage({ params, searchParams }: StorePageProps) {
   const { storeUrl } = await params;
   const { category, min, max } = await searchParams;
-  const store = getStoreByUrl(storeUrl);
+  const store = await getPublicStoreBySlug(storeUrl);
 
   if (!store) {
     notFound();
@@ -42,79 +42,35 @@ export default async function StorePage({ params, searchParams }: StorePageProps
     filteredProducts = filteredProducts.filter((p) => p.price <= Number(max));
   }
 
-  const featuredProducts = store.products.filter(
-    (p) => p.originalPrice && p.originalPrice > p.price
-  );
-
   const hasActiveFilters = category || min || max;
 
   return (
     <div className="flex min-h-screen flex-col">
       <StoreHeader
         name={store.name}
-        storeUrl={store.url}
+        storeUrl={store.slug}
         whatsapp={store.whatsapp}
         categories={categories}
       />
 
       <main className="flex-1">
-        {/* Banner Carousel */}
-        {store.banners && store.banners.length > 0 ? (
-          <BannerCarousel banners={store.banners} />
-        ) : (
-          <BannerCarousel
-            banners={[
-              {
-                image: store.bannerUrl,
-                title: store.description,
-                description: "Confira nossos produtos e faça seu pedido pelo WhatsApp.",
-                buttonText: "Ver produtos",
-                buttonLink: "#produtos",
-              },
-            ]}
-          />
-        )}
+        {/* Banner */}
+        <BannerCarousel
+          banners={[
+            {
+              image: store.logo,
+              title: store.name,
+              description: store.description || "Confira nossos produtos e faça seu pedido pelo WhatsApp.",
+              buttonText: "Ver produtos",
+              buttonLink: "#produtos",
+            },
+          ]}
+        />
 
         {/* Filters */}
         <Suspense>
-          <ProductFilters categories={categories} storeUrl={store.url} />
+          <ProductFilters categories={categories} storeUrl={store.slug} />
         </Suspense>
-
-        {/* Featured Products (on sale) — only when no filters active */}
-        {!hasActiveFilters && featuredProducts.length > 0 && (
-          <section className="py-8 md:py-12">
-            <div className="mx-auto max-w-6xl px-4">
-              <div className="mb-6 flex items-end justify-between">
-                <div>
-                  <span
-                    className="text-xs font-bold uppercase tracking-widest"
-                    style={{ color: "var(--theme-primary)" }}
-                  >
-                    Ofertas especiais
-                  </span>
-                  <h2
-                    className="mt-1 text-xl font-extrabold tracking-tight md:text-2xl"
-                    style={{ color: "var(--theme-text)" }}
-                  >
-                    Promoções da semana
-                  </h2>
-                </div>
-                <a
-                  href="#produtos"
-                  className="text-sm font-bold transition-opacity hover:opacity-70"
-                  style={{ color: "var(--theme-text)" }}
-                >
-                  Ver todos →
-                </a>
-              </div>
-              <ProductGrid
-                products={featuredProducts}
-                storeUrl={store.url}
-                whatsapp={store.whatsapp}
-              />
-            </div>
-          </section>
-        )}
 
         {/* CTA Banner — only when no filters active */}
         {!hasActiveFilters && (
@@ -159,7 +115,7 @@ export default async function StorePage({ params, searchParams }: StorePageProps
             {filteredProducts.length > 0 ? (
               <ProductGrid
                 products={filteredProducts}
-                storeUrl={store.url}
+                storeUrl={store.slug}
                 whatsapp={store.whatsapp}
               />
             ) : (
@@ -197,15 +153,17 @@ export default async function StorePage({ params, searchParams }: StorePageProps
 
       <StoreFooter
         name={store.name}
-        storeUrl={store.url}
+        storeUrl={store.slug}
         description={store.description}
         whatsapp={store.whatsapp}
       />
 
-      <FloatingWhatsApp
-        whatsapp={store.whatsapp}
-        storeName={store.name}
-      />
+      {store.whatsapp && (
+        <FloatingWhatsApp
+          whatsapp={store.whatsapp}
+          storeName={store.name}
+        />
+      )}
     </div>
   );
 }

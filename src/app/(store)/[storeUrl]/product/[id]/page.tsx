@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, MessageCircle, Share2, Shield, Truck, Star } from "lucide-react";
-import { getProductById } from "@/lib/mock-data";
+import { prisma } from "@/lib/prisma";
+import { getPublicStoreBySlug } from "@/lib/store-data";
 import { StoreHeader } from "@/components/store/StoreHeader";
 import { StoreFooter } from "@/components/store/StoreFooter";
 import { ProductCard } from "@/components/store/ProductCard";
@@ -14,13 +15,17 @@ interface ProductPageProps {
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { storeUrl, id } = await params;
-  const result = getProductById(storeUrl, id);
+  const store = await getPublicStoreBySlug(storeUrl);
 
-  if (!result) {
+  if (!store) {
     notFound();
   }
 
-  const { store, product } = result;
+  const product = store.products.find((p) => p.id === id);
+
+  if (!product) {
+    notFound();
+  }
 
   const categories = Array.from(
     new Set(store.products.map((p) => p.category))
@@ -30,22 +35,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
     .filter((p) => p.id !== product.id)
     .slice(0, 4);
 
-  const images = product.images?.length
-    ? product.images
-    : [product.imageUrl];
-
-  const discount =
-    product.originalPrice && product.originalPrice > product.price
-      ? Math.round(
-          ((product.originalPrice - product.price) / product.originalPrice) * 100
-        )
-      : null;
+  const images = [product.imageUrl];
 
   return (
     <div className="flex min-h-screen flex-col">
       <StoreHeader
         name={store.name}
-        storeUrl={store.url}
+        storeUrl={store.slug}
         whatsapp={store.whatsapp}
         categories={categories}
       />
@@ -80,24 +76,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 {product.name}
               </h1>
 
-              <div className="mt-3 flex items-center gap-2">
-                <div className="flex gap-0.5">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      size={15}
-                      className={i < 4 ? "fill-amber-400 text-amber-400" : "text-gray-300"}
-                    />
-                  ))}
-                </div>
-                <span
-                  className="text-xs font-medium"
-                  style={{ color: "var(--theme-text)", opacity: 0.5 }}
-                >
-                  4.0 (12 avaliações)
-                </span>
-              </div>
-
               <p
                 className="mt-5 text-base font-medium leading-relaxed"
                 style={{ color: "var(--theme-text)", opacity: 0.7 }}
@@ -106,17 +84,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </p>
 
               <div className="mt-8 flex items-baseline gap-3">
-                {product.originalPrice && product.originalPrice > product.price && (
-                  <span
-                    className="text-lg font-medium line-through"
-                    style={{ color: "var(--theme-text)", opacity: 0.3 }}
-                  >
-                    {product.originalPrice.toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })}
-                  </span>
-                )}
                 <span
                   className="text-4xl font-extrabold"
                   style={{ color: "var(--theme-text)" }}
@@ -126,30 +93,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     currency: "BRL",
                   })}
                 </span>
-                {discount && (
-                  <span
-                    className="rounded-lg px-2.5 py-1 text-xs font-bold"
-                    style={{
-                      backgroundColor: "var(--theme-primary)",
-                      color: "var(--theme-secondary)",
-                    }}
-                  >
-                    -{discount}%
-                  </span>
-                )}
               </div>
 
               <div className="mt-8 flex flex-col gap-3">
-                <a
-                  href={`https://wa.me/${store.whatsapp}?text=${encodeURIComponent(`Olá! Tenho interesse no produto: ${product.name}`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-bold text-white transition-all hover:shadow-lg"
-                  style={{ backgroundColor: "#25D366" }}
-                >
-                  <MessageCircle size={20} />
-                  Comprar pelo WhatsApp
-                </a>
+                {store.whatsapp && (
+                  <a
+                    href={`https://wa.me/${store.whatsapp}?text=${encodeURIComponent(`Olá! Tenho interesse no produto: ${product.name}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-bold text-white transition-all hover:shadow-lg"
+                    style={{ backgroundColor: "#25D366" }}
+                  >
+                    <MessageCircle size={20} />
+                    Comprar pelo WhatsApp
+                  </a>
+                )}
                 <button
                   className="flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold transition-all hover:shadow-md"
                   style={{
@@ -197,7 +155,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   <ProductCard
                     key={p.id}
                     product={p}
-                    storeUrl={store.url}
+                    storeUrl={store.slug}
                     whatsapp={store.whatsapp}
                   />
                 ))}
@@ -209,15 +167,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       <StoreFooter
         name={store.name}
-        storeUrl={store.url}
+        storeUrl={store.slug}
         description={store.description}
         whatsapp={store.whatsapp}
       />
 
-      <FloatingWhatsApp
-        whatsapp={store.whatsapp}
-        storeName={store.name}
-      />
+      {store.whatsapp && (
+        <FloatingWhatsApp
+          whatsapp={store.whatsapp}
+          storeName={store.name}
+        />
+      )}
     </div>
   );
 }
