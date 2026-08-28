@@ -9,6 +9,7 @@ import {
   Store,
   Image,
   Tags,
+  Link2,
   X,
   LogOut,
 } from "lucide-react";
@@ -24,6 +25,7 @@ const navItems = [
   { href: "/admin/products", label: "Produtos", icon: Package },
   { href: "/admin/categories", label: "Categorias", icon: Tags },
   { href: "/admin/banners", label: "Banners", icon: Image },
+  { href: "/admin/linktree", label: "Linktree", icon: Link2 },
   { href: "/admin/settings", label: "Configurações", icon: Settings },
 ];
 
