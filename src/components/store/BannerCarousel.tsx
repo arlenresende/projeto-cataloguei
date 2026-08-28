@@ -87,8 +87,24 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
 
           {/* Content */}
           {hasContent && (
-            <div className="absolute inset-0 flex items-center">
-              <div className="px-8 py-8 md:px-16 md:py-12">
+            <div
+              className={`absolute inset-0 flex items-center ${
+                banner.alignment === "RIGHT"
+                  ? "justify-end"
+                  : banner.alignment === "LEFT"
+                    ? "justify-start"
+                    : "justify-center"
+              }`}
+            >
+              <div
+                className={`px-8 py-8 md:px-16 md:py-12 ${
+                  banner.alignment === "RIGHT"
+                    ? "text-right"
+                    : banner.alignment === "LEFT"
+                      ? "text-left"
+                      : "text-center"
+                }`}
+              >
                 {banner.title && (
                   <h2
                     className="max-w-lg text-2xl font-extrabold leading-[1.1] tracking-tight md:text-4xl lg:text-5xl"

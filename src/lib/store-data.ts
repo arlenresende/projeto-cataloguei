@@ -51,6 +51,7 @@ export async function getPublicStoreBySlug(slug: string) {
       description: h.description || "",
       image: h.image || "",
       bgColor: h.bgColor || "",
+      alignment: h.alignment,
       buttonText: h.buttonText || "",
       buttonUrl: h.buttonUrl || "",
     })),

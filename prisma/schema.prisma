@@ -157,17 +157,24 @@ model Product {
   @@map("products")
 }
 
+enum HeroAlignment {
+  LEFT
+  CENTER
+  RIGHT
+}
+
 model StoreHero {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   storeId     String
   title       String
   description String?
   image       String?
   bgColor     String?
+  alignment   HeroAlignment @default(CENTER)
   buttonText  String?
   buttonUrl   String?
-  position    Int      @default(0)
-  isActive    Boolean  @default(true)
+  position    Int           @default(0)
+  isActive    Boolean       @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

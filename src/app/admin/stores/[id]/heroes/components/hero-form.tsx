@@ -1,10 +1,18 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, ArrowRight } from "lucide-react";
+import { ChromePicker } from "react-color";
+import { useState, useRef, useEffect } from "react";
 import { Input, Textarea } from "@/components/ui/input";
 import { storeHeroSchema, type StoreHeroFormData } from "@/lib/schemas/store-hero";
+
+const ALIGNMENT_OPTIONS = [
+  { value: "LEFT", label: "Esquerda" },
+  { value: "CENTER", label: "Centro" },
+  { value: "RIGHT", label: "Direita" },
+] as const;
 
 interface HeroFormProps {
   mode: "create" | "edit";
@@ -25,6 +33,8 @@ export function HeroForm({
     register,
     handleSubmit,
     watch,
+    control,
+    setValue,
     formState: { errors },
   } = useForm<StoreHeroFormData>({
     resolver: zodResolver(storeHeroSchema),
@@ -33,6 +43,7 @@ export function HeroForm({
       description: "",
       image: "",
       bgColor: "",
+      alignment: "CENTER",
       buttonText: "",
       buttonUrl: "",
       position: 0,
@@ -42,6 +53,26 @@ export function HeroForm({
   });
 
   const watchedValues = watch();
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const colorPickerRef = useRef<HTMLDivElement>(null);
+
+  // Close color picker on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (colorPickerRef.current && !colorPickerRef.current.contains(e.target as Node)) {
+        setShowColorPicker(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const alignmentClass =
+    watchedValues.alignment === "LEFT"
+      ? "items-start text-left"
+      : watchedValues.alignment === "RIGHT"
+        ? "items-end text-right"
+        : "items-center text-center";
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
@@ -69,20 +100,82 @@ export function HeroForm({
           error={errors.image?.message}
         />
 
+        {/* Color picker */}
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-[var(--brand-black)]">
+            Cor de fundo
+          </label>
+          <div className="relative" ref={colorPickerRef}>
+            <button
+              type="button"
+              onClick={() => setShowColorPicker(!showColorPicker)}
+              className="flex h-10 w-full items-center gap-3 rounded-lg border border-[var(--brand-border)] bg-white px-3.5 text-sm transition-colors focus:border-[var(--brand-black)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-black)]/10"
+            >
+              <span
+                className="size-6 shrink-0 rounded-md border border-[var(--brand-border)]"
+                style={{ backgroundColor: watchedValues.bgColor || "#ffffff" }}
+              />
+              <span className="text-[var(--brand-black)]">
+                {watchedValues.bgColor || "Nenhuma cor selecionada"}
+              </span>
+            </button>
+            {showColorPicker && (
+              <div className="absolute left-0 top-12 z-50">
+                <ChromePicker
+                  color={watchedValues.bgColor || "#ffffff"}
+                  onChange={(color) => setValue("bgColor", color.hex)}
+                  disableAlpha
+                />
+              </div>
+            )}
+          </div>
+          <input type="hidden" {...register("bgColor")} />
+        </div>
+
+        {/* Alignment */}
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-[var(--brand-black)]">
+            Alinhamento do texto
+          </label>
+          <div className="flex gap-2">
+            {ALIGNMENT_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setValue("alignment", opt.value)}
+                className={`flex-1 rounded-lg border py-2.5 text-sm font-bold transition-all ${
+                  watchedValues.alignment === opt.value
+                    ? "border-[var(--brand-black)] bg-[var(--brand-black)] text-white"
+                    : "border-[var(--brand-border)] bg-white text-[var(--brand-black)] hover:bg-[var(--brand-tertiary)]"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <input type="hidden" {...register("alignment")} />
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <Input
-            label="Cor de fundo"
-            placeholder="#FFD400"
-            {...register("bgColor")}
-            error={errors.bgColor?.message}
-          />
-          <Input
-            label="Posição"
+            label="Posição (ordem)"
             type="number"
             placeholder="0"
             {...register("position")}
             error={errors.position?.message}
           />
+          <div className="flex items-end">
+            <label className="flex cursor-pointer items-center gap-3 pb-2">
+              <input
+                type="checkbox"
+                {...register("isActive")}
+                className="size-4 rounded accent-[var(--brand-yellow)]"
+              />
+              <span className="text-sm font-medium text-[var(--brand-black)]">
+                Hero ativo
+              </span>
+            </label>
+          </div>
         </div>
 
         <Input
@@ -98,17 +191,6 @@ export function HeroForm({
           {...register("buttonUrl")}
           error={errors.buttonUrl?.message}
         />
-
-        <label className="flex cursor-pointer items-center gap-3">
-          <input
-            type="checkbox"
-            {...register("isActive")}
-            className="size-4 rounded accent-[var(--brand-yellow)]"
-          />
-          <span className="text-sm font-medium text-[var(--brand-black)]">
-            Hero ativo
-          </span>
-        </label>
 
         {serverError && (
           <div className="rounded-lg bg-[var(--brand-error-light)] px-4 py-3 text-sm font-medium text-[var(--brand-error)]">
@@ -142,7 +224,7 @@ export function HeroForm({
           Preview
         </p>
         <div
-          className="flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-[var(--brand-border)] p-8 text-center"
+          className={`flex min-h-[220px] flex-col rounded-2xl border border-[var(--brand-border)] p-8 ${alignmentClass}`}
           style={{
             backgroundColor: watchedValues.bgColor || "var(--brand-tertiary)",
           }}

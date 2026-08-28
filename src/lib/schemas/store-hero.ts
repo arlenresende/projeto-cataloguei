@@ -20,6 +20,7 @@ export const storeHeroSchema = z.object({
     .max(20)
     .optional()
     .or(z.literal("")),
+  alignment: z.enum(["LEFT", "CENTER", "RIGHT"]),
   buttonText: z
     .string()
     .max(50, "O texto do botão deve ter no máximo 50 caracteres.")

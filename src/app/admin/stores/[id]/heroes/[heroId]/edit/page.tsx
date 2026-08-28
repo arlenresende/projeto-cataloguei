@@ -28,6 +28,7 @@ export default function EditHeroPage() {
             description: found.description || "",
             image: found.image || "",
             bgColor: found.bgColor || "",
+            alignment: found.alignment || "CENTER",
             buttonText: found.buttonText || "",
             buttonUrl: found.buttonUrl || "",
             position: found.position,

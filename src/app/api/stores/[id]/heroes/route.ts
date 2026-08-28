@@ -76,6 +76,7 @@ export async function POST(
         description: data.description || null,
         image: data.image || null,
         bgColor: data.bgColor || null,
+        alignment: data.alignment,
         buttonText: data.buttonText || null,
         buttonUrl: data.buttonUrl || null,
         position: data.position,

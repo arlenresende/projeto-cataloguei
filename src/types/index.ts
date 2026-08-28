@@ -18,6 +18,7 @@ export interface StoreBanner {
   buttonText?: string;
   buttonLink?: string;
   bgColor?: string;
+  alignment?: "LEFT" | "CENTER" | "RIGHT";
 }
 
 export interface Store {

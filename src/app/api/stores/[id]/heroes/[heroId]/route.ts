@@ -55,6 +55,7 @@ export async function PATCH(
         ...(data.description !== undefined && { description: data.description || null }),
         ...(data.image !== undefined && { image: data.image || null }),
         ...(data.bgColor !== undefined && { bgColor: data.bgColor || null }),
+        ...(data.alignment !== undefined && { alignment: data.alignment }),
         ...(data.buttonText !== undefined && { buttonText: data.buttonText || null }),
         ...(data.buttonUrl !== undefined && { buttonUrl: data.buttonUrl || null }),
         ...(data.position !== undefined && { position: data.position }),
