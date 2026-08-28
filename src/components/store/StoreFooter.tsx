@@ -8,10 +8,37 @@ interface StoreFooterProps {
   storeUrl: string;
   description: string;
   whatsapp?: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postalCode?: string | null;
+  websiteUrl?: string | null;
+  instagramUrl?: string | null;
+  facebookUrl?: string | null;
 }
 
-export function StoreFooter({ name, storeUrl, description, whatsapp }: StoreFooterProps) {
+export function StoreFooter({
+  name,
+  storeUrl,
+  description,
+  whatsapp,
+  email,
+  phone,
+  address,
+  city,
+  state,
+  postalCode,
+  websiteUrl,
+  instagramUrl,
+  facebookUrl,
+}: StoreFooterProps) {
   const { resolvedColors } = useTheme();
+
+  const hasAddress = address || city || postalCode;
+  const hasContact = email || phone || whatsapp;
+  const hasSocial = websiteUrl || instagramUrl || facebookUrl;
 
   return (
     <footer
@@ -23,8 +50,9 @@ export function StoreFooter({ name, storeUrl, description, whatsapp }: StoreFoot
       }}
     >
       <div className="mx-auto max-w-6xl px-4 py-12 md:py-16">
-        <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
-          <div className="col-span-2 md:col-span-1">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-4">
+          {/* Brand */}
+          <div className="sm:col-span-2 md:col-span-1">
             <Link
               href={`/${storeUrl}`}
               className="flex items-center gap-3"
@@ -43,75 +71,120 @@ export function StoreFooter({ name, storeUrl, description, whatsapp }: StoreFoot
                 {name}
               </span>
             </Link>
-            <p className="mt-4 max-w-xs text-sm font-medium opacity-60">
-              {description}
-            </p>
+            {description && (
+              <p className="mt-4 max-w-xs text-sm font-medium opacity-60">
+                {description}
+              </p>
+            )}
           </div>
 
-          <div>
-            <p className="text-sm font-bold">
-              Navegação
-            </p>
-            <ul className="mt-4 space-y-3">
-              {[
-                { label: "Produtos", href: `/${storeUrl}` },
-                { label: "Contato", href: `/${storeUrl}#contato` },
-              ].map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-sm font-medium transition-colors hover:opacity-100"
-                    style={{ opacity: 0.6 }}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <p className="text-sm font-bold">
-              Contato
-            </p>
-            <ul className="mt-4 space-y-3">
-              {whatsapp && (
-                <li>
-                  <a
-                    href={`https://wa.me/${whatsapp}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-medium transition-colors hover:opacity-100"
-                    style={{ opacity: 0.6 }}
-                  >
-                    WhatsApp
-                  </a>
-                </li>
-              )}
-              <li>
-                <span className="text-sm font-medium opacity-60">
-                  Suporte online
-                </span>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <p className="text-sm font-bold">
-              Informações
-            </p>
-            <ul className="mt-4 space-y-3">
-              {["Sobre nós", "Política de privacidade", "Termos de uso"].map(
-                (label) => (
-                  <li key={label}>
-                    <span className="text-sm font-medium opacity-60">
-                      {label}
-                    </span>
+          {/* Address */}
+          {hasAddress && (
+            <div>
+              <p className="text-sm font-bold">Endereço</p>
+              <ul className="mt-4 space-y-2">
+                {address && (
+                  <li className="text-sm font-medium opacity-60">{address}</li>
+                )}
+                {(city || state) && (
+                  <li className="text-sm font-medium opacity-60">
+                    {city}{state ? ` - ${state}` : ""}
                   </li>
-                )
-              )}
-            </ul>
-          </div>
+                )}
+                {postalCode && (
+                  <li className="text-sm font-medium opacity-60">
+                    CEP: {postalCode}
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
+
+          {/* Contact */}
+          {hasContact && (
+            <div>
+              <p className="text-sm font-bold">Contato</p>
+              <ul className="mt-4 space-y-2">
+                {email && (
+                  <li>
+                    <a
+                      href={`mailto:${email}`}
+                      className="text-sm font-medium transition-colors hover:opacity-100"
+                      style={{ opacity: 0.6 }}
+                    >
+                      {email}
+                    </a>
+                  </li>
+                )}
+                {phone && (
+                  <li className="text-sm font-medium opacity-60">
+                    {phone}
+                  </li>
+                )}
+                {whatsapp && (
+                  <li>
+                    <a
+                      href={`https://wa.me/${whatsapp}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium transition-colors hover:opacity-100"
+                      style={{ opacity: 0.6 }}
+                    >
+                      WhatsApp
+                    </a>
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
+
+          {/* Social */}
+          {hasSocial && (
+            <div>
+              <p className="text-sm font-bold">Redes sociais</p>
+              <ul className="mt-4 space-y-2">
+                {websiteUrl && (
+                  <li>
+                    <a
+                      href={websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium transition-colors hover:opacity-100"
+                      style={{ opacity: 0.6 }}
+                    >
+                      Website
+                    </a>
+                  </li>
+                )}
+                {instagramUrl && (
+                  <li>
+                    <a
+                      href={instagramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium transition-colors hover:opacity-100"
+                      style={{ opacity: 0.6 }}
+                    >
+                      Instagram
+                    </a>
+                  </li>
+                )}
+                {facebookUrl && (
+                  <li>
+                    <a
+                      href={facebookUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium transition-colors hover:opacity-100"
+                      style={{ opacity: 0.6 }}
+                    >
+                      Facebook
+                    </a>
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
         </div>
 
         <div

@@ -170,6 +170,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
         storeUrl={store.slug}
         description={store.description}
         whatsapp={store.whatsapp}
+        email={store.email}
+        phone={store.phone}
+        address={store.address}
+        city={store.city}
+        state={store.state}
+        postalCode={store.postalCode}
+        websiteUrl={store.websiteUrl}
+        instagramUrl={store.instagramUrl}
+        facebookUrl={store.facebookUrl}
       />
 
       {store.whatsapp && (

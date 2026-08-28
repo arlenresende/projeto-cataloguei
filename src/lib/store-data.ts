@@ -36,6 +36,7 @@ export async function getPublicStoreBySlug(slug: string) {
     address: store.address,
     city: store.city,
     state: store.state,
+    postalCode: store.postalCode,
     websiteUrl: store.websiteUrl,
     instagramUrl: store.instagramUrl,
     facebookUrl: store.facebookUrl,
