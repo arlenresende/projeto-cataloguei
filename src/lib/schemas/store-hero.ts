@@ -20,6 +20,11 @@ export const storeHeroSchema = z.object({
     .max(20)
     .optional()
     .or(z.literal("")),
+  textColor: z
+    .string()
+    .max(20)
+    .optional()
+    .or(z.literal("")),
   alignment: z.enum(["LEFT", "CENTER", "RIGHT"]),
   buttonText: z
     .string()

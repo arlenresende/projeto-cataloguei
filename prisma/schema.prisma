@@ -170,6 +170,7 @@ model StoreHero {
   description String?
   image       String?
   bgColor     String?
+  textColor   String?
   alignment   HeroAlignment @default(CENTER)
   buttonText  String?
   buttonUrl   String?

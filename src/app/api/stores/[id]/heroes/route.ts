@@ -76,6 +76,7 @@ export async function POST(
         description: data.description || null,
         image: data.image || null,
         bgColor: data.bgColor || null,
+        textColor: data.textColor || null,
         alignment: data.alignment,
         buttonText: data.buttonText || null,
         buttonUrl: data.buttonUrl || null,
@@ -88,7 +89,7 @@ export async function POST(
   } catch (error) {
     console.error("Error creating hero:", error);
     return NextResponse.json(
-      { error: "Erro ao criar o hero." },
+      { error: error instanceof Error ? error.message : "Erro ao criar o hero." },
       { status: 500 }
     );
   }

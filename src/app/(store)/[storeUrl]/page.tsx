@@ -64,6 +64,7 @@ export default async function StorePage({ params, searchParams }: StorePageProps
                   buttonText: h.buttonText || undefined,
                   buttonLink: h.buttonUrl || undefined,
                   bgColor: h.bgColor || undefined,
+                  textColor: h.textColor || undefined,
                   alignment: h.alignment,
                 }))
               : store.description

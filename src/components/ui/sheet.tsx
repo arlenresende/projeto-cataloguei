@@ -37,23 +37,25 @@ function SheetContent({
   return (
     <SheetPortal>
       <SheetOverlay />
-      <DrawerPrimitive.Popup
-        className={cn(
-          "fixed bottom-0 right-0 z-50 flex h-full w-full max-w-md flex-col border-l bg-white shadow-xl outline-none",
-          "data-[open]:animate-in data-[open]:slide-in-from-right data-[open]:duration-300 data-[open]:ease-out",
-          "data-[closed]:animate-out data-[closed]:slide-out-to-right data-[closed]:duration-200 data-[closed]:ease-in",
-          className
-        )}
-        {...props}
-      >
-        {children}
-        <DrawerPrimitive.Close
-          className="absolute right-4 top-4 rounded-lg p-1.5 opacity-50 transition-all hover:bg-black/5 hover:opacity-100"
+      <DrawerPrimitive.Viewport className="fixed inset-0 z-50">
+        <DrawerPrimitive.Popup
+          className={cn(
+            "fixed bottom-0 right-0 z-50 flex h-full w-full max-w-md flex-col border-l bg-white shadow-xl outline-none",
+            "data-[open]:animate-in data-[open]:slide-in-from-right data-[open]:duration-300 data-[open]:ease-out",
+            "data-[closed]:animate-out data-[closed]:slide-out-to-right data-[closed]:duration-200 data-[closed]:ease-in",
+            className
+          )}
+          {...props}
         >
-          <X size={18} />
-          <span className="sr-only">Fechar</span>
-        </DrawerPrimitive.Close>
-      </DrawerPrimitive.Popup>
+          {children}
+          <DrawerPrimitive.Close
+            className="absolute right-4 top-4 rounded-lg p-1.5 opacity-50 transition-all hover:bg-black/5 hover:opacity-100"
+          >
+            <X size={18} />
+            <span className="sr-only">Fechar</span>
+          </DrawerPrimitive.Close>
+        </DrawerPrimitive.Popup>
+      </DrawerPrimitive.Viewport>
     </SheetPortal>
   )
 }

@@ -108,7 +108,7 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
                 {banner.title && (
                   <h2
                     className="max-w-lg text-2xl font-extrabold leading-[1.1] tracking-tight md:text-4xl lg:text-5xl"
-                    style={{ color: "#FFFFFF" }}
+                    style={{ color: banner.textColor || "#FFFFFF" }}
                   >
                     {banner.title}
                   </h2>
@@ -116,7 +116,7 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
                 {banner.description && (
                   <p
                     className="mt-4 max-w-md text-sm font-medium leading-relaxed md:text-base"
-                    style={{ color: "#FFFFFFCC" }}
+                    style={{ color: banner.textColor ? banner.textColor + "CC" : "#FFFFFFCC" }}
                   >
                     {banner.description}
                   </p>

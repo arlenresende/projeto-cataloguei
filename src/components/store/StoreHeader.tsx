@@ -89,8 +89,8 @@ export function StoreHeader({ name, storeUrl, whatsapp, categories = [] }: Store
             style={{ backgroundColor: resolvedColors.border }}
           />
           <CartDrawer whatsapp={whatsapp || ""} storeName={name}>
-            <button
-              className="relative rounded-xl p-2.5 transition-colors"
+            <div
+              className="relative cursor-pointer rounded-xl p-2.5 transition-colors"
               style={{ color: resolvedColors.text }}
               aria-label="Carrinho"
             >
@@ -104,7 +104,7 @@ export function StoreHeader({ name, storeUrl, whatsapp, categories = [] }: Store
               >
                 2
               </span>
-            </button>
+            </div>
           </CartDrawer>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}

@@ -53,14 +53,19 @@ export function HeroForm({
   });
 
   const watchedValues = watch();
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const colorPickerRef = useRef<HTMLDivElement>(null);
+  const [showBgPicker, setShowBgPicker] = useState(false);
+  const [showTextPicker, setShowTextPicker] = useState(false);
+  const bgPickerRef = useRef<HTMLDivElement>(null);
+  const textPickerRef = useRef<HTMLDivElement>(null);
 
-  // Close color picker on outside click
+  // Close color pickers on outside click
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (colorPickerRef.current && !colorPickerRef.current.contains(e.target as Node)) {
-        setShowColorPicker(false);
+      if (bgPickerRef.current && !bgPickerRef.current.contains(e.target as Node)) {
+        setShowBgPicker(false);
+      }
+      if (textPickerRef.current && !textPickerRef.current.contains(e.target as Node)) {
+        setShowTextPicker(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -100,36 +105,69 @@ export function HeroForm({
           error={errors.image?.message}
         />
 
-        {/* Color picker */}
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-[var(--brand-black)]">
-            Cor de fundo
-          </label>
-          <div className="relative" ref={colorPickerRef}>
-            <button
-              type="button"
-              onClick={() => setShowColorPicker(!showColorPicker)}
-              className="flex h-10 w-full items-center gap-3 rounded-lg border border-[var(--brand-border)] bg-white px-3.5 text-sm transition-colors focus:border-[var(--brand-black)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-black)]/10"
-            >
-              <span
-                className="size-6 shrink-0 rounded-md border border-[var(--brand-border)]"
-                style={{ backgroundColor: watchedValues.bgColor || "#ffffff" }}
-              />
-              <span className="text-[var(--brand-black)]">
-                {watchedValues.bgColor || "Nenhuma cor selecionada"}
-              </span>
-            </button>
-            {showColorPicker && (
-              <div className="absolute left-0 top-12 z-50">
-                <ChromePicker
-                  color={watchedValues.bgColor || "#ffffff"}
-                  onChange={(color) => setValue("bgColor", color.hex)}
-                  disableAlpha
+        {/* Color pickers */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-[var(--brand-black)]">
+              Cor de fundo
+            </label>
+            <div className="relative" ref={bgPickerRef}>
+              <button
+                type="button"
+                onClick={() => setShowBgPicker(!showBgPicker)}
+                className="flex h-10 w-full items-center gap-3 rounded-lg border border-[var(--brand-border)] bg-white px-3.5 text-sm transition-colors focus:border-[var(--brand-black)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-black)]/10"
+              >
+                <span
+                  className="size-6 shrink-0 rounded-md border border-[var(--brand-border)]"
+                  style={{ backgroundColor: watchedValues.bgColor || "#ffffff" }}
                 />
-              </div>
-            )}
+                <span className="truncate text-[var(--brand-black)]">
+                  {watchedValues.bgColor || "Padrão"}
+                </span>
+              </button>
+              {showBgPicker && (
+                <div className="absolute left-0 top-12 z-50">
+                  <ChromePicker
+                    color={watchedValues.bgColor || "#ffffff"}
+                    onChange={(color) => setValue("bgColor", color.hex)}
+                    disableAlpha
+                  />
+                </div>
+              )}
+            </div>
+            <input type="hidden" {...register("bgColor")} />
           </div>
-          <input type="hidden" {...register("bgColor")} />
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-[var(--brand-black)]">
+              Cor do texto
+            </label>
+            <div className="relative" ref={textPickerRef}>
+              <button
+                type="button"
+                onClick={() => setShowTextPicker(!showTextPicker)}
+                className="flex h-10 w-full items-center gap-3 rounded-lg border border-[var(--brand-border)] bg-white px-3.5 text-sm transition-colors focus:border-[var(--brand-black)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-black)]/10"
+              >
+                <span
+                  className="size-6 shrink-0 rounded-md border border-[var(--brand-border)]"
+                  style={{ backgroundColor: watchedValues.textColor || "#000000" }}
+                />
+                <span className="truncate text-[var(--brand-black)]">
+                  {watchedValues.textColor || "Padrão"}
+                </span>
+              </button>
+              {showTextPicker && (
+                <div className="absolute left-0 top-12 z-50">
+                  <ChromePicker
+                    color={watchedValues.textColor || "#000000"}
+                    onChange={(color) => setValue("textColor", color.hex)}
+                    disableAlpha
+                  />
+                </div>
+              )}
+            </div>
+            <input type="hidden" {...register("textColor")} />
+          </div>
         </div>
 
         {/* Alignment */}
@@ -231,11 +269,17 @@ export function HeroForm({
         >
           {watchedValues.title ? (
             <>
-              <h3 className="text-xl font-extrabold text-[var(--brand-black)]">
+              <h3
+                className="text-xl font-extrabold"
+                style={{ color: watchedValues.textColor || "var(--brand-black)" }}
+              >
                 {watchedValues.title}
               </h3>
               {watchedValues.description && (
-                <p className="mt-2 max-w-sm text-sm text-[var(--brand-black)]/60">
+                <p
+                  className="mt-2 max-w-sm text-sm"
+                  style={{ color: watchedValues.textColor || "var(--brand-black)", opacity: 0.7 }}
+                >
                   {watchedValues.description}
                 </p>
               )}
