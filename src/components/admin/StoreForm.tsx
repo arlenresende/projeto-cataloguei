@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useState, useRef, useEffect } from "react";
-import { useForm, useWatch, Controller } from "react-hook-form";
+import { useCallback, useState, useRef } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, ArrowRight, MapPin } from "lucide-react";
 import { Input, Textarea } from "@/components/ui/input";
@@ -431,12 +431,6 @@ export function StoreForm({
             placeholder="https://facebook.com/sualoja"
             {...register("facebookUrl")}
             error={errors.facebookUrl?.message}
-          />
-          <Input
-            label="Logo (URL)"
-            placeholder="https://..."
-            {...register("logo")}
-            error={errors.logo?.message}
           />
         </div>
       </section>

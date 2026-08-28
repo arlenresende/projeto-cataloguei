@@ -1,17 +1,20 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
 import { Plus, Store, ExternalLink, Edit, Trash2, Eye } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Badge } from "@/components/ui/badge";
 import { DeleteStoreDialog } from "@/components/admin/DeleteStoreDialog";
+import { StoreLogoUpload } from "@/components/store-admin/store-logo-upload";
 
 interface StoreData {
   id: string;
   name: string;
   slug: string;
   description: string | null;
+  logo: string | null;
   isActive: boolean;
   themeStore: string;
   createdAt: Date;
@@ -25,6 +28,17 @@ export function StoresContent({ initialStore }: StoresContentProps) {
   const [store, setStore] = useState<StoreData | null>(initialStore);
   const [showDelete, setShowDelete] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  function handleLogoChange(logoUrl: string | null) {
+    setStore((currentStore) =>
+      currentStore
+        ? {
+            ...currentStore,
+            logo: logoUrl,
+          }
+        : currentStore
+    );
+  }
 
   async function handleDelete() {
     if (!store) return;
@@ -102,8 +116,18 @@ export function StoresContent({ initialStore }: StoresContentProps) {
       <div className="rounded-2xl border border-[var(--brand-border)] bg-white p-6 transition-all hover:shadow-md">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-[var(--brand-yellow)] text-base font-extrabold text-[var(--brand-black)]">
-              {store.name.charAt(0)}
+            <div className="relative flex size-12 items-center justify-center overflow-hidden rounded-xl bg-[var(--brand-yellow)] text-base font-extrabold text-[var(--brand-black)]">
+              {store.logo ? (
+                <Image
+                  src={store.logo}
+                  alt={`Logo de ${store.name}`}
+                  fill
+                  className="bg-white object-contain p-1"
+                  sizes="48px"
+                />
+              ) : (
+                store.name.charAt(0)
+              )}
             </div>
             <div>
               <p className="text-lg font-bold text-[var(--brand-black)]">
@@ -157,6 +181,13 @@ export function StoresContent({ initialStore }: StoresContentProps) {
           </button>
         </div>
       </div>
+
+      <StoreLogoUpload
+        storeId={store.id}
+        storeName={store.name}
+        initialLogoUrl={store.logo}
+        onLogoChange={handleLogoChange}
+      />
 
       {showDelete && store && (
         <DeleteStoreDialog

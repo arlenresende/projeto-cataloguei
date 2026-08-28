@@ -18,6 +18,7 @@ export default async function StoresPage() {
         name: true,
         slug: true,
         description: true,
+        logo: true,
         isActive: true,
         themeStore: true,
         createdAt: true,
