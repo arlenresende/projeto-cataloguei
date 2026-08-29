@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  buildProductImageObjectKey,
+  ProductImageValidationError,
+  validateProductImageFile,
+} from "@/lib/product-image";
+import {
+  SUPABASE_STORAGE_CONFIG_ERROR_MESSAGE,
+  uploadFileToSupabaseStorage,
+  deleteFileFromSupabaseStorage,
+} from "@/lib/storage/supabase";
 
 // POST /api/products/[id]/images — add image to product
 export async function POST(
@@ -33,38 +43,102 @@ export async function POST(
     return NextResponse.json({ error: "Produto não encontrado." }, { status: 404 });
   }
 
-  const body = await request.json();
-  const { url, alt } = body;
+  let formData: FormData;
 
-  if (!url || typeof url !== "string") {
-    return NextResponse.json({ error: "URL da imagem é obrigatória." }, { status: 400 });
+  try {
+    formData = await request.formData();
+  } catch {
+    return NextResponse.json({ error: "Payload inválido." }, { status: 400 });
   }
 
-  // Get max position
-  const maxPos = await prisma.productImage.aggregate({
-    where: { productId: id },
-    _max: { position: true },
-  });
+  const file = formData.get("file");
+  const altValue = formData.get("alt");
+  const alt = typeof altValue === "string" ? altValue.trim() : null;
 
-  const image = await prisma.productImage.create({
-    data: {
-      productId: id,
-      url: url.trim(),
-      alt: alt?.trim() || null,
-      position: (maxPos._max.position ?? -1) + 1,
-    },
-  });
+  if (!(file instanceof File)) {
+    return NextResponse.json(
+      { error: "Selecione uma imagem para enviar." },
+      { status: 400 }
+    );
+  }
 
-  // Update product imageUrl if it's the first image
-  const imageCount = await prisma.productImage.count({ where: { productId: id } });
-  if (imageCount === 1) {
-    await prisma.product.update({
-      where: { id },
-      data: { imageUrl: url.trim() },
+  try {
+    const validatedFile = await validateProductImageFile(file);
+    const objectKey = buildProductImageObjectKey(
+      store.id,
+      id,
+      validatedFile.kind
+    );
+    const uploadedFile = await uploadFileToSupabaseStorage({
+      objectKey,
+      body: validatedFile.bytes,
+      contentType: validatedFile.mimeType,
     });
-  }
 
-  return NextResponse.json({ image }, { status: 201 });
+    const maxPos = await prisma.productImage.aggregate({
+      where: { productId: id },
+      _max: { position: true },
+    });
+
+    let image;
+
+    try {
+      image = await prisma.productImage.create({
+        data: {
+          productId: id,
+          url: uploadedFile.publicUrl,
+          alt: alt || null,
+          position: (maxPos._max.position ?? -1) + 1,
+        },
+      });
+    } catch (error) {
+      await deleteFileFromSupabaseStorage(uploadedFile.objectKey).catch(() => {
+        console.error(
+          "Não foi possível limpar a nova imagem do produto após erro no banco."
+        );
+      });
+
+      throw error;
+    }
+
+    const imageCount = await prisma.productImage.count({ where: { productId: id } });
+    if (imageCount === 1) {
+      await prisma.product.update({
+        where: { id },
+        data: { imageUrl: uploadedFile.publicUrl },
+      });
+    }
+
+    return NextResponse.json({ image }, { status: 201 });
+  } catch (error) {
+    if (error instanceof ProductImageValidationError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    if (error instanceof Error) {
+      const isConfigurationError =
+        error.message === SUPABASE_STORAGE_CONFIG_ERROR_MESSAGE;
+
+      if (!isConfigurationError) {
+        console.error("Erro ao enviar imagem do produto:", error);
+      }
+
+      return NextResponse.json(
+        {
+          error: isConfigurationError
+            ? "O storage de imagens ainda não está configurado no servidor."
+            : "Não foi possível enviar a imagem.",
+        },
+        { status: 500 }
+      );
+    }
+
+    console.error("Erro ao enviar imagem do produto:", error);
+    return NextResponse.json(
+      { error: "Não foi possível enviar a imagem." },
+      { status: 500 }
+    );
+  }
 }
 
 // PATCH /api/products/[id]/images — reorder images

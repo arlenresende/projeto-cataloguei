@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, ShoppingBag, Menu, X, ChevronRight, Phone } from "lucide-react";
@@ -15,11 +16,18 @@ interface StoreHeaderCategory {
 interface StoreHeaderProps {
   name: string;
   storeUrl: string;
+  logoUrl?: string | null;
   whatsapp?: string;
   categories?: (string | StoreHeaderCategory)[];
 }
 
-export function StoreHeader({ name, storeUrl, whatsapp, categories = [] }: StoreHeaderProps) {
+export function StoreHeader({
+  name,
+  storeUrl,
+  logoUrl,
+  whatsapp,
+  categories = [],
+}: StoreHeaderProps) {
   const { resolvedColors } = useTheme();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -52,24 +60,38 @@ export function StoreHeader({ name, storeUrl, whatsapp, categories = [] }: Store
         {/* Logo */}
         <Link
           href={`/${storeUrl}`}
-          className="flex items-center gap-3"
+          className={`flex items-center ${logoUrl ? "gap-0" : "gap-3"}`}
           aria-label={`${name} - Página inicial`}
         >
           <span
-            className="flex size-10 items-center justify-center rounded-xl text-base font-extrabold"
+            className={`relative flex items-center justify-center overflow-hidden text-base font-extrabold ${
+              logoUrl ? "h-14 w-36 rounded-2xl md:h-16 md:w-44" : "size-10 rounded-xl"
+            }`}
             style={{
               backgroundColor: resolvedColors.primary,
               color: resolvedColors.secondary,
             }}
           >
-            {name.charAt(0)}
+            {logoUrl ? (
+              <Image
+                src={logoUrl}
+                alt={`Logo de ${name}`}
+                fill
+                className="bg-white object-contain p-2"
+                sizes="(max-width: 768px) 144px, 176px"
+              />
+            ) : (
+              name.charAt(0)
+            )}
           </span>
-          <span
-            className="text-xl font-extrabold tracking-tight"
-            style={{ color: resolvedColors.text }}
-          >
-            {name}
-          </span>
+          {!logoUrl ? (
+            <span
+              className="text-xl font-extrabold tracking-tight"
+              style={{ color: resolvedColors.text }}
+            >
+              {name}
+            </span>
+          ) : null}
         </Link>
 
         {/* Search - desktop */}

@@ -113,81 +113,83 @@ export function StoresContent({ initialStore }: StoresContentProps) {
         }
       />
 
-      <div className="rounded-2xl border border-[var(--brand-border)] bg-white p-6 transition-all hover:shadow-md">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
-            <div className="relative flex size-12 items-center justify-center overflow-hidden rounded-xl bg-[var(--brand-yellow)] text-base font-extrabold text-[var(--brand-black)]">
-              {store.logo ? (
-                <Image
-                  src={store.logo}
-                  alt={`Logo de ${store.name}`}
-                  fill
-                  className="bg-white object-contain p-1"
-                  sizes="48px"
-                />
-              ) : (
-                store.name.charAt(0)
-              )}
+      <div className="space-y-6">
+        <div className="rounded-2xl border border-[var(--brand-border)] bg-white p-6 transition-all hover:shadow-md">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-4">
+              <div className="relative flex size-12 items-center justify-center overflow-hidden rounded-xl bg-[var(--brand-yellow)] text-base font-extrabold text-[var(--brand-black)]">
+                {store.logo ? (
+                  <Image
+                    src={store.logo}
+                    alt={`Logo de ${store.name}`}
+                    fill
+                    className="bg-white object-contain p-1"
+                    sizes="48px"
+                  />
+                ) : (
+                  store.name.charAt(0)
+                )}
+              </div>
+              <div>
+                <p className="text-lg font-bold text-[var(--brand-black)]">
+                  {store.name}
+                </p>
+                <p className="text-sm font-medium text-[var(--brand-black)]/40">
+                  cataloguei.com.br/{store.slug}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-lg font-bold text-[var(--brand-black)]">
-                {store.name}
-              </p>
-              <p className="text-sm font-medium text-[var(--brand-black)]/40">
-                cataloguei.com.br/{store.slug}
-              </p>
-            </div>
+            <Badge variant={store.isActive ? "success" : "neutral"}>
+              {store.isActive ? "Ativa" : "Inativa"}
+            </Badge>
           </div>
-          <Badge variant={store.isActive ? "success" : "neutral"}>
-            {store.isActive ? "Ativa" : "Inativa"}
-          </Badge>
+
+          {store.description && (
+            <p className="mt-4 text-sm text-[var(--brand-black)]/60">
+              {store.description}
+            </p>
+          )}
+
+          <div className="mt-6 flex items-center gap-2 border-t border-[var(--brand-border)] pt-4">
+            <Link
+              href={`/${store.slug}`}
+              target="_blank"
+              className="flex items-center gap-1.5 rounded-lg border border-[var(--brand-border)] px-3 py-2 text-xs font-bold text-[var(--brand-black)] transition-colors hover:bg-[var(--brand-tertiary)]"
+            >
+              <ExternalLink size={12} />
+              Visualizar
+            </Link>
+            <Link
+              href={`/admin/stores/${store.id}`}
+              className="flex items-center gap-1.5 rounded-lg border border-[var(--brand-border)] px-3 py-2 text-xs font-bold text-[var(--brand-black)] transition-colors hover:bg-[var(--brand-tertiary)]"
+            >
+              <Eye size={12} />
+              Detalhes
+            </Link>
+            <Link
+              href={`/admin/stores/${store.id}/edit`}
+              className="flex items-center gap-1.5 rounded-lg border border-[var(--brand-border)] px-3 py-2 text-xs font-bold text-[var(--brand-black)] transition-colors hover:bg-[var(--brand-tertiary)]"
+            >
+              <Edit size={12} />
+              Editar
+            </Link>
+            <button
+              onClick={() => setShowDelete(true)}
+              className="ml-auto flex items-center gap-1.5 rounded-lg p-2 text-xs font-bold text-red-500 transition-colors hover:bg-red-50"
+            >
+              <Trash2 size={14} />
+              Excluir
+            </button>
+          </div>
         </div>
 
-        {store.description && (
-          <p className="mt-4 text-sm text-[var(--brand-black)]/60">
-            {store.description}
-          </p>
-        )}
-
-        <div className="mt-6 flex items-center gap-2 border-t border-[var(--brand-border)] pt-4">
-          <Link
-            href={`/${store.slug}`}
-            target="_blank"
-            className="flex items-center gap-1.5 rounded-lg border border-[var(--brand-border)] px-3 py-2 text-xs font-bold text-[var(--brand-black)] transition-colors hover:bg-[var(--brand-tertiary)]"
-          >
-            <ExternalLink size={12} />
-            Visualizar
-          </Link>
-          <Link
-            href={`/admin/stores/${store.id}`}
-            className="flex items-center gap-1.5 rounded-lg border border-[var(--brand-border)] px-3 py-2 text-xs font-bold text-[var(--brand-black)] transition-colors hover:bg-[var(--brand-tertiary)]"
-          >
-            <Eye size={12} />
-            Detalhes
-          </Link>
-          <Link
-            href={`/admin/stores/${store.id}/edit`}
-            className="flex items-center gap-1.5 rounded-lg border border-[var(--brand-border)] px-3 py-2 text-xs font-bold text-[var(--brand-black)] transition-colors hover:bg-[var(--brand-tertiary)]"
-          >
-            <Edit size={12} />
-            Editar
-          </Link>
-          <button
-            onClick={() => setShowDelete(true)}
-            className="ml-auto flex items-center gap-1.5 rounded-lg p-2 text-xs font-bold text-red-500 transition-colors hover:bg-red-50"
-          >
-            <Trash2 size={14} />
-            Excluir
-          </button>
-        </div>
+        <StoreLogoUpload
+          storeId={store.id}
+          storeName={store.name}
+          initialLogoUrl={store.logo}
+          onLogoChange={handleLogoChange}
+        />
       </div>
-
-      <StoreLogoUpload
-        storeId={store.id}
-        storeName={store.name}
-        initialLogoUrl={store.logo}
-        onLogoChange={handleLogoChange}
-      />
 
       {showDelete && store && (
         <DeleteStoreDialog

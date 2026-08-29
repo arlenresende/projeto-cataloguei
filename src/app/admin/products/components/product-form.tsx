@@ -2,9 +2,10 @@
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, ArrowRight, Plus, X, GripVertical, ImageIcon } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Loader2, ArrowRight, Plus, X, Upload } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { toast } from "sonner";
 import { Input, Textarea } from "@/components/ui/input";
 import { CurrencyInput, WeightInput } from "@/components/ui/currency-input";
 import { RichTextEditor } from "@/components/editor/rich-text-editor";
@@ -14,6 +15,11 @@ import {
   type ProductFormData,
 } from "@/lib/schemas/product";
 import { normalizeStoreSlug } from "@/lib/schemas/store";
+import {
+  formatProductImageMaxSize,
+  PRODUCT_IMAGE_ACCEPT,
+  PRODUCT_IMAGE_MAX_SIZE_BYTES,
+} from "@/lib/product-image";
 
 interface CategoryOption {
   id: string;
@@ -32,7 +38,7 @@ interface ProductFormProps {
   defaultValues?: Partial<ProductFormData> & { images?: ProductImage[] };
   categories: CategoryOption[];
   onSubmit: (data: ProductFormData) => Promise<void>;
-  onAddImage?: (url: string, alt?: string) => Promise<void>;
+  onAddImage?: (file: File) => Promise<void>;
   onRemoveImage?: (imageId: string) => Promise<void>;
   onReorderImages?: (images: { id: string; position: number }[]) => Promise<void>;
   serverError?: string | null;
@@ -95,8 +101,8 @@ export function ProductForm({
   const watchedName = watch("name");
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(mode === "edit");
   const [images, setImages] = useState<ProductImage[]>(defaultValues?.images || []);
-  const [newImageUrl, setNewImageUrl] = useState("");
   const [addingImage, setAddingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-generate slug from name
   useEffect(() => {
@@ -105,12 +111,60 @@ export function ProductForm({
     }
   }, [watchedName, slugManuallyEdited, setValue]);
 
-  async function handleAddImage() {
-    if (!newImageUrl.trim() || !onAddImage) return;
+  useEffect(() => {
+    setImages(defaultValues?.images || []);
+  }, [defaultValues?.images]);
+
+  async function handleAddImages(files: File[]) {
+    if (!onAddImage || files.length === 0) return;
+
+    const validFiles: File[] = [];
+
+    for (const file of files) {
+      if (file.size > PRODUCT_IMAGE_MAX_SIZE_BYTES) {
+        toast.error(
+          `"${file.name}" excede o limite de ${formatProductImageMaxSize()}.`
+        );
+        continue;
+      }
+
+      if (!PRODUCT_IMAGE_ACCEPT.split(",").includes(file.type)) {
+        toast.error(`"${file.name}" não é uma imagem JPG, PNG ou WEBP válida.`);
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    if (validFiles.length === 0) {
+      return;
+    }
+
     setAddingImage(true);
+
+    let successCount = 0;
+
     try {
-      await onAddImage(newImageUrl.trim());
-      setNewImageUrl("");
+      for (const file of validFiles) {
+        try {
+          await onAddImage(file);
+          successCount += 1;
+        } catch (error) {
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : `Não foi possível enviar "${file.name}".`
+          );
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(
+          successCount === 1
+            ? "Imagem adicionada com sucesso."
+            : `${successCount} imagens adicionadas com sucesso.`
+        );
+      }
     } finally {
       setAddingImage(false);
     }
@@ -250,38 +304,45 @@ export function ProductForm({
           ))}
         </div>
 
-        {onAddImage && (
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <ImageIcon
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                size={16}
-              />
-              <input
-                type="url"
-                value={newImageUrl}
-                onChange={(e) => setNewImageUrl(e.target.value)}
-                placeholder="Cole a URL da imagem aqui"
-                className="h-10 w-full rounded-lg border border-[var(--brand-border)] bg-white pl-10 pr-4 text-sm outline-none transition-colors focus:border-[var(--brand-black)] focus:ring-2 focus:ring-[var(--brand-black)]/10"
-              />
-            </div>
+        {onAddImage ? (
+          <>
             <button
               type="button"
-              onClick={handleAddImage}
-              disabled={!newImageUrl.trim() || addingImage}
+              onClick={() => fileInputRef.current?.click()}
+              disabled={addingImage}
               className="flex items-center gap-2 rounded-lg bg-[var(--brand-black)] px-4 py-2.5 text-sm font-bold text-white transition-all hover:opacity-80 disabled:opacity-50"
             >
               {addingImage ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
-                <Plus size={16} />
+                <>
+                  <Upload size={16} />
+                  <Plus size={16} />
+                </>
               )}
-              Adicionar
+              {addingImage ? "Enviando imagens..." : "Adicionar imagens"}
             </button>
-          </div>
-        )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={PRODUCT_IMAGE_ACCEPT}
+              multiple
+              className="sr-only"
+              disabled={addingImage}
+              onChange={(e) => {
+                const files = Array.from(e.target.files || []);
+                e.target.value = "";
+
+                if (files.length > 0) {
+                  void handleAddImages(files);
+                }
+              }}
+            />
+          </>
+        ) : null}
         <p className="text-xs text-muted-foreground">
-          Cole a URL de uma imagem. A primeira imagem será a principal.
+          Envie uma ou mais imagens JPG, PNG ou WEBP de at&eacute; {formatProductImageMaxSize()}. A primeira imagem ser&aacute; a principal.
         </p>
       </Section>
 

@@ -71,7 +71,6 @@ export function StoreForm({
       postalCode: "",
       country: "Brasil",
       email: "",
-      logo: "",
       websiteUrl: "",
       whatsappUrl: "",
       instagramUrl: "",

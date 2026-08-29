@@ -31,7 +31,6 @@ export default function EditStorePage() {
             postalCode: data.store.postalCode || "",
             country: data.store.country || "",
             email: data.store.email || "",
-            logo: data.store.logo || "",
             websiteUrl: data.store.websiteUrl || "",
             whatsappUrl: data.store.whatsappUrl || "",
             instagramUrl: data.store.instagramUrl || "",

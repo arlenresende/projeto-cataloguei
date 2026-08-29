@@ -105,13 +105,18 @@ export default function EditProductPage() {
     }
   }
 
-  async function handleAddImage(url: string) {
+  async function handleAddImage(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+
     const res = await fetch(`/api/products/${id}/images`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }),
+      body: formData,
     });
     const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || "Erro ao enviar a imagem.");
+    }
     if (data.image) {
       setImages((prev) => [...prev, data.image]);
     }

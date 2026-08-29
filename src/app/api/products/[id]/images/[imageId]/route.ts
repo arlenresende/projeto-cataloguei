@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { extractSupabaseStorageObjectKey } from "@/lib/store-logo";
+import {
+  deleteFileFromSupabaseStorage,
+  getSupabaseStorageBucketName,
+} from "@/lib/storage/supabase";
 
 // DELETE /api/products/[id]/images/[imageId]
 export async function DELETE(
@@ -42,6 +47,20 @@ export async function DELETE(
   }
 
   await prisma.productImage.delete({ where: { id: imageId } });
+
+  const objectKey = extractSupabaseStorageObjectKey(
+    image.url,
+    getSupabaseStorageBucketName()
+  );
+
+  if (objectKey) {
+    await deleteFileFromSupabaseStorage(objectKey).catch((error) => {
+      console.error(
+        "Não foi possível remover a imagem do produto do Supabase Storage:",
+        error
+      );
+    });
+  }
 
   // Update product imageUrl to new first image
   const firstImage = await prisma.productImage.findFirst({

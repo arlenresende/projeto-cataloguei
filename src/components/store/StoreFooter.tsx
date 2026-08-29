@@ -1,11 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "@/components/providers/ThemeProvider";
 
 interface StoreFooterProps {
   name: string;
   storeUrl: string;
+  logoUrl?: string | null;
   description: string;
   whatsapp?: string;
   email?: string | null;
@@ -22,6 +24,7 @@ interface StoreFooterProps {
 export function StoreFooter({
   name,
   storeUrl,
+  logoUrl,
   description,
   whatsapp,
   email,
@@ -55,21 +58,35 @@ export function StoreFooter({
           <div className="sm:col-span-2 md:col-span-1">
             <Link
               href={`/${storeUrl}`}
-              className="flex items-center gap-3"
+              className={`flex items-center ${logoUrl ? "gap-0" : "gap-3"}`}
               aria-label={`${name} - Página inicial`}
             >
               <span
-                className="flex size-10 items-center justify-center rounded-xl text-base font-extrabold"
+                className={`relative flex items-center justify-center overflow-hidden text-base font-extrabold ${
+                  logoUrl ? "h-14 w-36 rounded-2xl" : "size-10 rounded-xl"
+                }`}
                 style={{
                   backgroundColor: resolvedColors.primary,
                   color: resolvedColors.secondary,
                 }}
               >
-                {name.charAt(0)}
+                {logoUrl ? (
+                  <Image
+                    src={logoUrl}
+                    alt={`Logo de ${name}`}
+                    fill
+                    className="bg-white object-contain p-2"
+                    sizes="144px"
+                  />
+                ) : (
+                  name.charAt(0)
+                )}
               </span>
-              <span className="text-xl font-extrabold tracking-tight">
-                {name}
-              </span>
+              {!logoUrl ? (
+                <span className="text-xl font-extrabold tracking-tight">
+                  {name}
+                </span>
+              ) : null}
             </Link>
             {description && (
               <p className="mt-4 max-w-xs text-sm font-medium opacity-60">

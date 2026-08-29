@@ -59,6 +59,7 @@ export default async function StorePage({ params, searchParams }: StorePageProps
       <StoreHeader
         name={store.name}
         storeUrl={store.slug}
+        logoUrl={store.logo}
         whatsapp={store.whatsapp}
         categories={
           store.categories.length > 0
@@ -163,6 +164,7 @@ export default async function StorePage({ params, searchParams }: StorePageProps
       <StoreFooter
         name={store.name}
         storeUrl={store.slug}
+        logoUrl={store.logo}
         description={store.description}
         whatsapp={store.whatsapp}
         email={store.email}
