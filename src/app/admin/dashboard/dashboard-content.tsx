@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   BarChart3,
   ChevronDown,
@@ -21,6 +22,13 @@ interface StatItem {
 
 interface DashboardContentProps {
   stats: StatItem[];
+  billing: {
+    effectivePlan: "FREE" | "PREMIUM";
+    subscription: {
+      status: string;
+      currentPeriodEnd?: string | Date | null;
+    };
+  } | null;
 }
 
 const platforms = [
@@ -30,7 +38,7 @@ const platforms = [
   { name: "Conversão", value: "7.2%", share: "8%", color: "bg-[var(--brand-yellow)]", icon: "C" },
 ];
 
-export function DashboardContent({ stats }: DashboardContentProps) {
+export function DashboardContent({ stats, billing }: DashboardContentProps) {
   const [filter, setFilter] = useState(false);
 
   return (
@@ -79,6 +87,46 @@ export function DashboardContent({ stats }: DashboardContentProps) {
       </div>
 
       <StatsGrid stats={stats} />
+
+      {billing ? (
+        <Card className="mt-6">
+          <CardHeader
+            action={
+              <Badge variant={billing.effectivePlan === "PREMIUM" ? "default" : "neutral"}>
+                {billing.effectivePlan}
+              </Badge>
+            }
+          >
+            Plano atual
+          </CardHeader>
+          <div className="mt-4 flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p>
+                Status da assinatura:{" "}
+                <strong className="text-[var(--brand-black)]">
+                  {billing.subscription.status}
+                </strong>
+              </p>
+              {billing.subscription.currentPeriodEnd ? (
+                <p className="mt-1">
+                  Próxima referência:{" "}
+                  <strong className="text-[var(--brand-black)]">
+                    {new Date(billing.subscription.currentPeriodEnd).toLocaleDateString("pt-BR")}
+                  </strong>
+                </p>
+              ) : null}
+            </div>
+            <Link
+              href="/admin/plans"
+              className="inline-flex items-center justify-center rounded-lg bg-[var(--brand-black)] px-4 py-2 font-semibold text-white transition-opacity hover:opacity-90"
+            >
+              {billing.effectivePlan === "PREMIUM"
+                ? "Gerenciar assinatura"
+                : "Fazer upgrade"}
+            </Link>
+          </div>
+        </Card>
+      ) : null}
 
       <section className="mt-6 grid gap-4 xl:grid-cols-[1.05fr_1.05fr_0.9fr]">
         <Card>

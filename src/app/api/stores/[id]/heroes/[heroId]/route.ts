@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { requireVerifiedSession } from "@/lib/api-session";
+import {
+  assertCanCreateOrActivateBanner,
+  BillingAccessError,
+} from "@/lib/billing/subscription";
 import { prisma } from "@/lib/prisma";
 import { storeHeroSchema } from "@/lib/schemas/store-hero";
 
@@ -45,6 +49,18 @@ export async function PATCH(
   }
 
   const data = parsed.data;
+
+  if (data.isActive === true && !existing.isActive) {
+    try {
+      await assertCanCreateOrActivateBanner(session.user.id, store.id);
+    } catch (error) {
+      if (error instanceof BillingAccessError) {
+        return NextResponse.json({ error: error.message }, { status: error.status });
+      }
+
+      throw error;
+    }
+  }
 
   try {
     const result = await prisma.storeHero.updateMany({

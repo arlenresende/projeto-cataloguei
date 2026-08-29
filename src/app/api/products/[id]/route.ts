@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireVerifiedSession } from "@/lib/api-session";
+import { assertAdvancedSeoAccess, BillingAccessError } from "@/lib/billing/subscription";
 import { prisma } from "@/lib/prisma";
 import { productUpdateSchema } from "@/lib/schemas/product";
 import { getPrismaErrorCode, prismaTargetIncludes } from "@/lib/prisma-error";
@@ -84,6 +85,19 @@ export async function PATCH(
   }
 
   const data = parsed.data;
+
+  try {
+    await assertAdvancedSeoAccess(session.user.id, {
+      seoTitle: data.seoTitle || null,
+      seoDescription: data.seoDescription || null,
+    });
+  } catch (error) {
+    if (error instanceof BillingAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+
+    throw error;
+  }
 
   // Validate category belongs to store if provided
   if (data.categoryId) {

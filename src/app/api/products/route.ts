@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { requireVerifiedSession } from "@/lib/api-session";
+import {
+  assertAdvancedSeoAccess,
+  assertCanCreateProduct,
+  BillingAccessError,
+} from "@/lib/billing/subscription";
 import { prisma } from "@/lib/prisma";
 import { productCreateSchema } from "@/lib/schemas/product";
 import { getPrismaErrorCode, prismaTargetIncludes } from "@/lib/prisma-error";
@@ -113,6 +118,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Loja não encontrada." }, { status: 404 });
   }
 
+  try {
+    await assertCanCreateProduct(session.user.id, store.id);
+  } catch (error) {
+    if (error instanceof BillingAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+
+    throw error;
+  }
+
   const body = await request.json();
   const parsed = productCreateSchema.safeParse(body);
 
@@ -124,6 +139,19 @@ export async function POST(request: Request) {
   }
 
   const data = parsed.data;
+
+  try {
+    await assertAdvancedSeoAccess(session.user.id, {
+      seoTitle: data.seoTitle || null,
+      seoDescription: data.seoDescription || null,
+    });
+  } catch (error) {
+    if (error instanceof BillingAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+
+    throw error;
+  }
 
   // Validate category belongs to store if provided
   if (data.categoryId) {

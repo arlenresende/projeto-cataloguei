@@ -26,6 +26,20 @@ function optionalEmail() {
   );
 }
 
+function optionalHexColor() {
+  return z.preprocess(
+    trimString,
+    z
+      .string()
+      .regex(
+        /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/,
+        "Informe uma cor hexadecimal válida."
+      )
+      .optional()
+      .or(z.literal(""))
+  );
+}
+
 /** Telefone BR: 10 ou 11 dígitos */
 function optionalPhone() {
   return z.preprocess(
@@ -103,6 +117,9 @@ const baseStoreSchema = z.object({
   facebookUrl: optionalUrl(),
   phoneNumber: optionalPhone(),
   cellPhone: optionalPhone(),
+  primaryColor: optionalHexColor(),
+  secondaryColor: optionalHexColor(),
+  hideCatalogueiBranding: z.boolean().optional(),
   themeStore: storeThemeSchema.optional(),
   isActive: z.boolean().optional(),
 });

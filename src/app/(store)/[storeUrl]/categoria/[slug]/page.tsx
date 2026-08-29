@@ -188,6 +188,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         storeUrl={store.slug}
         logoUrl={store.logo}
         description={store.description}
+        showCatalogueiBranding={!store.hideCatalogueiBranding}
         whatsapp={store.whatsapp}
         email={store.email}
         phone={store.phone}

@@ -50,6 +50,11 @@ export const getPublicStoreBySlug = cache(async (slug: string) => {
     logo: store.logo,
     whatsapp: whatsappNumber,
     theme: (store.themeStore || "DEFAULT") as StoreThemeSegment,
+    themeOverrides: {
+      primaryColor: store.primaryColor || undefined,
+      secondaryColor: store.secondaryColor || undefined,
+    },
+    hideCatalogueiBranding: store.hideCatalogueiBranding,
     email: store.email,
     phone: store.phoneNumber || store.cellPhone,
     address: store.address,

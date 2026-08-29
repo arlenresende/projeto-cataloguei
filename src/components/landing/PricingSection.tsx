@@ -2,20 +2,24 @@ import { Check, ArrowRight, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const FREE_FEATURES = [
-  "Criar sua página profissional",
-  "Apresentar produtos ou serviços",
-  "Compartilhar sua página por um link",
-  "Página responsiva para celular",
-  "Receber contatos pelo WhatsApp",
+  "1 loja com URL propria do Cataloguei",
+  "Ate 15 produtos",
+  "Analytics basico",
+  "Ate 2 banners ativos",
+  "Personalizacao basica",
+  "SEO basico",
+  "Marca Cataloguei obrigatoria",
 ];
 
 const PREMIUM_FEATURES = [
-  "Tudo do plano Grátis",
-  "Mais possibilidades de personalização",
-  "Recursos premium da página",
-  "Domínio personalizado",
-  "Mais opções para apresentar seu negócio",
-  "Acesso a solicitações de novas funcionalidades",
+  "Tudo do plano Free",
+  "Produtos ilimitados",
+  "Banners ilimitados",
+  "Remocao da marca Cataloguei",
+  "Analytics completo",
+  "Personalizacao completa",
+  "SEO avancado e dominio proprio",
+  "Compartilhamento avancado e suporte prioritario",
 ];
 
 export function PricingSection() {
@@ -50,7 +54,7 @@ export function PricingSection() {
             <div>
               <h3 className="text-lg font-semibold text-[var(--brand-black)]">Grátis</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Para começar a apresentar seu negócio online.
+                Para comecar sua loja online com o essencial.
               </p>
             </div>
 
@@ -91,7 +95,7 @@ export function PricingSection() {
             <div>
               <h3 className="text-lg font-semibold text-[var(--brand-black)]">Premium</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Para quem quer levar sua presença online mais longe.
+                Para quem quer crescer com recursos avancados e assinatura mensal.
               </p>
             </div>
 
@@ -100,7 +104,7 @@ export function PricingSection() {
                 <span className="text-4xl font-bold tracking-tight text-[var(--brand-black)]">
                   R$ 24,90
                 </span>
-                <span className="text-sm text-muted-foreground">por mês</span>
+                <span className="text-sm text-muted-foreground">/mes</span>
               </div>
             </div>
 

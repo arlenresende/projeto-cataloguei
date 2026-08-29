@@ -79,6 +79,9 @@ export function StoreForm({
       facebookUrl: "",
       phoneNumber: "",
       cellPhone: "",
+      primaryColor: "",
+      secondaryColor: "",
+      hideCatalogueiBranding: false,
       themeStore: "DEFAULT",
       isActive: true,
       ...defaultValues,
@@ -453,6 +456,35 @@ export function StoreForm({
                 </option>
               ))}
             </select>
+          </div>
+          <Input
+            label="Cor principal"
+            placeholder="#7C3AED"
+            {...register("primaryColor")}
+            error={errors.primaryColor?.message}
+            helperText="Premium: personalize a cor principal da vitrine."
+          />
+          <Input
+            label="Cor secundária"
+            placeholder="#0A0A0A"
+            {...register("secondaryColor")}
+            error={errors.secondaryColor?.message}
+            helperText="Premium: personalize a cor secundária da vitrine."
+          />
+          <div className="sm:col-span-2">
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                {...register("hideCatalogueiBranding")}
+                className="size-4 rounded accent-[var(--brand-yellow)]"
+              />
+              <span className="text-sm font-medium text-[var(--brand-black)]">
+                Remover marca Cataloguei da loja
+              </span>
+            </label>
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              Recurso Premium. No plano gratuito a marca permanece visível na vitrine.
+            </p>
           </div>
           {mode === "edit" ? (
             <div className="flex items-end">

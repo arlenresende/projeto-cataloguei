@@ -336,6 +336,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         storeUrl={store.slug}
         logoUrl={store.logo}
         description={store.description}
+        showCatalogueiBranding={!store.hideCatalogueiBranding}
         whatsapp={store.whatsapp}
         email={store.email}
         phone={store.phone}

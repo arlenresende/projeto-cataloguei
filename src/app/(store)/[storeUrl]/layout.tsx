@@ -19,7 +19,10 @@ export default async function StoreLayout({
   }
 
   return (
-    <ThemeWrapper segment={store.theme}>
+    <ThemeWrapper
+      segment={store.theme}
+      overrides={store.themeOverrides}
+    >
       {children}
     </ThemeWrapper>
   );

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { assertStoreCustomizationAccess, BillingAccessError } from "@/lib/billing/subscription";
 import { prisma } from "@/lib/prisma";
 import { storeCreateSchema } from "@/lib/schemas/store";
 import {
@@ -90,6 +91,20 @@ export async function POST(request: Request) {
   }
 
   const data = parsed.data;
+
+  try {
+    await assertStoreCustomizationAccess(session.user.id, {
+      primaryColor: data.primaryColor || null,
+      secondaryColor: data.secondaryColor || null,
+      hideCatalogueiBranding: data.hideCatalogueiBranding,
+    });
+  } catch (error) {
+    if (error instanceof BillingAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+
+    throw error;
+  }
 
   // Check if slug is taken
   const slugTaken = await prisma.store.findUnique({

@@ -19,6 +19,9 @@ export const storeAdminSelect = {
   facebookUrl: true,
   phoneNumber: true,
   cellPhone: true,
+  primaryColor: true,
+  secondaryColor: true,
+  hideCatalogueiBranding: true,
   themeStore: true,
   isActive: true,
   createdAt: true,
@@ -50,6 +53,9 @@ export function buildStoreCreateData(
     facebookUrl: nullableText(data.facebookUrl),
     phoneNumber: nullableText(data.phoneNumber),
     cellPhone: nullableText(data.cellPhone),
+    primaryColor: nullableText(data.primaryColor),
+    secondaryColor: nullableText(data.secondaryColor),
+    hideCatalogueiBranding: data.hideCatalogueiBranding ?? false,
     themeStore: data.themeStore ?? StoreThemeSegment.DEFAULT,
     isActive: true,
     userId,
@@ -91,6 +97,15 @@ export function buildStoreUpdateData(
     }),
     ...(data.cellPhone !== undefined && {
       cellPhone: nullableText(data.cellPhone),
+    }),
+    ...(data.primaryColor !== undefined && {
+      primaryColor: nullableText(data.primaryColor),
+    }),
+    ...(data.secondaryColor !== undefined && {
+      secondaryColor: nullableText(data.secondaryColor),
+    }),
+    ...(data.hideCatalogueiBranding !== undefined && {
+      hideCatalogueiBranding: data.hideCatalogueiBranding,
     }),
     ...(data.themeStore !== undefined && { themeStore: data.themeStore }),
     ...(data.isActive !== undefined && { isActive: data.isActive }),

@@ -19,6 +19,7 @@ interface StoreFooterProps {
   websiteUrl?: string | null;
   instagramUrl?: string | null;
   facebookUrl?: string | null;
+  showCatalogueiBranding?: boolean;
 }
 
 export function StoreFooter({
@@ -36,6 +37,7 @@ export function StoreFooter({
   websiteUrl,
   instagramUrl,
   facebookUrl,
+  showCatalogueiBranding = true,
 }: StoreFooterProps) {
   const { resolvedColors } = useTheme();
 
@@ -212,6 +214,17 @@ export function StoreFooter({
             &copy; {new Date().getFullYear()}{" "}
             {logoUrl ? "Todos os direitos reservados." : `${name}. Todos os direitos reservados.`}
           </p>
+          {showCatalogueiBranding ? (
+            <p className="mt-2 text-center text-xs font-semibold opacity-60">
+              Criado com{" "}
+              <Link
+                href="/"
+                className="underline underline-offset-2"
+              >
+                Cataloguei
+              </Link>
+            </p>
+          ) : null}
         </div>
       </div>
     </footer>

@@ -256,6 +256,7 @@ export default async function StorePage({ params, searchParams }: StorePageProps
         storeUrl={store.slug}
         logoUrl={store.logo}
         description={store.description}
+        showCatalogueiBranding={!store.hideCatalogueiBranding}
         whatsapp={store.whatsapp}
         email={store.email}
         phone={store.phone}

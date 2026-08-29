@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireVerifiedSession } from "@/lib/api-session";
+import { assertCanAddProductImage, BillingAccessError } from "@/lib/billing/subscription";
 import { prisma } from "@/lib/prisma";
 import {
   buildProductImageObjectKey,
@@ -42,6 +43,16 @@ export async function POST(
 
   if (!product) {
     return NextResponse.json({ error: "Produto não encontrado." }, { status: 404 });
+  }
+
+  try {
+    await assertCanAddProductImage(session.user.id, id);
+  } catch (error) {
+    if (error instanceof BillingAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+
+    throw error;
   }
 
   let formData: FormData;

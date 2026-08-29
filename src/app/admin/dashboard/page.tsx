@@ -1,4 +1,7 @@
+import { headers } from "next/headers";
 import { DashboardContent } from "./dashboard-content";
+import { auth } from "@/lib/auth";
+import { getUserBillingState, serializeBillingState } from "@/lib/billing/subscription";
 
 const stats = [
   {
@@ -19,6 +22,14 @@ const stats = [
   },
 ];
 
-export default function DashboardPage() {
-  return <DashboardContent stats={stats} />;
+export default async function DashboardPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  const billing = session
+    ? serializeBillingState(await getUserBillingState(session.user.id))
+    : null;
+
+  return <DashboardContent stats={stats} billing={billing} />;
 }
