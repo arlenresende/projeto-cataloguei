@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { buildProductImageAlt } from "@/lib/seo";
 
 interface ProductGalleryProps {
   images: string[];
@@ -22,7 +23,10 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
       >
         <Image
           src={images[current]}
-          alt={`Imagem principal de ${productName}`}
+          alt={buildProductImageAlt({
+            productName,
+            position: current + 1,
+          })}
           fill
           className="object-cover"
           priority
@@ -69,7 +73,10 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             >
               <Image
                 src={img}
-                alt={`Imagem ${i + 1} de ${productName}`}
+                alt={buildProductImageAlt({
+                  productName,
+                  position: i + 1,
+                })}
                 fill
                 className="object-cover"
                 sizes="80px"

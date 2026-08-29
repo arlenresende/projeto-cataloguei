@@ -7,9 +7,10 @@ import { getPublicLinktreeByStoreSlug } from "@/lib/store-data";
 import {
   buildBreadcrumbJsonLd,
   buildCanonicalUrl,
-  buildOpenGraphImage,
-  buildRobots,
-  buildTwitterImage,
+  buildCollectionPageJsonLd,
+  buildDefaultSeoImage,
+  buildNoIndexMetadata,
+  buildPageMetadata,
   truncateText,
 } from "@/lib/seo";
 import { absoluteUrl, toAbsoluteAssetUrl } from "@/lib/site-config";
@@ -46,53 +47,39 @@ export async function generateMetadata({
   const result = await getPublicLinktreeByStoreSlug(storeUrl);
 
   if (!result) {
-    return {
-      title: "Links não encontrados",
-      robots: buildRobots({ index: false }),
-    };
+    return buildNoIndexMetadata("Links não encontrados");
   }
 
-  const { linktree } = result;
+  const { store, linktree } = result;
   const canonicalPath = `/${storeUrl}/links`;
   const title = `${linktree.title} | Links`;
   const description = truncateText(
     linktree.description || `Links oficiais de ${linktree.title}.`
   );
-  const shareImageUrl = absoluteUrl(`/og/store/${storeUrl}`);
+  const shareImages = [
+    ...(toAbsoluteAssetUrl(store.logo)
+      ? [
+          {
+            url: toAbsoluteAssetUrl(store.logo)!,
+            alt: `Logo de ${store.name}`,
+          },
+        ]
+      : []),
+    {
+      url: absoluteUrl(`/og/store/${storeUrl}`),
+      alt: `Compartilhamento da página de links de ${linktree.title}`,
+    },
+    buildDefaultSeoImage(),
+  ];
 
-  return {
+  return buildPageMetadata({
     title,
+    socialTitle: `${linktree.title} | Links | Cataloguei`,
     description,
-    alternates: {
-      canonical: canonicalPath,
-    },
-    robots: buildRobots({ index: true }),
-    openGraph: {
-      type: "profile",
-      url: buildCanonicalUrl(canonicalPath),
-      title,
-      description,
-      siteName: "Cataloguei",
-      locale: "pt_BR",
-      images: [
-        buildOpenGraphImage(
-          shareImageUrl,
-          `Compartilhamento da página de links de ${linktree.title}`
-        ),
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [
-        buildTwitterImage(
-          shareImageUrl,
-          `Compartilhamento da página de links de ${linktree.title}`
-        ),
-      ],
-    },
-  };
+    path: canonicalPath,
+    openGraphType: "profile",
+    images: shareImages,
+  });
 }
 
 export default async function LinksPage({ params }: LinksPageProps) {
@@ -120,6 +107,13 @@ export default async function LinksPage({ params }: LinksPageProps) {
           { name: store.name, url: absoluteUrl(`/${storeUrl}`) },
           { name: "Links", url: canonicalUrl },
         ])}
+      />
+      <StructuredData
+        data={buildCollectionPageJsonLd({
+          name: `${linktree.title} | Links`,
+          description: linktree.description,
+          url: canonicalUrl,
+        })}
       />
 
       <section className="w-full max-w-md">

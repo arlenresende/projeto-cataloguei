@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { cancelAsaasSubscription } from "@/lib/asaas/subscriptions";
 import { requireVerifiedSession } from "@/lib/api-session";
-import { serializeBillingState, getUserBillingState, updateSubscriptionSnapshot } from "@/lib/billing/subscription";
+import { serializeBillingState, getUserBillingState } from "@/lib/billing/subscription";
 import { prisma } from "@/lib/prisma";
+import { absoluteUrl } from "@/lib/site-config";
+import { getStripe } from "@/lib/stripe";
 
 export async function GET() {
   const session = await requireVerifiedSession(
@@ -37,9 +38,9 @@ export async function GET() {
   });
 }
 
-export async function DELETE() {
+export async function POST() {
   const session = await requireVerifiedSession(
-    "Verifique seu e-mail antes de cancelar sua assinatura."
+    "Verifique seu e-mail antes de gerenciar sua assinatura."
   );
   if (session instanceof NextResponse) {
     return session;
@@ -50,41 +51,30 @@ export async function DELETE() {
 
     if (
       billing.subscription.plan !== "PREMIUM" ||
-      !billing.subscription.asaasSubscriptionId
+      !billing.subscription.stripeCustomerId
     ) {
       return NextResponse.json(
-        { error: "Nenhuma assinatura Premium foi encontrada para cancelamento." },
+        { error: "Nenhuma assinatura Premium foi encontrada para gerenciamento." },
         { status: 404 }
       );
     }
 
-    await cancelAsaasSubscription(billing.subscription.asaasSubscriptionId);
-
-    const now = new Date();
-    const keepAccessUntilPeriodEnd =
-      billing.subscription.currentPeriodEnd &&
-      billing.subscription.currentPeriodEnd.getTime() > now.getTime();
-
-    await updateSubscriptionSnapshot(
-      { userId: session.user.id },
-      {
-        canceledAt: now,
-        latestInvoiceUrl: null,
-        latestPaymentStatus: "CANCELED",
-        status: keepAccessUntilPeriodEnd ? "ACTIVE" : "CANCELED",
-      }
-    );
-
-    const refreshed = await getUserBillingState(session.user.id);
+    const portalSession = await getStripe().billingPortal.sessions.create({
+      customer: billing.subscription.stripeCustomerId,
+      return_url: absoluteUrl("/admin/plans"),
+    });
 
     return NextResponse.json({
-      success: true,
-      billing: serializeBillingState(refreshed),
+      portalUrl: portalSession.url,
     });
   } catch (error) {
-    console.error("Erro ao cancelar assinatura:", error);
+    if (error instanceof Error && error.message.includes("STRIPE_SECRET_KEY")) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    console.error("Erro ao criar portal de assinatura:", error);
     return NextResponse.json(
-      { error: "Não foi possível cancelar a assinatura no momento." },
+      { error: "Não foi possível abrir o portal de assinatura no momento." },
       { status: 500 }
     );
   }

@@ -1,31 +1,13 @@
 import { NextResponse } from "next/server";
-import { AsaasApiError } from "@/lib/asaas/client";
-import { createAsaasCustomer } from "@/lib/asaas/customers";
-import { createAsaasSubscription, listAsaasSubscriptionPayments } from "@/lib/asaas/subscriptions";
-import { parseAsaasDate } from "@/lib/asaas/webhooks";
 import { requireVerifiedSession } from "@/lib/api-session";
-import { PREMIUM_MONTHLY_PRICE } from "@/lib/billing/plans";
 import {
-  getUserBillingState,
-  serializeBillingState,
-  syncAsaasCustomerId,
-  updateSubscriptionSnapshot,
-  upsertPremiumSubscription,
-} from "@/lib/billing/subscription";
+  ensureStripeCustomerForUser,
+  STRIPE_PREMIUM_SUBSCRIPTION_METADATA,
+} from "@/lib/billing/stripe";
+import { getUserBillingState, serializeBillingState } from "@/lib/billing/subscription";
 import { prisma } from "@/lib/prisma";
-
-function getTodayAsDateInput() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function normalizePhone(value?: string | null) {
-  if (!value) {
-    return null;
-  }
-
-  const digits = value.replace(/\D/g, "");
-  return digits.length >= 10 ? digits : null;
-}
+import { absoluteUrl } from "@/lib/site-config";
+import { getStripe, getStripePremiumPriceId } from "@/lib/stripe";
 
 export async function POST() {
   const session = await requireVerifiedSession(
@@ -45,134 +27,54 @@ export async function POST() {
       );
     }
 
-    if (
-      billing.subscription.plan === "PREMIUM" &&
-      (billing.subscription.status === "PENDING" ||
-        billing.subscription.status === "OVERDUE") &&
-      billing.subscription.asaasSubscriptionId
-    ) {
-      const payments = await listAsaasSubscriptionPayments(
-        billing.subscription.asaasSubscriptionId
-      ).catch(() => null);
-      const existingPayment = payments?.data?.[0] ?? null;
-
-      if (existingPayment?.invoiceUrl) {
-        await updateSubscriptionSnapshot(
-          { userId: session.user.id },
-          {
-            asaasPaymentId: existingPayment.id,
-            latestInvoiceUrl: existingPayment.invoiceUrl,
-            latestPaymentStatus: existingPayment.status,
-            currentPeriodEnd: parseAsaasDate(
-              existingPayment.dueDate || billing.subscription.currentPeriodEnd?.toISOString()
-            ),
-          }
-        );
-
-        const refreshed = await getUserBillingState(session.user.id);
-
-        return NextResponse.json({
-          reused: true,
-          checkoutUrl: existingPayment.invoiceUrl,
-          payment: existingPayment,
-          billing: serializeBillingState(refreshed),
-        });
-      }
-    }
-
-    const store = await prisma.store.findUnique({
-      where: { userId: session.user.id },
-      select: {
-        phoneNumber: true,
-        cellPhone: true,
-        whatsappUrl: true,
-      },
-    });
-
+    const stripe = getStripe();
+    const priceId = getStripePremiumPriceId();
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: {
-        asaasCustomerId: true,
+      select: { stripeCustomerId: true },
+    });
+    const stripeCustomerId = await ensureStripeCustomerForUser({
+      userId: session.user.id,
+      name: session.user.name,
+      email: session.user.email,
+      existingCustomerId:
+        billing.subscription.stripeCustomerId || user?.stripeCustomerId || null,
+      stripe,
+    });
+
+    const checkoutSession = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      customer: stripeCustomerId,
+      client_reference_id: session.user.id,
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: absoluteUrl("/admin/plans?payment=success"),
+      cancel_url: absoluteUrl("/admin/plans?payment=canceled"),
+      subscription_data: {
+        metadata: {
+          userId: session.user.id,
+          ...STRIPE_PREMIUM_SUBSCRIPTION_METADATA,
+        },
       },
-    });
-
-    let asaasCustomerId =
-      billing.subscription.asaasCustomerId || user?.asaasCustomerId || null;
-
-    if (!asaasCustomerId) {
-      const customer = await createAsaasCustomer({
-        name: session.user.name,
-        email: session.user.email,
-        phone:
-          normalizePhone(store?.cellPhone) ||
-          normalizePhone(store?.phoneNumber) ||
-          null,
-        externalReference: session.user.id,
-      });
-
-      asaasCustomerId = customer.id;
-      await syncAsaasCustomerId(session.user.id, customer.id);
-    }
-
-    const createdSubscription = await createAsaasSubscription({
-      customer: asaasCustomerId,
-      billingType: "CREDIT_CARD",
-      value: PREMIUM_MONTHLY_PRICE,
-      nextDueDate: getTodayAsDateInput(),
-      description: "Cataloguei Premium - assinatura mensal",
-      externalReference: session.user.id,
-    });
-
-    const payments = await listAsaasSubscriptionPayments(
-      createdSubscription.id
-    ).catch(() => null);
-    const firstPayment = payments?.data?.[0] ?? null;
-
-    await upsertPremiumSubscription(session.user.id, {
-      asaasCustomerId,
-      asaasSubscriptionId: createdSubscription.id,
-      asaasPaymentId: firstPayment?.id ?? null,
-      latestInvoiceUrl: firstPayment?.invoiceUrl ?? null,
-      latestPaymentStatus: firstPayment?.status ?? "PENDING",
-      currentPeriodEnd: parseAsaasDate(
-        firstPayment?.dueDate || createdSubscription.nextDueDate
-      ),
+      metadata: {
+        userId: session.user.id,
+        ...STRIPE_PREMIUM_SUBSCRIPTION_METADATA,
+      },
     });
 
     const refreshed = await getUserBillingState(session.user.id);
 
     return NextResponse.json(
       {
-        checkoutUrl: firstPayment?.invoiceUrl ?? null,
-        payment: firstPayment,
-        asaasSubscriptionId: createdSubscription.id,
+        checkoutUrl: checkoutSession.url,
         billing: serializeBillingState(refreshed),
       },
       { status: 201 }
     );
   } catch (error) {
     if (
-      error instanceof AsaasApiError ||
-      (error instanceof Error && error.name === "AsaasApiError")
-    ) {
-      const asaasError = error as AsaasApiError;
-      return NextResponse.json(
-        {
-          error:
-            asaasError.message ||
-            "Não foi possível iniciar a assinatura no Asaas.",
-        },
-        {
-          status:
-            asaasError.status >= 400 && asaasError.status < 500 ? 400 : 502,
-        }
-      );
-    }
-
-    if (
       error instanceof Error &&
-      (error.message.includes("ASAAS_API_KEY") ||
-        error.message.includes("ASAAS_API_URL"))
+      (error.message.includes("STRIPE_SECRET_KEY") ||
+        error.message.includes("STRIPE_PREMIUM_PRICE_ID"))
     ) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }

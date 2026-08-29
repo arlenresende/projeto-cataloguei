@@ -76,12 +76,10 @@ export function getEffectivePlan(
 
   const currentPeriodEnd = subscription.currentPeriodEnd;
 
-  const canceledPeriodExpired =
-    Boolean(subscription.canceledAt) &&
-    currentPeriodEnd !== null &&
-    currentPeriodEnd.getTime() <= Date.now();
+  const periodExpired =
+    currentPeriodEnd !== null && currentPeriodEnd.getTime() <= Date.now();
 
-  if (canceledPeriodExpired) {
+  if (periodExpired) {
     return "FREE";
   }
 

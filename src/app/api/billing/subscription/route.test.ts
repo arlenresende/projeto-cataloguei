@@ -3,17 +3,21 @@ import { NextResponse } from "next/server";
 
 const {
   requireVerifiedSessionMock,
-  cancelAsaasSubscriptionMock,
   getUserBillingStateMock,
   serializeBillingStateMock,
-  updateSubscriptionSnapshotMock,
+  stripeMock,
   prismaMock,
 } = vi.hoisted(() => ({
   requireVerifiedSessionMock: vi.fn(),
-  cancelAsaasSubscriptionMock: vi.fn(),
   getUserBillingStateMock: vi.fn(),
   serializeBillingStateMock: vi.fn((value) => value),
-  updateSubscriptionSnapshotMock: vi.fn(),
+  stripeMock: {
+    billingPortal: {
+      sessions: {
+        create: vi.fn(),
+      },
+    },
+  },
   prismaMock: {
     store: {
       findUnique: vi.fn(),
@@ -31,21 +35,24 @@ vi.mock("@/lib/api-session", () => ({
   requireVerifiedSession: requireVerifiedSessionMock,
 }));
 
-vi.mock("@/lib/asaas/subscriptions", () => ({
-  cancelAsaasSubscription: cancelAsaasSubscriptionMock,
-}));
-
 vi.mock("@/lib/billing/subscription", () => ({
   getUserBillingState: getUserBillingStateMock,
   serializeBillingState: serializeBillingStateMock,
-  updateSubscriptionSnapshot: updateSubscriptionSnapshotMock,
 }));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: prismaMock,
 }));
 
-import { DELETE } from "@/app/api/billing/subscription/route";
+vi.mock("@/lib/site-config", () => ({
+  absoluteUrl: vi.fn((path: string) => `http://localhost:3000${path}`),
+}));
+
+vi.mock("@/lib/stripe", () => ({
+  getStripe: vi.fn(() => stripeMock),
+}));
+
+import { POST } from "@/app/api/billing/subscription/route";
 
 function makeBillingState(options?: {
   effectivePlan?: "FREE" | "PREMIUM";
@@ -58,51 +65,39 @@ function makeBillingState(options?: {
     subscription: {
       plan: "PREMIUM",
       status: "ACTIVE",
-      asaasSubscriptionId: "sub_123",
+      stripeCustomerId: "cus_123",
       currentPeriodEnd: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       ...options?.subscription,
     },
   };
 }
 
-describe("DELETE /api/billing/subscription", () => {
+describe("POST /api/billing/subscription", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     requireVerifiedSessionMock.mockResolvedValue({
       user: { id: "user_1" },
     });
-    serializeBillingStateMock.mockImplementation((value) => value);
+    stripeMock.billingPortal.sessions.create.mockResolvedValue({
+      url: "https://billing.stripe.com/p/session_123",
+    });
   });
 
-  it("cancela a assinatura no Asaas e preserva acesso ate o fim do periodo pago", async () => {
-    getUserBillingStateMock
-      .mockResolvedValueOnce(makeBillingState())
-      .mockResolvedValueOnce(
-        makeBillingState({
-          subscription: {
-            plan: "PREMIUM",
-            status: "ACTIVE",
-            asaasSubscriptionId: "sub_123",
-          },
-        })
-      );
+  it("cria uma sessao do Customer Portal para o customer do usuario", async () => {
+    getUserBillingStateMock.mockResolvedValueOnce(makeBillingState());
 
-    const response = await DELETE();
+    const response = await POST();
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(cancelAsaasSubscriptionMock).toHaveBeenCalledWith("sub_123");
-    expect(updateSubscriptionSnapshotMock).toHaveBeenCalledWith(
-      { userId: "user_1" },
-      expect.objectContaining({
-        latestPaymentStatus: "CANCELED",
-        status: "ACTIVE",
-      })
-    );
-    expect(body.success).toBe(true);
+    expect(stripeMock.billingPortal.sessions.create).toHaveBeenCalledWith({
+      customer: "cus_123",
+      return_url: "http://localhost:3000/admin/plans",
+    });
+    expect(body.portalUrl).toBe("https://billing.stripe.com/p/session_123");
   });
 
-  it("retorna 404 quando nao existe assinatura premium para cancelar", async () => {
+  it("retorna 404 quando nao existe assinatura premium para gerenciar", async () => {
     getUserBillingStateMock.mockResolvedValueOnce(
       makeBillingState({
         effectivePlan: "FREE",
@@ -110,17 +105,17 @@ describe("DELETE /api/billing/subscription", () => {
         subscription: {
           plan: "FREE",
           status: "INACTIVE",
-          asaasSubscriptionId: null,
+          stripeCustomerId: null,
           currentPeriodEnd: null,
         },
       })
     );
 
-    const response = await DELETE();
+    const response = await POST();
 
     expect(response.status).toBe(404);
     expect(await response.json()).toEqual({
-      error: "Nenhuma assinatura Premium foi encontrada para cancelamento.",
+      error: "Nenhuma assinatura Premium foi encontrada para gerenciamento.",
     });
   });
 
@@ -129,7 +124,7 @@ describe("DELETE /api/billing/subscription", () => {
       NextResponse.json({ error: "Nao autenticado" }, { status: 401 })
     );
 
-    const response = await DELETE();
+    const response = await POST();
 
     expect(response.status).toBe(401);
     expect(await response.json()).toEqual({ error: "Nao autenticado" });

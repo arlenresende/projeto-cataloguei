@@ -46,14 +46,13 @@ export type SerializedBillingState = {
     status: SubscriptionStatus;
     billingCycle: BillingCycle;
     price: number;
-    asaasCustomerId: string | null;
-    asaasSubscriptionId: string | null;
-    asaasPaymentId: string | null;
-    latestInvoiceUrl: string | null;
-    latestPaymentStatus: string | null;
+    stripeCustomerId: string | null;
+    stripeSubscriptionId: string | null;
+    stripePriceId: string | null;
     currentPeriodStart: string | null;
     currentPeriodEnd: string | null;
     canceledAt: string | null;
+    cancelAtPeriodEnd: boolean;
     createdAt: string;
     updatedAt: string;
   };
@@ -95,14 +94,15 @@ export async function getUserBillingState(userId: string): Promise<BillingState>
 
   if (
     subscription.status === SubscriptionStatus.ACTIVE &&
-    subscription.canceledAt &&
     subscription.currentPeriodEnd &&
     subscription.currentPeriodEnd.getTime() <= Date.now()
   ) {
     subscription = await prisma.subscription.update({
       where: { userId },
       data: {
-        status: SubscriptionStatus.CANCELED,
+        status: subscription.cancelAtPeriodEnd
+          ? SubscriptionStatus.CANCELED
+          : SubscriptionStatus.INACTIVE,
       },
     });
   }
@@ -140,14 +140,13 @@ export function serializeBillingState(state: BillingState): SerializedBillingSta
       status: state.subscription.status,
       billingCycle: state.subscription.billingCycle,
       price: Number(state.subscription.price),
-      asaasCustomerId: state.subscription.asaasCustomerId,
-      asaasSubscriptionId: state.subscription.asaasSubscriptionId,
-      asaasPaymentId: state.subscription.asaasPaymentId,
-      latestInvoiceUrl: state.subscription.latestInvoiceUrl,
-      latestPaymentStatus: state.subscription.latestPaymentStatus,
+      stripeCustomerId: state.subscription.stripeCustomerId,
+      stripeSubscriptionId: state.subscription.stripeSubscriptionId,
+      stripePriceId: state.subscription.stripePriceId,
       currentPeriodStart: serializeDate(state.subscription.currentPeriodStart),
       currentPeriodEnd: serializeDate(state.subscription.currentPeriodEnd),
       canceledAt: serializeDate(state.subscription.canceledAt),
+      cancelAtPeriodEnd: state.subscription.cancelAtPeriodEnd,
       createdAt: state.subscription.createdAt.toISOString(),
       updatedAt: state.subscription.updatedAt.toISOString(),
     },
@@ -293,45 +292,47 @@ export async function assertStoreCustomizationAccess(
   return billing;
 }
 
-export async function syncAsaasCustomerId(userId: string, asaasCustomerId: string) {
+export async function syncStripeCustomerId(userId: string, stripeCustomerId: string) {
   await prisma.user.update({
     where: { id: userId },
-    data: { asaasCustomerId },
+    data: { stripeCustomerId },
   });
 
   return prisma.subscription.update({
     where: { userId },
-    data: { asaasCustomerId },
+    data: { stripeCustomerId },
   });
 }
 
 export async function upsertPremiumSubscription(
   userId: string,
   input: {
-    asaasCustomerId: string;
-    asaasSubscriptionId: string;
-    asaasPaymentId?: string | null;
-    latestInvoiceUrl?: string | null;
-    latestPaymentStatus?: string | null;
+    stripeCustomerId: string;
+    stripeSubscriptionId: string;
+    stripePriceId: string;
+    status: SubscriptionStatus;
+    currentPeriodStart?: Date | null;
     currentPeriodEnd?: Date | null;
+    cancelAtPeriodEnd?: boolean;
+    canceledAt?: Date | null;
   }
 ) {
-  await syncAsaasCustomerId(userId, input.asaasCustomerId);
+  await syncStripeCustomerId(userId, input.stripeCustomerId);
 
   return prisma.subscription.update({
     where: { userId },
     data: {
       plan: Plan.PREMIUM,
-      status: SubscriptionStatus.PENDING,
+      status: input.status,
       billingCycle: BillingCycle.MONTHLY,
       price: PREMIUM_MONTHLY_PRICE,
-      asaasCustomerId: input.asaasCustomerId,
-      asaasSubscriptionId: input.asaasSubscriptionId,
-      asaasPaymentId: input.asaasPaymentId ?? null,
-      latestInvoiceUrl: input.latestInvoiceUrl ?? null,
-      latestPaymentStatus: input.latestPaymentStatus ?? null,
+      stripeCustomerId: input.stripeCustomerId,
+      stripeSubscriptionId: input.stripeSubscriptionId,
+      stripePriceId: input.stripePriceId,
+      currentPeriodStart: input.currentPeriodStart ?? null,
       currentPeriodEnd: input.currentPeriodEnd ?? null,
-      canceledAt: null,
+      canceledAt: input.canceledAt ?? null,
+      cancelAtPeriodEnd: input.cancelAtPeriodEnd ?? false,
     },
   });
 }

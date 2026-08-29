@@ -1,19 +1,49 @@
 import type { Metadata } from "next";
 import {
   absoluteUrl,
+  DEFAULT_OG_IMAGE_ALT,
+  DEFAULT_OG_IMAGE_PATH,
+  GOOGLE_SITE_VERIFICATION,
+  normalizePublicPath,
   getMetadataBase,
   SITE_DESCRIPTION,
   SITE_KEYWORDS,
+  SITE_LANGUAGE,
   SITE_LOCALE,
   SITE_NAME,
+  SITE_TITLE,
+  TWITTER_HANDLE,
+  toAbsoluteAssetUrl,
 } from "@/lib/site-config";
 
 const MAX_DESCRIPTION_LENGTH = 160;
+const DEFAULT_OPEN_GRAPH_IMAGE_WIDTH = 1200;
+const DEFAULT_OPEN_GRAPH_IMAGE_HEIGHT = 630;
 const PRODUCT_PLACEHOLDER_PATH = "/placeholder-product.svg";
 
 export type BreadcrumbItem = {
   name: string;
   url: string;
+};
+
+export type SeoImage = {
+  url: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  type?: string;
+};
+
+type PageMetadataInput = {
+  title: string;
+  description: string;
+  path: string;
+  index?: boolean;
+  images?: SeoImage[];
+  keywords?: string[];
+  openGraphType?: "website" | "article" | "profile" | "product" | null;
+  twitterCard?: "summary" | "summary_large_image";
+  socialTitle?: string;
 };
 
 export function stripHtml(value: string | null | undefined) {
@@ -59,7 +89,7 @@ export function truncateText(value: string | null | undefined, max = MAX_DESCRIP
 }
 
 export function buildCanonicalUrl(path: string) {
-  return absoluteUrl(path);
+  return absoluteUrl(normalizePublicPath(path));
 }
 
 export function buildRobots({ index }: { index: boolean }): NonNullable<Metadata["robots"]> {
@@ -81,8 +111,8 @@ export function buildRobots({ index }: { index: boolean }): NonNullable<Metadata
 export function buildOpenGraphImage(url: string, alt: string) {
   return {
     url,
-    width: 1200,
-    height: 630,
+    width: DEFAULT_OPEN_GRAPH_IMAGE_WIDTH,
+    height: DEFAULT_OPEN_GRAPH_IMAGE_HEIGHT,
     alt,
     type: "image/png",
   };
@@ -92,6 +122,96 @@ export function buildTwitterImage(url: string, alt: string) {
   return {
     url,
     alt,
+  };
+}
+
+export function buildDefaultSeoImage() {
+  return buildOpenGraphImage(absoluteUrl(DEFAULT_OG_IMAGE_PATH), DEFAULT_OG_IMAGE_ALT);
+}
+
+export function normalizeSeoImages(images: SeoImage[] | undefined) {
+  const uniqueImages = new Map<string, SeoImage>();
+
+  for (const image of images || []) {
+    if (!image?.url) {
+      continue;
+    }
+
+    const absoluteImageUrl = toAbsoluteAssetUrl(image.url);
+
+    if (!absoluteImageUrl) {
+      continue;
+    }
+
+    uniqueImages.set(absoluteImageUrl, {
+      ...image,
+      url: absoluteImageUrl,
+      width: image.width || DEFAULT_OPEN_GRAPH_IMAGE_WIDTH,
+      height: image.height || DEFAULT_OPEN_GRAPH_IMAGE_HEIGHT,
+      type: image.type || "image/png",
+    });
+  }
+
+  if (uniqueImages.size === 0) {
+    const fallbackImage = buildDefaultSeoImage();
+    uniqueImages.set(fallbackImage.url, fallbackImage);
+  }
+
+  return Array.from(uniqueImages.values());
+}
+
+export function buildPageMetadata({
+  title,
+  description,
+  path,
+  index = true,
+  images,
+  keywords,
+  openGraphType = "website",
+  twitterCard,
+  socialTitle,
+}: PageMetadataInput): Metadata {
+  const canonicalPath = normalizePublicPath(path);
+  const canonicalUrl = buildCanonicalUrl(canonicalPath);
+  const normalizedImages = normalizeSeoImages(images);
+  const resolvedTitle = buildTitle(title);
+  const resolvedSocialTitle = socialTitle || resolvedTitle;
+
+  return {
+    title: resolvedTitle,
+    description,
+    keywords,
+    alternates: {
+      canonical: canonicalPath,
+    },
+    robots: buildRobots({ index }),
+    openGraph: {
+      ...(openGraphType ? { type: openGraphType } : {}),
+      url: canonicalUrl,
+      title: resolvedSocialTitle,
+      description,
+      siteName: SITE_NAME,
+      locale: SITE_LOCALE,
+      images: normalizedImages.map((image) => buildOpenGraphImage(image.url, image.alt)),
+    },
+    twitter: {
+      card:
+        twitterCard ||
+        (normalizedImages.length > 0 ? "summary_large_image" : "summary"),
+      title: resolvedSocialTitle,
+      description,
+      images: normalizedImages.map((image) => buildTwitterImage(image.url, image.alt)),
+      creator: TWITTER_HANDLE,
+      site: TWITTER_HANDLE,
+    },
+  };
+}
+
+export function buildNoIndexMetadata(title: string, description?: string): Metadata {
+  return {
+    title,
+    description,
+    robots: buildRobots({ index: false }),
   };
 }
 
@@ -112,14 +232,45 @@ export function getRealProductImages(
   );
 }
 
+export function buildProductImageAlt(input: {
+  productName: string;
+  brand?: string | null;
+  category?: string | null;
+  position?: number;
+}) {
+  const parts = [input.productName.trim()];
+
+  if (input.brand) {
+    parts.push(`da marca ${input.brand.trim()}`);
+  }
+
+  if (input.category) {
+    parts.push(`na categoria ${input.category.trim()}`);
+  }
+
+  if (typeof input.position === "number" && input.position > 0) {
+    parts.push(`imagem ${input.position}`);
+  }
+
+  return parts.join(" ");
+}
+
 export function buildDefaultMetadata(): Metadata {
-  const defaultImageUrl = absoluteUrl("/og");
+  const defaultPageMetadata = buildPageMetadata({
+    title: `${SITE_NAME} | ${SITE_TITLE}`,
+    socialTitle: `${SITE_NAME} | ${SITE_TITLE}`,
+    description: SITE_DESCRIPTION,
+    path: "/",
+    images: [buildDefaultSeoImage()],
+    keywords: SITE_KEYWORDS,
+  });
+  delete defaultPageMetadata.alternates;
 
   return {
     metadataBase: getMetadataBase(),
     applicationName: SITE_NAME,
     title: {
-      default: `${SITE_NAME} | Catálogo online para vender mais`,
+      default: `${SITE_NAME} | ${SITE_TITLE}`,
       template: `%s | ${SITE_NAME}`,
     },
     description: SITE_DESCRIPTION,
@@ -131,28 +282,16 @@ export function buildDefaultMetadata(): Metadata {
       shortcut: [{ url: "/favicon.ico" }],
       apple: [{ url: "/favicon.ico" }],
     },
-    robots: buildRobots({ index: true }),
-    openGraph: {
-      type: "website",
-      locale: SITE_LOCALE,
-      siteName: SITE_NAME,
-      title: `${SITE_NAME} | Catálogo online para vender mais`,
-      description: SITE_DESCRIPTION,
-      url: absoluteUrl("/"),
-      images: [buildOpenGraphImage(defaultImageUrl, `Compartilhamento do ${SITE_NAME}`)],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${SITE_NAME} | Catálogo online para vender mais`,
-      description: SITE_DESCRIPTION,
-      images: [buildTwitterImage(defaultImageUrl, `Compartilhamento do ${SITE_NAME}`)],
-    },
+    ...defaultPageMetadata,
     verification: {
-      google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+      google: GOOGLE_SITE_VERIFICATION,
     },
     category: "e-commerce",
     creator: SITE_NAME,
     publisher: SITE_NAME,
+    other: {
+      "content-language": SITE_LANGUAGE,
+    },
   };
 }
 
@@ -228,6 +367,37 @@ export function buildBreadcrumbJsonLd(items: BreadcrumbItem[]) {
   };
 }
 
+export function buildCollectionPageJsonLd(input: {
+  name: string;
+  description?: string | null;
+  url: string;
+  inLanguage?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: input.name,
+    description: truncateText(input.description),
+    url: input.url,
+    inLanguage: input.inLanguage || SITE_LANGUAGE,
+  };
+}
+
+export function buildWebSiteJsonLd(input: {
+  name?: string;
+  description?: string;
+  url?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: input.name || SITE_NAME,
+    url: input.url || absoluteUrl("/"),
+    description: input.description || SITE_DESCRIPTION,
+    inLanguage: SITE_LANGUAGE,
+  };
+}
+
 export function buildStoreJsonLd(input: {
   name: string;
   description?: string | null;
@@ -240,6 +410,7 @@ export function buildStoreJsonLd(input: {
   state?: string | null;
   postalCode?: string | null;
   country?: string | null;
+  sameAs?: string[];
 }) {
   const address = input.address || input.city || input.state || input.postalCode
     ? {
@@ -254,7 +425,7 @@ export function buildStoreJsonLd(input: {
 
   return {
     "@context": "https://schema.org",
-    "@type": "Store",
+    "@type": "OnlineStore",
     name: input.name,
     description: truncateText(input.description),
     url: input.url,
@@ -262,6 +433,7 @@ export function buildStoreJsonLd(input: {
     email: input.email || undefined,
     telephone: input.phone || undefined,
     address,
+    sameAs: input.sameAs?.length ? input.sameAs : undefined,
   };
 }
 
@@ -275,10 +447,20 @@ export function buildProductJsonLd(input: {
   category?: string | null;
   price: number;
   currency?: string;
+  sellerName?: string | null;
   availability?:
     | "https://schema.org/InStock"
     | "https://schema.org/OutOfStock"
     | "https://schema.org/PreOrder";
+  aggregateRating?: {
+    ratingValue: number;
+    reviewCount: number;
+  } | null;
+  review?: Array<{
+    author: string;
+    reviewBody?: string | null;
+    reviewRating?: number | null;
+  }>;
 }) {
   return {
     "@context": "https://schema.org",
@@ -301,8 +483,37 @@ export function buildProductJsonLd(input: {
       price: input.price.toFixed(2),
       priceCurrency: input.currency || "BRL",
       availability: input.availability,
-      itemCondition: "https://schema.org/NewCondition",
     },
+    seller: input.sellerName
+      ? {
+          "@type": "Organization",
+          name: input.sellerName,
+        }
+      : undefined,
+    aggregateRating: input.aggregateRating
+      ? {
+          "@type": "AggregateRating",
+          ratingValue: input.aggregateRating.ratingValue,
+          reviewCount: input.aggregateRating.reviewCount,
+        }
+      : undefined,
+    review: input.review?.length
+      ? input.review.map((item) => ({
+          "@type": "Review",
+          author: {
+            "@type": "Person",
+            name: item.author,
+          },
+          reviewBody: item.reviewBody || undefined,
+          reviewRating:
+            typeof item.reviewRating === "number"
+              ? {
+                  "@type": "Rating",
+                  ratingValue: item.reviewRating,
+                }
+              : undefined,
+        }))
+      : undefined,
   };
 }
 

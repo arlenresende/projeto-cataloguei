@@ -166,7 +166,8 @@ export function StoreHeader({
 
       {/* Categories bar - desktop */}
       {categories.length > 0 && (
-        <div
+        <nav
+          aria-label="Categorias da loja"
           className="hidden border-t md:block"
           style={{
             borderColor: resolvedColors.border,
@@ -200,7 +201,7 @@ export function StoreHeader({
               );
             })}
           </div>
-        </div>
+        </nav>
       )}
 
       {/* Mobile menu */}

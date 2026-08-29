@@ -1,4 +1,5 @@
 import { Check, ArrowRight, Lightbulb } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 const FREE_FEATURES = [
@@ -77,7 +78,12 @@ export function PricingSection() {
             </ul>
 
             <div className="mt-8">
-              <Button variant="outline" className="w-full" size="lg">
+              <Button
+                variant="outline"
+                className="w-full"
+                size="lg"
+                render={<Link href="/register">Começar grátis</Link>}
+              >
                 Começar grátis
                 <ArrowRight className="ml-2 size-4" />
               </Button>
@@ -118,7 +124,11 @@ export function PricingSection() {
             </ul>
 
             <div className="mt-8">
-              <Button className="w-full" size="lg">
+              <Button
+                className="w-full"
+                size="lg"
+                render={<Link href="/register">Quero ser Premium</Link>}
+              >
                 Quero ser Premium
                 <ArrowRight className="ml-2 size-4" />
               </Button>
@@ -143,7 +153,11 @@ export function PricingSection() {
               negócio.
             </p>
             <div className="mt-6">
-              <Button variant="outline" size="lg">
+              <Button
+                variant="outline"
+                size="lg"
+                render={<Link href="#contato">Quero sugerir uma ideia</Link>}
+              >
                 Quero sugerir uma ideia
                 <ArrowRight className="ml-2 size-4" />
               </Button>

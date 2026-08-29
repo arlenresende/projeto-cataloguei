@@ -3,6 +3,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, MessageCircle, Shield, Star, Truck } from "lucide-react";
 import { Breadcrumbs } from "@/components/seo/breadcrumbs";
+import { HeadMetadata } from "@/components/seo/head-metadata";
 import { StructuredData } from "@/components/seo/structured-data";
 import { StoreHeader } from "@/components/store/StoreHeader";
 import { StoreFooter } from "@/components/store/StoreFooter";
@@ -14,14 +15,14 @@ import { getPublicProductByIdentifier } from "@/lib/store-data";
 import {
   buildBreadcrumbJsonLd,
   buildCanonicalUrl,
-  buildOpenGraphImage,
   buildProductDescription,
   buildProductJsonLd,
-  buildRobots,
-  buildTwitterImage,
+  buildDefaultSeoImage,
+  buildNoIndexMetadata,
+  buildPageMetadata,
   getRealProductImages,
 } from "@/lib/seo";
-import { absoluteUrl } from "@/lib/site-config";
+import { absoluteUrl, toAbsoluteAssetUrl } from "@/lib/site-config";
 
 interface ProductPageProps {
   params: Promise<{ storeUrl: string; id: string }>;
@@ -34,10 +35,7 @@ export async function generateMetadata({
   const result = await getPublicProductByIdentifier(storeUrl, id);
 
   if (!result) {
-    return {
-      title: "Produto não encontrado",
-      robots: buildRobots({ index: false }),
-    };
+    return buildNoIndexMetadata("Produto não encontrado");
   }
 
   const { store, product } = result;
@@ -50,45 +48,34 @@ export async function generateMetadata({
     category: product.category,
     storeName: store.name,
   });
-  const shareImageUrl = absoluteUrl(
-    `/og/product/${store.slug}/${product.slug || product.id}`
-  );
+  const shareImages = [
+    ...getRealProductImages(product.images || [], product.imageUrl).map((image) => ({
+      url: image,
+      alt: `Imagem do produto ${product.name}`,
+    })),
+    ...(toAbsoluteAssetUrl(store.logo)
+      ? [
+          {
+            url: toAbsoluteAssetUrl(store.logo)!,
+            alt: `Logo da loja ${store.name}`,
+          },
+        ]
+      : []),
+    {
+      url: absoluteUrl(`/og/product/${store.slug}/${product.slug || product.id}`),
+      alt: `Compartilhamento do produto ${product.name}`,
+    },
+    buildDefaultSeoImage(),
+  ];
 
-  return {
+  return buildPageMetadata({
     title,
+    socialTitle: product.seoTitle || `${product.name} | ${store.name} | Cataloguei`,
     description,
-    alternates: {
-      canonical: canonicalPath,
-    },
-    robots: buildRobots({ index: true }),
-    openGraph: {
-      url: buildCanonicalUrl(canonicalPath),
-      title: product.seoTitle || `${product.name} | ${store.name} | Cataloguei`,
-      description,
-      siteName: "Cataloguei",
-      locale: "pt_BR",
-      images: [
-        buildOpenGraphImage(
-          shareImageUrl,
-          `Compartilhamento do produto ${product.name}`
-        ),
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: product.seoTitle || `${product.name} | ${store.name} | Cataloguei`,
-      description,
-      images: [
-        buildTwitterImage(
-          shareImageUrl,
-          `Compartilhamento do produto ${product.name}`
-        ),
-      ],
-    },
-    other: {
-      "og:type": "product",
-    },
-  };
+    path: canonicalPath,
+    openGraphType: null,
+    images: shareImages,
+  });
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
@@ -112,6 +99,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const relatedProducts = store.products
     .filter((item) => item.id !== product.id)
+    .sort((left, right) => {
+      const leftScore = left.category === product.category ? 1 : 0;
+      const rightScore = right.category === product.category ? 1 : 0;
+
+      return rightScore - leftScore;
+    })
     .slice(0, 4);
 
   const realProductImages = getRealProductImages(product.images || [], product.imageUrl);
@@ -144,6 +137,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <HeadMetadata
+        tags={[
+          { property: "og:type", content: "product" },
+          { property: "product:price:amount", content: product.price.toFixed(2) },
+          { property: "product:price:currency", content: "BRL" },
+          ...(typeof product.stock === "number"
+            ? [
+                {
+                  property: "product:availability",
+                  content: product.stock > 0 ? "in stock" : "out of stock",
+                } as const,
+              ]
+            : []),
+        ]}
+      />
       <StructuredData data={buildBreadcrumbJsonLd(breadcrumbItems)} />
       <StructuredData
         data={buildProductJsonLd({
@@ -155,6 +163,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           brand: product.brand,
           category: product.category,
           price: product.price,
+          sellerName: store.name,
           availability:
             typeof product.stock === "number"
               ? product.stock > 0
@@ -209,7 +218,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 className="text-xs font-bold uppercase tracking-widest"
                 style={{ color: "var(--theme-text)", opacity: 0.4 }}
               >
-                {product.category}
+                {product.categorySlug ? (
+                  <Link href={`/${store.slug}/categoria/${product.categorySlug}`}>
+                    {product.category}
+                  </Link>
+                ) : (
+                  product.category
+                )}
               </span>
               <h1
                 className="mt-3 text-2xl font-extrabold tracking-tight md:text-3xl"

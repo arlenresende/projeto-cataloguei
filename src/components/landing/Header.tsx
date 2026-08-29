@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { label: "Recursos", href: "#features" },
-  { label: "Temas", href: "#themes" },
+  { label: "Demonstração", href: "#showcase" },
   { label: "Como funciona", href: "#how-it-works" },
   { label: "Preços", href: "#pricing" },
   { label: "Contato", href: "#contato" },
@@ -53,11 +53,11 @@ export function Header() {
           <Button
             variant="ghost"
             size="sm"
-            render={<Link href="/admin/dashboard">Entrar</Link>}
+            render={<Link href="/login">Entrar</Link>}
           />
           <Button
             size="sm"
-            render={<Link href="/admin/dashboard">Criar catálogo</Link>}
+            render={<Link href="/register">Criar catálogo</Link>}
           />
         </div>
 
@@ -97,11 +97,11 @@ export function Header() {
           <div className="mt-3 flex flex-col gap-2 border-t border-[var(--brand-border)] pt-4">
             <Button
               variant="outline"
-              render={<Link href="/admin/dashboard">Entrar</Link>}
+              render={<Link href="/login">Entrar</Link>}
               className="w-full"
             />
             <Button
-              render={<Link href="/admin/dashboard">Criar catálogo</Link>}
+              render={<Link href="/register">Criar catálogo</Link>}
               className="w-full"
             />
           </div>

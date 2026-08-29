@@ -42,6 +42,7 @@ export function ProductShareButton({
           text: description,
           url,
         });
+        toast.success("Produto compartilhado com sucesso.");
         return;
       }
 
@@ -53,12 +54,25 @@ export function ProductShareButton({
       }
 
       window.prompt("Copie o link do produto:", url);
+      toast.success("Copie o link do produto para compartilhar.");
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
         return;
       }
 
+      try {
+        const copied = await copyUrl();
+
+        if (copied) {
+          toast.success("Link do produto copiado.");
+          return;
+        }
+      } catch {
+        // Se a cópia falhar, seguimos para o prompt manual.
+      }
+
       window.prompt("Copie o link do produto:", url);
+      toast.success("Copie o link do produto para compartilhar.");
     }
   }
 

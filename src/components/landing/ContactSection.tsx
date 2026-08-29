@@ -1,5 +1,6 @@
 import { MessageCircle, Heart, Send, Mail, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CONTACT_EMAIL, CONTACT_WHATSAPP } from "@/lib/site-config";
 
 const SUBJECTS = [
   "Tenho uma dúvida",
@@ -10,6 +11,8 @@ const SUBJECTS = [
 ];
 
 export function ContactSection() {
+  const contactWhatsappHref = CONTACT_WHATSAPP?.replace(/\D/g, "");
+
   return (
     <>
       {/* Hero */}
@@ -57,30 +60,48 @@ export function ContactSection() {
               </p>
 
               <div className="mt-8 space-y-4">
-                <div className="flex items-start gap-4">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--brand-yellow-light)] text-[var(--brand-black)]">
-                    <Mail className="size-5" />
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-[var(--brand-black)]">E-mail</p>
-                    <p className="mt-0.5 text-sm text-muted-foreground">
-                      contato@cataloguei.com.br
-                    </p>
+                {CONTACT_EMAIL ? (
+                  <div className="flex items-start gap-4">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--brand-yellow-light)] text-[var(--brand-black)]">
+                      <Mail className="size-5" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-[var(--brand-black)]">E-mail</p>
+                      <a
+                        href={`mailto:${CONTACT_EMAIL}`}
+                        className="mt-0.5 inline-flex text-sm text-muted-foreground transition-colors hover:text-[var(--brand-black)]"
+                      >
+                        {CONTACT_EMAIL}
+                      </a>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--brand-yellow-light)] text-[var(--brand-black)]">
-                    <Phone className="size-5" />
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-[var(--brand-black)]">
-                      WhatsApp
-                    </p>
-                    <p className="mt-0.5 text-sm text-muted-foreground">
-                      (11) 99999-9999
-                    </p>
+                ) : null}
+                {CONTACT_WHATSAPP && contactWhatsappHref ? (
+                  <div className="flex items-start gap-4">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--brand-yellow-light)] text-[var(--brand-black)]">
+                      <Phone className="size-5" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-[var(--brand-black)]">
+                        WhatsApp
+                      </p>
+                      <a
+                        href={`https://wa.me/${contactWhatsappHref}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-0.5 inline-flex text-sm text-muted-foreground transition-colors hover:text-[var(--brand-black)]"
+                      >
+                        {CONTACT_WHATSAPP}
+                      </a>
+                    </div>
                   </div>
-                </div>
+                ) : null}
+                {!CONTACT_EMAIL && !CONTACT_WHATSAPP ? (
+                  <p className="text-sm text-muted-foreground">
+                    Os canais oficiais de atendimento podem ser configurados por ambiente
+                    para evitar dados fictícios na página pública.
+                  </p>
+                ) : null}
               </div>
             </div>
 

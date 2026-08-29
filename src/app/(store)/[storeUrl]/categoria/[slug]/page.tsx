@@ -12,11 +12,12 @@ import {
   buildBreadcrumbJsonLd,
   buildCanonicalUrl,
   buildCategoryDescription,
-  buildOpenGraphImage,
-  buildRobots,
-  buildTwitterImage,
+  buildCollectionPageJsonLd,
+  buildDefaultSeoImage,
+  buildNoIndexMetadata,
+  buildPageMetadata,
 } from "@/lib/seo";
-import { absoluteUrl } from "@/lib/site-config";
+import { absoluteUrl, toAbsoluteAssetUrl } from "@/lib/site-config";
 
 interface CategoryPageProps {
   params: Promise<{ storeUrl: string; slug: string }>;
@@ -29,13 +30,10 @@ export async function generateMetadata({
   const result = await getPublicCategoryBySlug(storeUrl, slug);
 
   if (!result) {
-    return {
-      title: "Categoria não encontrada",
-      robots: buildRobots({ index: false }),
-    };
+    return buildNoIndexMetadata("Categoria não encontrada");
   }
 
-  const { store, category } = result;
+  const { store, category, products } = result;
   const title = `${category.name} | ${store.name}`;
   const description = buildCategoryDescription({
     categoryName: category.name,
@@ -43,31 +41,30 @@ export async function generateMetadata({
     storeName: store.name,
   });
   const canonicalPath = `/${store.slug}/categoria/${category.slug}`;
-  const shareImageUrl = absoluteUrl(`/og/store/${store.slug}`);
+  const shareImages = [
+    ...(toAbsoluteAssetUrl(store.heroes[0]?.image || store.logo)
+      ? [
+          {
+            url: toAbsoluteAssetUrl(store.heroes[0]?.image || store.logo)!,
+            alt: `Imagem da categoria ${category.name} da loja ${store.name}`,
+          },
+        ]
+      : []),
+    {
+      url: absoluteUrl(`/og/store/${store.slug}`),
+      alt: `Compartilhamento da categoria ${category.name} da loja ${store.name}`,
+    },
+    buildDefaultSeoImage(),
+  ];
 
-  return {
+  return buildPageMetadata({
     title,
+    socialTitle: `${category.name} | ${store.name} | Cataloguei`,
     description,
-    alternates: {
-      canonical: canonicalPath,
-    },
-    robots: buildRobots({ index: true }),
-    openGraph: {
-      type: "website",
-      url: buildCanonicalUrl(canonicalPath),
-      title,
-      description,
-      siteName: "Cataloguei",
-      locale: "pt_BR",
-      images: [buildOpenGraphImage(shareImageUrl, `Categoria ${category.name} da loja ${store.name}`)],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [buildTwitterImage(shareImageUrl, `Categoria ${category.name} da loja ${store.name}`)],
-    },
-  };
+    path: canonicalPath,
+    index: products.length > 0,
+    images: shareImages,
+  });
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
@@ -79,6 +76,11 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   }
 
   const { store, category, products: categoryProducts } = result;
+  const description = buildCategoryDescription({
+    categoryName: category.name,
+    description: category.description,
+    storeName: store.name,
+  });
 
   const canonicalUrl = buildCanonicalUrl(`/${store.slug}/categoria/${category.slug}`);
   const breadcrumbItems = [
@@ -90,6 +92,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   return (
     <div className="flex min-h-screen flex-col">
       <StructuredData data={buildBreadcrumbJsonLd(breadcrumbItems)} />
+      <StructuredData
+        data={buildCollectionPageJsonLd({
+          name: `${category.name} | ${store.name}`,
+          description,
+          url: canonicalUrl,
+        })}
+      />
       <StoreHeader
         name={store.name}
         storeUrl={store.slug}

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check, Crown, Loader2, Sparkles } from "lucide-react";
+import { Check, Crown, Loader2, Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -14,9 +14,9 @@ type PlansContentProps = {
     subscription: {
       plan: "FREE" | "PREMIUM";
       status: string;
-      latestInvoiceUrl?: string | null;
       currentPeriodEnd?: string | Date | null;
       canceledAt?: string | Date | null;
+      cancelAtPeriodEnd?: boolean;
     };
     limits: {
       products: number | null;
@@ -63,7 +63,7 @@ export function PlansContent({
   paymentSuccess,
 }: PlansContentProps) {
   const router = useRouter();
-  const [loadingAction, setLoadingAction] = useState<"subscribe" | "cancel" | null>(null);
+  const [loadingAction, setLoadingAction] = useState<"subscribe" | "manage" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubscribe() {
@@ -94,42 +94,30 @@ export function PlansContent({
     }
   }
 
-  async function handleCancel() {
-    const confirmed = window.confirm(
-      "Deseja cancelar a renovacao da sua assinatura Premium?"
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
+  async function handleManageSubscription() {
     setError(null);
-    setLoadingAction("cancel");
+    setLoadingAction("manage");
 
     try {
       const response = await fetch("/api/billing/subscription", {
-        method: "DELETE",
+        method: "POST",
       });
       const result = await response.json();
 
       if (!response.ok) {
-        setError(result.error || "Nao foi possivel cancelar sua assinatura.");
+        setError(result.error || "Nao foi possivel abrir o portal de assinatura.");
         return;
       }
 
-      router.refresh();
+      if (result.portalUrl) {
+        window.location.href = result.portalUrl;
+      }
     } catch {
-      setError("Erro de conexao ao cancelar a assinatura.");
+      setError("Erro de conexao ao abrir o portal de assinatura.");
     } finally {
       setLoadingAction(null);
     }
   }
-
-  const canContinuePayment =
-    billing.subscription.plan === "PREMIUM" &&
-    (billing.subscription.status === "PENDING" ||
-      billing.subscription.status === "OVERDUE") &&
-    Boolean(billing.subscription.latestInvoiceUrl);
 
   return (
     <div className="space-y-6">
@@ -140,7 +128,7 @@ export function PlansContent({
 
       {paymentSuccess ? (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-          Pagamento concluido no Asaas. O acesso Premium sera confirmado assim que o webhook sincronizar o status.
+          Pagamento concluido. O acesso Premium sera confirmado assim que o Stripe sincronizar o status.
         </div>
       ) : null}
 
@@ -202,11 +190,13 @@ export function PlansContent({
             </p>
           ) : null}
 
-          {billing.subscription.canceledAt ? (
+          {billing.subscription.cancelAtPeriodEnd ? (
             <p className="mt-2 text-sm text-muted-foreground">
-              Cancelamento solicitado em{" "}
+              Renovacao cancelada. Seu acesso Premium permanece ativo ate{" "}
               <strong className="text-[var(--brand-black)]">
-                {new Date(billing.subscription.canceledAt).toLocaleDateString("pt-BR")}
+                {billing.subscription.currentPeriodEnd
+                  ? new Date(billing.subscription.currentPeriodEnd).toLocaleDateString("pt-BR")
+                  : "o fim do periodo atual"}
               </strong>
             </p>
           ) : null}
@@ -229,26 +219,16 @@ export function PlansContent({
             ) : (
               <button
                 type="button"
-                onClick={handleCancel}
+                onClick={handleManageSubscription}
                 disabled={loadingAction !== null}
                 className="inline-flex items-center gap-2 rounded-xl border border-[var(--brand-border)] px-5 py-3 text-sm font-bold text-[var(--brand-black)] transition-colors hover:bg-[var(--brand-tertiary)] disabled:opacity-60"
               >
-                {loadingAction === "cancel" ? (
+                {loadingAction === "manage" ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : null}
-                Cancelar assinatura
+                Gerenciar assinatura
               </button>
             )}
-
-            {canContinuePayment ? (
-              <a
-                href={billing.subscription.latestInvoiceUrl!}
-                className="inline-flex items-center gap-2 rounded-xl bg-[var(--brand-yellow)] px-5 py-3 text-sm font-bold text-[var(--brand-black)] transition-opacity hover:opacity-90"
-              >
-                Continuar pagamento
-                <ArrowRight className="size-4" />
-              </a>
-            ) : null}
           </div>
         </Card>
 

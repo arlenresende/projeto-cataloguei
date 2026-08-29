@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Eye, MessageCircle } from "lucide-react";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { buildProductImageAlt } from "@/lib/seo";
 import type { Product } from "@/types";
 
 interface ProductCardProps {
@@ -54,7 +55,7 @@ export function ProductCard({ product, storeUrl, whatsapp }: ProductCardProps) {
   };
 
   return (
-    <div
+    <article
       className="group overflow-hidden rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
       style={{
         backgroundColor: resolvedColors.cardBg,
@@ -68,7 +69,12 @@ export function ProductCard({ product, storeUrl, whatsapp }: ProductCardProps) {
       >
         <Image
           src={images[imgIndex]}
-          alt={product.name}
+          alt={buildProductImageAlt({
+            productName: product.name,
+            brand: product.brand,
+            category: product.category,
+            position: hasMultiple ? imgIndex + 1 : undefined,
+          })}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-110"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
@@ -186,6 +192,6 @@ export function ProductCard({ product, storeUrl, whatsapp }: ProductCardProps) {
           )}
         </div>
       </div>
-    </div>
+    </article>
   );
 }

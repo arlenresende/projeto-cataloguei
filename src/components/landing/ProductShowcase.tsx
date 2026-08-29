@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 export function ProductShowcase() {
   return (
     <section
+      id="showcase"
       className="bg-[var(--brand-tertiary)] py-20 md:py-28"
       aria-labelledby="showcase-title"
     >
@@ -66,10 +67,10 @@ export function ProductShowcase() {
                   3 de 24 produtos
                 </span>
                 <Link
-                  href="#"
+                  href="/register"
                   className="inline-flex items-center text-xs font-medium text-[var(--brand-black)] hover:underline"
                 >
-                  Ver todos
+                  Criar meu catálogo
                   <ArrowRight className="ml-1 size-3" />
                 </Link>
               </div>

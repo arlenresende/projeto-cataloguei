@@ -6,25 +6,25 @@ const FOOTER_LINKS = [
     title: "Produto",
     links: [
       { label: "Recursos", href: "#features" },
-      { label: "Temas", href: "#themes" },
+      { label: "Demonstração", href: "#showcase" },
       { label: "Como funciona", href: "#how-it-works" },
       { label: "Preços", href: "#pricing" },
     ],
   },
   {
-    title: "Empresa",
+    title: "Acesso",
     links: [
-      { label: "Sobre", href: "#" },
-      { label: "Blog", href: "#" },
-      { label: "Contato", href: "#" },
+      { label: "Entrar", href: "/login" },
+      { label: "Criar conta", href: "/register" },
+      { label: "Falar com a gente", href: "#contato" },
     ],
   },
   {
     title: "Suporte",
     links: [
-      { label: "Central de ajuda", href: "#" },
-      { label: "Termos de uso", href: "#" },
-      { label: "Privacidade", href: "#" },
+      { label: "Contato", href: "#contato" },
+      { label: "Planos", href: "#pricing" },
+      { label: "Criar catálogo", href: "/register" },
     ],
   },
 ];

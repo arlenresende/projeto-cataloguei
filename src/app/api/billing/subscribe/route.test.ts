@@ -5,29 +5,22 @@ const {
   requireVerifiedSessionMock,
   getUserBillingStateMock,
   serializeBillingStateMock,
-  syncAsaasCustomerIdMock,
-  updateSubscriptionSnapshotMock,
-  upsertPremiumSubscriptionMock,
-  createAsaasCustomerMock,
-  createAsaasSubscriptionMock,
-  listAsaasSubscriptionPaymentsMock,
-  absoluteUrlMock,
+  ensureStripeCustomerForUserMock,
+  stripeMock,
   prismaMock,
 } = vi.hoisted(() => ({
   requireVerifiedSessionMock: vi.fn(),
   getUserBillingStateMock: vi.fn(),
   serializeBillingStateMock: vi.fn((value) => value),
-  syncAsaasCustomerIdMock: vi.fn(),
-  updateSubscriptionSnapshotMock: vi.fn(),
-  upsertPremiumSubscriptionMock: vi.fn(),
-  createAsaasCustomerMock: vi.fn(),
-  createAsaasSubscriptionMock: vi.fn(),
-  listAsaasSubscriptionPaymentsMock: vi.fn(),
-  absoluteUrlMock: vi.fn((path: string) => `http://localhost:3000${path}`),
-  prismaMock: {
-    store: {
-      findUnique: vi.fn(),
+  ensureStripeCustomerForUserMock: vi.fn(),
+  stripeMock: {
+    checkout: {
+      sessions: {
+        create: vi.fn(),
+      },
     },
+  },
+  prismaMock: {
     user: {
       findUnique: vi.fn(),
     },
@@ -41,18 +34,15 @@ vi.mock("@/lib/api-session", () => ({
 vi.mock("@/lib/billing/subscription", () => ({
   getUserBillingState: getUserBillingStateMock,
   serializeBillingState: serializeBillingStateMock,
-  syncAsaasCustomerId: syncAsaasCustomerIdMock,
-  updateSubscriptionSnapshot: updateSubscriptionSnapshotMock,
-  upsertPremiumSubscription: upsertPremiumSubscriptionMock,
 }));
 
-vi.mock("@/lib/asaas/customers", () => ({
-  createAsaasCustomer: createAsaasCustomerMock,
-}));
-
-vi.mock("@/lib/asaas/subscriptions", () => ({
-  createAsaasSubscription: createAsaasSubscriptionMock,
-  listAsaasSubscriptionPayments: listAsaasSubscriptionPaymentsMock,
+vi.mock("@/lib/billing/stripe", () => ({
+  ensureStripeCustomerForUser: ensureStripeCustomerForUserMock,
+  STRIPE_PREMIUM_SUBSCRIPTION_METADATA: {
+    plan: "PREMIUM",
+    billingCycle: "MONTHLY",
+    price: "24.9",
+  },
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -60,7 +50,12 @@ vi.mock("@/lib/prisma", () => ({
 }));
 
 vi.mock("@/lib/site-config", () => ({
-  absoluteUrl: absoluteUrlMock,
+  absoluteUrl: vi.fn((path: string) => `http://localhost:3000${path}`),
+}));
+
+vi.mock("@/lib/stripe", () => ({
+  getStripe: vi.fn(() => stripeMock),
+  getStripePremiumPriceId: vi.fn(() => "price_premium"),
 }));
 
 import { POST } from "@/app/api/billing/subscribe/route";
@@ -68,12 +63,12 @@ import { POST } from "@/app/api/billing/subscribe/route";
 function makeBillingState(overrides: Record<string, unknown> = {}) {
   return {
     effectivePlan: "FREE",
-    isPremium: false,
+    isPremium: overrides.isPremium ?? false,
     subscription: {
       plan: "FREE",
       status: "INACTIVE",
-      asaasCustomerId: null,
-      asaasSubscriptionId: null,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
       currentPeriodEnd: null,
       ...overrides,
     },
@@ -90,109 +85,51 @@ describe("POST /api/billing/subscribe", () => {
         email: "arlen@example.com",
       },
     });
-    prismaMock.store.findUnique.mockResolvedValue({
-      phoneNumber: "11999999999",
-      cellPhone: null,
-      whatsappUrl: null,
-    });
     prismaMock.user.findUnique.mockResolvedValue({
-      asaasCustomerId: null,
+      stripeCustomerId: null,
     });
-    serializeBillingStateMock.mockImplementation((value) => value);
+    ensureStripeCustomerForUserMock.mockResolvedValue("cus_123");
+    stripeMock.checkout.sessions.create.mockResolvedValue({
+      url: "https://checkout.stripe.com/c/session_123",
+    });
   });
 
-  it("cria customer e assinatura mensal no Asaas para usuario FREE", async () => {
+  it("cria uma Checkout Session de assinatura Premium", async () => {
     getUserBillingStateMock
       .mockResolvedValueOnce(makeBillingState())
-      .mockResolvedValueOnce(makeBillingState({
-        plan: "PREMIUM",
-        status: "PENDING",
-        asaasCustomerId: "cus_123",
-        asaasSubscriptionId: "sub_123",
-      }));
-
-    createAsaasCustomerMock.mockResolvedValue({ id: "cus_123" });
-    createAsaasSubscriptionMock.mockResolvedValue({
-      id: "sub_123",
-      nextDueDate: "2026-08-29",
-    });
-    listAsaasSubscriptionPaymentsMock.mockResolvedValue({
-      data: [
-        {
-          id: "pay_123",
-          invoiceUrl: "https://sandbox.asaas.com/i/pay_123",
-          status: "PENDING",
-          dueDate: "2026-08-29",
-        },
-      ],
-    });
+      .mockResolvedValueOnce(makeBillingState({ stripeCustomerId: "cus_123" }));
 
     const response = await POST();
     const body = await response.json();
 
     expect(response.status).toBe(201);
-    expect(createAsaasCustomerMock).toHaveBeenCalledWith(
+    expect(ensureStripeCustomerForUserMock).toHaveBeenCalledWith(
       expect.objectContaining({
+        userId: "user_1",
         email: "arlen@example.com",
-        externalReference: "user_1",
       })
     );
-    expect(syncAsaasCustomerIdMock).toHaveBeenCalledWith("user_1", "cus_123");
-    expect(createAsaasSubscriptionMock).toHaveBeenCalledWith(
+    expect(stripeMock.checkout.sessions.create).toHaveBeenCalledWith(
       expect.objectContaining({
+        mode: "subscription",
         customer: "cus_123",
-        value: 24.9,
+        line_items: [{ price: "price_premium", quantity: 1 }],
+        success_url: "http://localhost:3000/admin/plans?payment=success",
+        cancel_url: "http://localhost:3000/admin/plans?payment=canceled",
       })
     );
-    expect(upsertPremiumSubscriptionMock).toHaveBeenCalledWith(
-      "user_1",
-      expect.objectContaining({
-        asaasCustomerId: "cus_123",
-        asaasSubscriptionId: "sub_123",
-        asaasPaymentId: "pay_123",
-      })
-    );
-    expect(body.checkoutUrl).toBe("https://sandbox.asaas.com/i/pay_123");
+    expect(body.checkoutUrl).toBe("https://checkout.stripe.com/c/session_123");
   });
 
-  it("reaproveita pagamento pendente sem criar novo customer ou assinatura", async () => {
-    getUserBillingStateMock
-      .mockResolvedValueOnce(
-        makeBillingState({
-          plan: "PREMIUM",
-          status: "PENDING",
-          asaasSubscriptionId: "sub_pending",
-          currentPeriodEnd: new Date("2026-09-01T00:00:00Z"),
-        })
-      )
-      .mockResolvedValueOnce(
-        makeBillingState({
-          plan: "PREMIUM",
-          status: "PENDING",
-          asaasSubscriptionId: "sub_pending",
-        })
-      );
-
-    listAsaasSubscriptionPaymentsMock.mockResolvedValue({
-      data: [
-        {
-          id: "pay_existing",
-          invoiceUrl: "https://sandbox.asaas.com/i/pay_existing",
-          status: "PENDING",
-          dueDate: "2026-09-01",
-        },
-      ],
-    });
+  it("retorna 409 quando o Premium ja esta ativo", async () => {
+    getUserBillingStateMock.mockResolvedValueOnce(
+      makeBillingState({ isPremium: true, plan: "PREMIUM", status: "ACTIVE" })
+    );
 
     const response = await POST();
-    const body = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(body.reused).toBe(true);
-    expect(body.checkoutUrl).toBe("https://sandbox.asaas.com/i/pay_existing");
-    expect(updateSubscriptionSnapshotMock).toHaveBeenCalled();
-    expect(createAsaasCustomerMock).not.toHaveBeenCalled();
-    expect(createAsaasSubscriptionMock).not.toHaveBeenCalled();
+    expect(response.status).toBe(409);
+    expect(stripeMock.checkout.sessions.create).not.toHaveBeenCalled();
   });
 
   it("retorna a resposta de sessao quando o usuario nao esta autorizado", async () => {

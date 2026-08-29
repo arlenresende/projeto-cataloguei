@@ -12,12 +12,13 @@ import { FloatingWhatsApp } from "@/components/store/FloatingWhatsApp";
 import { getPublicStoreBySlug } from "@/lib/store-data";
 import {
   buildBreadcrumbJsonLd,
+  buildCollectionPageJsonLd,
   buildCanonicalUrl,
-  buildOpenGraphImage,
-  buildRobots,
+  buildDefaultSeoImage,
+  buildNoIndexMetadata,
+  buildPageMetadata,
   buildStoreDescription,
   buildStoreJsonLd,
-  buildTwitterImage,
 } from "@/lib/seo";
 import { absoluteUrl, toAbsoluteAssetUrl } from "@/lib/site-config";
 
@@ -35,10 +36,7 @@ export async function generateMetadata({
   const store = await getPublicStoreBySlug(storeUrl);
 
   if (!store) {
-    return {
-      title: "Loja não encontrada",
-      robots: buildRobots({ index: false }),
-    };
+    return buildNoIndexMetadata("Loja não encontrada");
   }
 
   const hasActiveFilters = Boolean(
@@ -52,31 +50,30 @@ export async function generateMetadata({
     state: store.state,
   });
   const canonicalPath = `/${store.slug}`;
-  const shareImageUrl = absoluteUrl(`/og/store/${store.slug}`);
+  const shareImages = [
+    ...(toAbsoluteAssetUrl(store.heroes[0]?.image || store.logo)
+      ? [
+          {
+            url: toAbsoluteAssetUrl(store.heroes[0]?.image || store.logo)!,
+            alt: `Imagem principal da loja ${store.name}`,
+          },
+        ]
+      : []),
+    {
+      url: absoluteUrl(`/og/store/${store.slug}`),
+      alt: `Compartilhamento da loja ${store.name}`,
+    },
+    buildDefaultSeoImage(),
+  ];
 
-  return {
+  return buildPageMetadata({
     title,
+    socialTitle: `${store.name} | Cataloguei`,
     description,
-    alternates: {
-      canonical: canonicalPath,
-    },
-    robots: buildRobots({ index: !hasActiveFilters }),
-    openGraph: {
-      type: "website",
-      url: buildCanonicalUrl(canonicalPath),
-      title: `${store.name} | Cataloguei`,
-      description,
-      siteName: "Cataloguei",
-      locale: "pt_BR",
-      images: [buildOpenGraphImage(shareImageUrl, `Compartilhamento da loja ${store.name}`)],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${store.name} | Cataloguei`,
-      description,
-      images: [buildTwitterImage(shareImageUrl, `Compartilhamento da loja ${store.name}`)],
-    },
-  };
+    path: canonicalPath,
+    index: !hasActiveFilters,
+    images: shareImages,
+  });
 }
 
 export default async function StorePage({ params, searchParams }: StorePageProps) {
@@ -128,8 +125,13 @@ export default async function StorePage({ params, searchParams }: StorePageProps
 
   return (
     <div className="flex min-h-screen flex-col">
+      <StructuredData data={buildBreadcrumbJsonLd(breadcrumbItems)} />
       <StructuredData
-        data={buildBreadcrumbJsonLd(breadcrumbItems)}
+        data={buildCollectionPageJsonLd({
+          name: store.name,
+          description: store.description,
+          url: canonicalUrl,
+        })}
       />
       <StructuredData
         data={buildStoreJsonLd({
@@ -144,6 +146,11 @@ export default async function StorePage({ params, searchParams }: StorePageProps
           state: store.state,
           postalCode: store.postalCode,
           country: store.country,
+          sameAs: [
+            store.websiteUrl,
+            store.instagramUrl,
+            store.facebookUrl,
+          ].filter((value): value is string => Boolean(value)),
         })}
       />
       <StoreHeader
@@ -181,6 +188,29 @@ export default async function StorePage({ params, searchParams }: StorePageProps
         {/* Products */}
         <section id="produtos" className="py-8 md:py-12">
           <div className="mx-auto max-w-6xl px-4">
+            <header className="mb-8 max-w-3xl">
+              <p
+                className="text-xs font-bold uppercase tracking-widest"
+                style={{ color: "var(--theme-primary)" }}
+              >
+                Loja online
+              </p>
+              <h1
+                className="mt-2 text-3xl font-extrabold tracking-tight md:text-4xl"
+                style={{ color: "var(--theme-text)" }}
+              >
+                {store.name}
+              </h1>
+              {store.description ? (
+                <p
+                  className="mt-3 text-sm leading-relaxed md:text-base"
+                  style={{ color: "var(--theme-text)", opacity: 0.68 }}
+                >
+                  {store.description}
+                </p>
+              ) : null}
+            </header>
+
             <div className="mb-6 flex items-end justify-between">
               <div>
                 <span
