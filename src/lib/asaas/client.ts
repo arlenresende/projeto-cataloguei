@@ -1,7 +1,8 @@
 import "server-only";
 
+import fs from "node:fs";
 import path from "node:path";
-import { config as loadEnv } from "dotenv";
+import { parse as parseEnv } from "dotenv";
 
 type AsaasRequestOptions = {
   method?: "GET" | "POST" | "PUT" | "DELETE";
@@ -30,24 +31,32 @@ export class AsaasApiError extends Error {
   }
 }
 
-let envFallbackLoaded = false;
+let parsedLocalEnv: Record<string, string> | null = null;
 
-function ensureAsaasEnvLoaded() {
-  if (envFallbackLoaded) {
-    return;
+function getParsedLocalEnv() {
+  if (parsedLocalEnv) {
+    return parsedLocalEnv;
   }
 
-  envFallbackLoaded = true;
-
   const envPath = path.join(process.cwd(), ".env.local");
-  loadEnv({ path: envPath, override: false });
+
+  try {
+    const content = fs.readFileSync(envPath, "utf-8");
+    parsedLocalEnv = parseEnv(content);
+  } catch {
+    parsedLocalEnv = {};
+  }
+
+  return parsedLocalEnv;
 }
 
 function getAsaasConfig() {
-  ensureAsaasEnvLoaded();
+  const localEnv = getParsedLocalEnv();
 
-  const apiKey = process.env.ASAAS_API_KEY?.trim();
-  const apiUrl = process.env.ASAAS_API_URL?.trim();
+  const apiKey =
+    process.env.ASAAS_API_KEY?.trim() || localEnv.ASAAS_API_KEY?.trim();
+  const apiUrl =
+    process.env.ASAAS_API_URL?.trim() || localEnv.ASAAS_API_URL?.trim();
 
   if (!apiKey) {
     throw new Error("ASAAS_API_KEY não está definida no servidor.");
