@@ -1,8 +1,20 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
 import { auth } from "@/lib/auth";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Painel administrativo",
+    template: "%s | Admin | Cataloguei",
+  },
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 interface AdminLayoutProps {
   children: React.ReactNode;

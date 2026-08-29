@@ -104,6 +104,7 @@ export function StoreHeader({
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label="Buscar produtos"
               className="h-11 w-full rounded-xl border pl-12 pr-4 text-sm font-medium outline-none transition-all focus:shadow-sm"
               style={{
                 borderColor: resolvedColors.border,
@@ -220,6 +221,7 @@ export function StoreHeader({
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Buscar produtos"
                 className="h-11 w-full rounded-xl border pl-12 pr-4 text-sm font-medium outline-none"
                 style={{
                   borderColor: resolvedColors.border,

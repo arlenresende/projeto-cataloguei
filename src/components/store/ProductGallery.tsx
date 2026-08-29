@@ -22,7 +22,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
       >
         <Image
           src={images[current]}
-          alt={productName}
+          alt={`Imagem principal de ${productName}`}
           fill
           className="object-cover"
           priority
@@ -69,7 +69,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             >
               <Image
                 src={img}
-                alt={`${productName} ${i + 1}`}
+                alt={`Imagem ${i + 1} de ${productName}`}
                 fill
                 className="object-cover"
                 sizes="80px"

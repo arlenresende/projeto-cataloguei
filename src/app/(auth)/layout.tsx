@@ -1,5 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { MoreVertical } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Acesse sua conta",
+    template: "%s | Conta | Cataloguei",
+  },
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 function BrandHeader() {
   return (

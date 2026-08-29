@@ -15,7 +15,12 @@ interface ProductCardProps {
 
 export function ProductCard({ product, storeUrl, whatsapp }: ProductCardProps) {
   const { resolvedColors } = useTheme();
-  const images = product.images?.length ? product.images : [product.imageUrl];
+  const images =
+    product.images?.length
+      ? product.images
+      : product.imageUrl
+        ? [product.imageUrl]
+        : ["/placeholder-product.svg"];
   const [imgIndex, setImgIndex] = useState(0);
   const hasMultiple = images.length > 1;
   const comparePrice = product.compareAtPrice || product.originalPrice;

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Layers, Palette, Share2 } from "lucide-react";
+import { getSiteHost } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 const TABS = [
@@ -144,6 +145,8 @@ export function FeatureTabs() {
 }
 
 function FeaturePreview({ tab }: { tab: TabId }) {
+  const siteHost = getSiteHost();
+
   if (tab === "catalog") {
     return (
       <div className="rounded-xl border border-[var(--brand-border)] bg-white p-4 shadow-sm">
@@ -208,7 +211,7 @@ function FeaturePreview({ tab }: { tab: TabId }) {
     <div className="rounded-xl border border-[var(--brand-border)] bg-white p-6 shadow-sm">
       <div className="flex items-center gap-2 rounded-lg bg-[var(--brand-tertiary)] px-3 py-2">
         <Share2 className="size-4 text-muted-foreground" />
-        <span className="text-xs text-muted-foreground">cataloguei.com.br/</span>
+        <span className="text-xs text-muted-foreground">{siteHost}/</span>
         <span className="text-xs font-semibold text-[var(--brand-black)]">sualoja</span>
       </div>
       <div className="mt-4 flex flex-wrap gap-2">

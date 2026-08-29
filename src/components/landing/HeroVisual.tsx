@@ -7,8 +7,11 @@ import {
   ShoppingBag,
   Box,
 } from "lucide-react";
+import { getSiteHost } from "@/lib/site-config";
 
 export function HeroVisual() {
+  const siteHost = getSiteHost();
+
   return (
     <div
       className="relative mx-auto mt-16 w-full max-w-4xl md:mt-24"
@@ -92,7 +95,7 @@ export function HeroVisual() {
             </div>
             <div className="flex-1 px-6">
               <div className="mx-auto h-6 max-w-xs rounded-md bg-[var(--brand-tertiary)] text-center text-[10px] leading-6 text-muted-foreground">
-                cataloguei.com.br/techstore
+                {siteHost}/techstore
               </div>
             </div>
             <div className="size-6" />

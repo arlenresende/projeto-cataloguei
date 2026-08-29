@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import Link from "next/link";
+import { StructuredData } from "@/components/seo/structured-data";
 import { StoreHeader } from "@/components/store/StoreHeader";
 import { BannerCarousel } from "@/components/store/BannerCarousel";
 import { ProductFilters } from "@/components/store/ProductFilters";
@@ -7,10 +10,73 @@ import { ProductGrid } from "@/components/store/ProductGrid";
 import { StoreFooter } from "@/components/store/StoreFooter";
 import { FloatingWhatsApp } from "@/components/store/FloatingWhatsApp";
 import { getPublicStoreBySlug } from "@/lib/store-data";
+import {
+  buildBreadcrumbJsonLd,
+  buildCanonicalUrl,
+  buildOpenGraphImage,
+  buildRobots,
+  buildStoreDescription,
+  buildStoreJsonLd,
+  buildTwitterImage,
+} from "@/lib/seo";
+import { absoluteUrl, toAbsoluteAssetUrl } from "@/lib/site-config";
 
 interface StorePageProps {
   params: Promise<{ storeUrl: string }>;
   searchParams: Promise<{ category?: string; min?: string; max?: string; q?: string }>;
+}
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: StorePageProps): Promise<Metadata> {
+  const { storeUrl } = await params;
+  const filters = await searchParams;
+  const store = await getPublicStoreBySlug(storeUrl);
+
+  if (!store) {
+    return {
+      title: "Loja não encontrada",
+      robots: buildRobots({ index: false }),
+    };
+  }
+
+  const hasActiveFilters = Boolean(
+    filters.category || filters.min || filters.max || filters.q
+  );
+  const title = store.name;
+  const description = buildStoreDescription({
+    name: store.name,
+    description: store.description,
+    city: store.city,
+    state: store.state,
+  });
+  const canonicalPath = `/${store.slug}`;
+  const shareImageUrl = absoluteUrl(`/og/store/${store.slug}`);
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: canonicalPath,
+    },
+    robots: buildRobots({ index: !hasActiveFilters }),
+    openGraph: {
+      type: "website",
+      url: buildCanonicalUrl(canonicalPath),
+      title: `${store.name} | Cataloguei`,
+      description,
+      siteName: "Cataloguei",
+      locale: "pt_BR",
+      images: [buildOpenGraphImage(shareImageUrl, `Compartilhamento da loja ${store.name}`)],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${store.name} | Cataloguei`,
+      description,
+      images: [buildTwitterImage(shareImageUrl, `Compartilhamento da loja ${store.name}`)],
+    },
+  };
 }
 
 export default async function StorePage({ params, searchParams }: StorePageProps) {
@@ -53,9 +119,33 @@ export default async function StorePage({ params, searchParams }: StorePageProps
   }
 
   const hasActiveFilters = category || min || max || q;
+  const canonicalUrl = buildCanonicalUrl(`/${store.slug}`);
+  const breadcrumbItems = [
+    { name: "Home", url: absoluteUrl("/") },
+    { name: store.name, url: canonicalUrl },
+  ];
+  const shareImage = toAbsoluteAssetUrl(store.heroes[0]?.image || store.logo);
 
   return (
     <div className="flex min-h-screen flex-col">
+      <StructuredData
+        data={buildBreadcrumbJsonLd(breadcrumbItems)}
+      />
+      <StructuredData
+        data={buildStoreJsonLd({
+          name: store.name,
+          description: store.description,
+          url: canonicalUrl,
+          image: shareImage,
+          email: store.email,
+          phone: store.phone,
+          address: store.address,
+          city: store.city,
+          state: store.state,
+          postalCode: store.postalCode,
+          country: store.country,
+        })}
+      />
       <StoreHeader
         name={store.name}
         storeUrl={store.slug}
@@ -113,13 +203,13 @@ export default async function StorePage({ params, searchParams }: StorePageProps
                 </h2>
               </div>
               {hasActiveFilters && (
-                <a
+                <Link
                   href={`/${storeUrl}`}
                   className="text-sm font-bold transition-opacity hover:opacity-70"
                   style={{ color: "var(--theme-text)" }}
                 >
                   Limpar filtros
-                </a>
+                </Link>
               )}
             </div>
             {filteredProducts.length > 0 ? (
@@ -147,13 +237,13 @@ export default async function StorePage({ params, searchParams }: StorePageProps
                   style={{ color: "var(--theme-text)", opacity: 0.5 }}
                 >
                   Tente ajustar os filtros ou{" "}
-                  <a
+                  <Link
                     href={`/${storeUrl}`}
                     className="underline"
                     style={{ color: "var(--theme-primary)" }}
                   >
                     ver todos os produtos
-                  </a>
+                  </Link>
                 </p>
               </div>
             )}

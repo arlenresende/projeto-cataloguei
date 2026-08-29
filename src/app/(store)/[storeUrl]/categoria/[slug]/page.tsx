@@ -1,44 +1,95 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { Breadcrumbs } from "@/components/seo/breadcrumbs";
+import { StructuredData } from "@/components/seo/structured-data";
 import { StoreHeader } from "@/components/store/StoreHeader";
 import { ProductGrid } from "@/components/store/ProductGrid";
 import { StoreFooter } from "@/components/store/StoreFooter";
 import { FloatingWhatsApp } from "@/components/store/FloatingWhatsApp";
-import { getPublicStoreBySlug } from "@/lib/store-data";
-import { prisma } from "@/lib/prisma";
+import { getPublicCategoryBySlug } from "@/lib/store-data";
+import {
+  buildBreadcrumbJsonLd,
+  buildCanonicalUrl,
+  buildCategoryDescription,
+  buildOpenGraphImage,
+  buildRobots,
+  buildTwitterImage,
+} from "@/lib/seo";
+import { absoluteUrl } from "@/lib/site-config";
 
 interface CategoryPageProps {
   params: Promise<{ storeUrl: string; slug: string }>;
 }
 
+export async function generateMetadata({
+  params,
+}: CategoryPageProps): Promise<Metadata> {
+  const { storeUrl, slug } = await params;
+  const result = await getPublicCategoryBySlug(storeUrl, slug);
+
+  if (!result) {
+    return {
+      title: "Categoria não encontrada",
+      robots: buildRobots({ index: false }),
+    };
+  }
+
+  const { store, category } = result;
+  const title = `${category.name} | ${store.name}`;
+  const description = buildCategoryDescription({
+    categoryName: category.name,
+    description: category.description,
+    storeName: store.name,
+  });
+  const canonicalPath = `/${store.slug}/categoria/${category.slug}`;
+  const shareImageUrl = absoluteUrl(`/og/store/${store.slug}`);
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: canonicalPath,
+    },
+    robots: buildRobots({ index: true }),
+    openGraph: {
+      type: "website",
+      url: buildCanonicalUrl(canonicalPath),
+      title,
+      description,
+      siteName: "Cataloguei",
+      locale: "pt_BR",
+      images: [buildOpenGraphImage(shareImageUrl, `Categoria ${category.name} da loja ${store.name}`)],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [buildTwitterImage(shareImageUrl, `Categoria ${category.name} da loja ${store.name}`)],
+    },
+  };
+}
+
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { storeUrl, slug } = await params;
-  const store = await getPublicStoreBySlug(storeUrl);
+  const result = await getPublicCategoryBySlug(storeUrl, slug);
 
-  if (!store) {
+  if (!result) {
     notFound();
   }
 
-  const category = await prisma.category.findFirst({
-    where: {
-      slug,
-      storeId: store.id,
-      isActive: true,
-    },
-  });
+  const { store, category, products: categoryProducts } = result;
 
-  if (!category) {
-    notFound();
-  }
-
-  // Filter products by category name (since products use the string category field)
-  const categoryProducts = store.products.filter(
-    (p) => p.category === category.name
-  );
+  const canonicalUrl = buildCanonicalUrl(`/${store.slug}/categoria/${category.slug}`);
+  const breadcrumbItems = [
+    { name: "Home", url: absoluteUrl("/") },
+    { name: store.name, url: absoluteUrl(`/${store.slug}`) },
+    { name: category.name, url: canonicalUrl },
+  ];
 
   return (
     <div className="flex min-h-screen flex-col">
+      <StructuredData data={buildBreadcrumbJsonLd(breadcrumbItems)} />
       <StoreHeader
         name={store.name}
         storeUrl={store.slug}
@@ -54,15 +105,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       <main className="flex-1">
         <section className="py-8 md:py-12">
           <div className="mx-auto max-w-6xl px-4">
-            {/* Back link */}
-            <Link
-              href={`/${storeUrl}`}
-              className="mb-6 inline-flex items-center gap-1.5 text-sm font-bold transition-opacity hover:opacity-70"
-              style={{ color: "var(--theme-text)" }}
-            >
-              <ChevronLeft size={16} />
-              Voltar para a loja
-            </Link>
+            <Breadcrumbs
+              items={[
+                { label: "Home", href: "/" },
+                { label: store.name, href: `/${store.slug}` },
+                { label: category.name },
+              ]}
+            />
 
             {/* Category header */}
             <div className="mb-8">
@@ -120,13 +169,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                   className="mt-2 text-sm font-medium"
                   style={{ color: "var(--theme-text)", opacity: 0.5 }}
                 >
-                  <a
+                  <Link
                     href={`/${storeUrl}`}
                     className="underline"
                     style={{ color: "var(--theme-primary)" }}
                   >
                     Ver todos os produtos
-                  </a>
+                  </Link>
                 </p>
               </div>
             )}

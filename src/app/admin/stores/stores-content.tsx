@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Badge } from "@/components/ui/badge";
 import { DeleteStoreDialog } from "@/components/admin/DeleteStoreDialog";
 import { StoreLogoUpload } from "@/components/store-admin/store-logo-upload";
+import { getSiteHost } from "@/lib/site-config";
 
 interface StoreData {
   id: string;
@@ -25,6 +26,7 @@ interface StoresContentProps {
 }
 
 export function StoresContent({ initialStore }: StoresContentProps) {
+  const siteHost = getSiteHost();
   const [store, setStore] = useState<StoreData | null>(initialStore);
   const [showDelete, setShowDelete] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -91,7 +93,7 @@ export function StoresContent({ initialStore }: StoresContentProps) {
     <>
       <PageHeader
         title="Minha loja"
-        subtitle={`cataloguei.com.br/${store.slug}`}
+        subtitle={`${siteHost}/${store.slug}`}
         action={
           <div className="flex gap-2">
             <Link
@@ -135,7 +137,7 @@ export function StoresContent({ initialStore }: StoresContentProps) {
                   {store.name}
                 </p>
                 <p className="text-sm font-medium text-[var(--brand-black)]/40">
-                  cataloguei.com.br/{store.slug}
+                  {siteHost}/{store.slug}
                 </p>
               </div>
             </div>

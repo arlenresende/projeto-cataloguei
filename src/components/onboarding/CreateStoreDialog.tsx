@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Confetti } from "@/components/ui/confetti";
 import { Input, Textarea } from "@/components/ui/input";
+import { getSiteHost } from "@/lib/site-config";
 import {
   onboardingSchema,
   generateSlug,
@@ -26,6 +27,7 @@ interface CreateStoreDialogProps {
 }
 
 export function CreateStoreDialog({ open, onStoreCreated }: CreateStoreDialogProps) {
+  const siteHost = getSiteHost();
   const [serverError, setServerError] = useState<string | null>(null);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -153,7 +155,7 @@ export function CreateStoreDialog({ open, onStoreCreated }: CreateStoreDialogPro
                     </label>
                     <div className="flex items-center overflow-hidden rounded-lg border border-[var(--brand-border)] bg-white focus-within:border-[var(--brand-black)] focus-within:ring-2 focus-within:ring-[var(--brand-black)]/10">
                       <span className="shrink-0 border-r border-[var(--brand-border)] bg-[var(--brand-tertiary)] px-3 py-2.5 text-sm font-medium text-[var(--brand-black)]/50">
-                        cataloguei.com.br/
+                        {siteHost}/
                       </span>
                       <input
                         type="text"

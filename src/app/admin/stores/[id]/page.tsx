@@ -7,6 +7,7 @@ import { Edit, ExternalLink, Store, MapPin, Phone, Globe } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { getSiteHost } from "@/lib/site-config";
 
 interface StoreData {
   id: string;
@@ -32,6 +33,7 @@ interface StoreData {
 }
 
 export default function ViewStorePage() {
+  const siteHost = getSiteHost();
   const params = useParams();
   const id = params.id as string;
   const [store, setStore] = useState<StoreData | null>(null);
@@ -78,7 +80,7 @@ export default function ViewStorePage() {
     <div>
       <PageHeader
         title={store.name}
-        subtitle={`cataloguei.com.br/${store.slug}`}
+        subtitle={`${siteHost}/${store.slug}`}
         action={
           <div className="flex gap-2">
             <Link

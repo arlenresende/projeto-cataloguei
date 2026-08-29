@@ -7,7 +7,7 @@ export interface Product {
   description: string;
   price: number;
   compareAtPrice?: number | null;
-  imageUrl: string;
+  imageUrl: string | null;
   images?: string[];
   category: string;
   categoryId?: string | null;

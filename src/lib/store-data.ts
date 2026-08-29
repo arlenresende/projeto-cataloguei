@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import type { StoreThemeSegment } from "@prisma/client";
 
@@ -6,8 +7,8 @@ import type { StoreThemeSegment } from "@prisma/client";
  * to the format the store components expect. Returns null if not found
  * or inactive.
  */
-export async function getPublicStoreBySlug(slug: string) {
-  const store = await prisma.store.findUnique({
+const getPublicStoreRecordBySlug = cache(async (slug: string) => {
+  return prisma.store.findUnique({
     where: { slug, isActive: true },
     include: {
       products: {
@@ -28,6 +29,10 @@ export async function getPublicStoreBySlug(slug: string) {
       },
     },
   });
+});
+
+export const getPublicStoreBySlug = cache(async (slug: string) => {
+  const store = await getPublicStoreRecordBySlug(slug);
 
   if (!store) return null;
 
@@ -42,7 +47,7 @@ export async function getPublicStoreBySlug(slug: string) {
     name: store.name,
     slug: store.slug,
     description: store.description || "",
-    logo: store.logo || "/placeholder-logo.svg",
+    logo: store.logo,
     whatsapp: whatsappNumber,
     theme: (store.themeStore || "DEFAULT") as StoreThemeSegment,
     email: store.email,
@@ -54,6 +59,8 @@ export async function getPublicStoreBySlug(slug: string) {
     websiteUrl: store.websiteUrl,
     instagramUrl: store.instagramUrl,
     facebookUrl: store.facebookUrl,
+    country: store.country,
+    updatedAt: store.updatedAt,
     heroes: store.heroes.map((h) => ({
       id: h.id,
       title: h.title,
@@ -64,30 +71,118 @@ export async function getPublicStoreBySlug(slug: string) {
       alignment: h.alignment,
       buttonText: h.buttonText || "",
       buttonUrl: h.buttonUrl || "",
+      updatedAt: h.updatedAt,
     })),
     categories: store.categories.map((c) => ({
       id: c.id,
       name: c.name,
       slug: c.slug,
       description: c.description || "",
+      updatedAt: c.updatedAt,
     })),
     products: store.products.map((p) => ({
       id: p.id,
       name: p.name,
       slug: p.slug,
       description: p.descriptionHtml || "",
+      seoTitle: p.seoTitle,
+      seoDescription: p.seoDescription,
       price: Number(p.price),
       compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
-      imageUrl: p.imageUrl || "/placeholder-product.svg",
+      imageUrl: p.imageUrl,
       images: p.images.map((img) => img.url),
       category: p.categoryRel?.name || p.category || "Sem categoria",
       categoryId: p.categoryId,
+      categorySlug: p.categoryRel?.slug || null,
       brand: p.brand || "",
+      sku: p.sku || null,
       stock: p.stock,
       featured: p.featured,
+      updatedAt: p.updatedAt,
     })),
   };
-}
+});
+
+export const getPublicCategoryBySlug = cache(
+  async (storeSlug: string, categorySlug: string) => {
+    const store = await getPublicStoreBySlug(storeSlug);
+
+    if (!store) {
+      return null;
+    }
+
+    const category = store.categories.find((item) => item.slug === categorySlug);
+
+    if (!category) {
+      return null;
+    }
+
+    const products = store.products.filter(
+      (product) =>
+        product.categorySlug === category.slug || product.category === category.name
+    );
+
+    return {
+      store,
+      category,
+      products,
+    };
+  }
+);
+
+export const getPublicProductByIdentifier = cache(
+  async (storeSlug: string, identifier: string) => {
+    const store = await getPublicStoreBySlug(storeSlug);
+
+    if (!store) {
+      return null;
+    }
+
+    const product = store.products.find(
+      (item) => item.slug === identifier || item.id === identifier
+    );
+
+    if (!product) {
+      return null;
+    }
+
+    return {
+      store,
+      product,
+    };
+  }
+);
+
+export const getPublicLinktreeByStoreSlug = cache(async (storeSlug: string) => {
+  const store = await prisma.store.findUnique({
+    where: { slug: storeSlug, isActive: true },
+    select: {
+      id: true,
+      userId: true,
+      name: true,
+      logo: true,
+      updatedAt: true,
+    },
+  });
+
+  if (!store) {
+    return null;
+  }
+
+  const linktree = await prisma.linktree.findUnique({
+    where: { userId: store.userId },
+    include: { links: { orderBy: { order: "asc" } } },
+  });
+
+  if (!linktree) {
+    return null;
+  }
+
+  return {
+    store,
+    linktree,
+  };
+});
 
 export type PublicStore = NonNullable<Awaited<ReturnType<typeof getPublicStoreBySlug>>>;
 export type PublicProduct = PublicStore["products"][number];

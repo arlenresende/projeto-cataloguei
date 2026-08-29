@@ -18,6 +18,7 @@ import {
   formatCEPDisplay,
   formatPhoneDisplay,
 } from "@/lib/masks";
+import { getSiteHost } from "@/lib/site-config";
 
 const THEME_OPTIONS = [
   { value: "DEFAULT", label: "Padrão" },
@@ -53,6 +54,7 @@ export function StoreForm({
   serverError,
   isSubmitting,
 }: StoreFormProps) {
+  const siteHost = getSiteHost();
   const {
     register,
     handleSubmit,
@@ -212,7 +214,7 @@ export function StoreForm({
             </label>
             <div className="flex items-center overflow-hidden rounded-lg border border-[var(--brand-border)] bg-white focus-within:border-[var(--brand-black)] focus-within:ring-2 focus-within:ring-[var(--brand-black)]/10">
               <span className="shrink-0 border-r border-[var(--brand-border)] bg-[var(--brand-tertiary)] px-3 py-2.5 text-sm font-medium text-[var(--brand-black)]/50">
-                cataloguei.com.br/
+                {siteHost}/
               </span>
               <input
                 type="text"

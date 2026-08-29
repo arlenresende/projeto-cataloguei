@@ -55,7 +55,11 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
             {banner.image && (
               <Image
                 src={banner.image}
-                alt={banner.title || "Banner"}
+                alt={
+                  banner.title
+                    ? `Banner promocional: ${banner.title}`
+                    : "Banner promocional da loja"
+                }
                 fill
                 className="object-cover transition-transform duration-700"
                 style={{
