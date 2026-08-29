@@ -42,6 +42,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       <StoreHeader
         name={store.name}
         storeUrl={store.slug}
+        logoUrl={store.logo}
         whatsapp={store.whatsapp}
         categories={
           store.categories.length > 0
@@ -136,6 +137,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       <StoreFooter
         name={store.name}
         storeUrl={store.slug}
+        logoUrl={store.logo}
         description={store.description}
         whatsapp={store.whatsapp}
         email={store.email}

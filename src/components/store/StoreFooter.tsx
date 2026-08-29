@@ -209,8 +209,8 @@ export function StoreFooter({
           style={{ borderColor: resolvedColors.cardBg + "15" }}
         >
           <p className="text-center text-xs font-medium opacity-40">
-            &copy; {new Date().getFullYear()} {name}. Todos os direitos
-            reservados.
+            &copy; {new Date().getFullYear()}{" "}
+            {logoUrl ? "Todos os direitos reservados." : `${name}. Todos os direitos reservados.`}
           </p>
         </div>
       </div>

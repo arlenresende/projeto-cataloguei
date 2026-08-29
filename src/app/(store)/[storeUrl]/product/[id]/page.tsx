@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, MessageCircle, Share2, Shield, Truck, Star } from "lucide-react";
-import { prisma } from "@/lib/prisma";
 import { getPublicStoreBySlug } from "@/lib/store-data";
 import { StoreHeader } from "@/components/store/StoreHeader";
 import { StoreFooter } from "@/components/store/StoreFooter";
@@ -43,6 +42,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <StoreHeader
         name={store.name}
         storeUrl={store.slug}
+        logoUrl={store.logo}
         whatsapp={store.whatsapp}
         categories={categories}
       />
@@ -196,6 +196,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <StoreFooter
         name={store.name}
         storeUrl={store.slug}
+        logoUrl={store.logo}
         description={store.description}
         whatsapp={store.whatsapp}
         email={store.email}
