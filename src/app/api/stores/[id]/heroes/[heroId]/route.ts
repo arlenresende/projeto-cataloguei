@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { requireVerifiedSession } from "@/lib/api-session";
 import { prisma } from "@/lib/prisma";
 import { storeHeroSchema } from "@/lib/schemas/store-hero";
 
@@ -9,9 +8,9 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string; heroId: string }> }
 ) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  const session = await requireVerifiedSession();
+  if (session instanceof NextResponse) {
+    return session;
   }
 
   const { id, heroId } = await params;
@@ -48,8 +47,8 @@ export async function PATCH(
   const data = parsed.data;
 
   try {
-    const hero = await prisma.storeHero.update({
-      where: { id: heroId },
+    const result = await prisma.storeHero.updateMany({
+      where: { id: heroId, storeId: store.id },
       data: {
         ...(data.title !== undefined && { title: data.title }),
         ...(data.description !== undefined && { description: data.description || null }),
@@ -62,6 +61,14 @@ export async function PATCH(
         ...(data.position !== undefined && { position: data.position }),
         ...(data.isActive !== undefined && { isActive: data.isActive }),
       },
+    });
+
+    if (result.count === 0) {
+      return NextResponse.json({ error: "Hero não encontrado." }, { status: 404 });
+    }
+
+    const hero = await prisma.storeHero.findFirst({
+      where: { id: heroId, storeId: store.id },
     });
 
     return NextResponse.json({ hero });
@@ -79,9 +86,9 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string; heroId: string }> }
 ) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  const session = await requireVerifiedSession();
+  if (session instanceof NextResponse) {
+    return session;
   }
 
   const { id, heroId } = await params;
@@ -106,7 +113,14 @@ export async function DELETE(
   }
 
   try {
-    await prisma.storeHero.delete({ where: { id: heroId } });
+    const result = await prisma.storeHero.deleteMany({
+      where: { id: heroId, storeId: store.id },
+    });
+
+    if (result.count === 0) {
+      return NextResponse.json({ error: "Hero não encontrado." }, { status: 404 });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting hero:", error);

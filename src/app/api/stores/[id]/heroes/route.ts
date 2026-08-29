@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { requireVerifiedSession } from "@/lib/api-session";
 import { prisma } from "@/lib/prisma";
 import { storeHeroSchema } from "@/lib/schemas/store-hero";
 
@@ -9,9 +8,9 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  const session = await requireVerifiedSession();
+  if (session instanceof NextResponse) {
+    return session;
   }
 
   const { id } = await params;
@@ -39,9 +38,9 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  const session = await requireVerifiedSession();
+  if (session instanceof NextResponse) {
+    return session;
   }
 
   const { id } = await params;

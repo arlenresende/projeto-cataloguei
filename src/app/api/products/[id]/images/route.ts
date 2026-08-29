@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { requireVerifiedSession } from "@/lib/api-session";
 import { prisma } from "@/lib/prisma";
 import {
   buildProductImageObjectKey,
@@ -18,9 +17,11 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  const session = await requireVerifiedSession(
+    "Verifique seu e-mail antes de enviar imagens de produto."
+  );
+  if (session instanceof NextResponse) {
+    return session;
   }
 
   const { id } = await params;
@@ -103,8 +104,8 @@ export async function POST(
 
     const imageCount = await prisma.productImage.count({ where: { productId: id } });
     if (imageCount === 1) {
-      await prisma.product.update({
-        where: { id },
+      await prisma.product.updateMany({
+        where: { id, storeId: store.id },
         data: { imageUrl: uploadedFile.publicUrl },
       });
     }
@@ -146,9 +147,11 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  const session = await requireVerifiedSession(
+    "Verifique seu e-mail antes de reorganizar imagens de produto."
+  );
+  if (session instanceof NextResponse) {
+    return session;
   }
 
   const { id } = await params;
@@ -180,7 +183,7 @@ export async function PATCH(
 
   await prisma.$transaction(
     images.map((img: { id: string; position: number }) =>
-      prisma.productImage.update({
+      prisma.productImage.updateMany({
         where: { id: img.id, productId: id },
         data: { position: img.position },
       })
@@ -195,8 +198,8 @@ export async function PATCH(
   });
 
   if (firstImage) {
-    await prisma.product.update({
-      where: { id },
+    await prisma.product.updateMany({
+      where: { id, storeId: store.id },
       data: { imageUrl: firstImage.url },
     });
   }

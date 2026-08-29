@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
 import type { Prisma } from "@prisma/client";
-import { auth } from "@/lib/auth";
+import { requireVerifiedSession } from "@/lib/api-session";
 import { prisma } from "@/lib/prisma";
 import { productCreateSchema } from "@/lib/schemas/product";
 import { getPrismaErrorCode, prismaTargetIncludes } from "@/lib/prisma-error";
 
 // GET /api/products — list products of the user's store
 export async function GET(request: Request) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  const session = await requireVerifiedSession(
+    "Verifique seu e-mail antes de acessar produtos."
+  );
+  if (session instanceof NextResponse) {
+    return session;
   }
 
   const store = await prisma.store.findUnique({
@@ -96,16 +97,11 @@ export async function GET(request: Request) {
 
 // POST /api/products — create a product
 export async function POST(request: Request) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
-  }
-
-  if (!session.user.emailVerified) {
-    return NextResponse.json(
-      { error: "Verifique seu e-mail antes de criar produtos." },
-      { status: 403 }
-    );
+  const session = await requireVerifiedSession(
+    "Verifique seu e-mail antes de criar produtos."
+  );
+  if (session instanceof NextResponse) {
+    return session;
   }
 
   const store = await prisma.store.findUnique({

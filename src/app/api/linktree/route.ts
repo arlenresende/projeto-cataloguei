@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { requireVerifiedSession } from "@/lib/api-session";
 import { prisma } from "@/lib/prisma";
 import { linktreeSchema } from "@/lib/schemas/linktree";
 
 // GET /api/linktree — get the authenticated user's linktree
 export async function GET() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  const session = await requireVerifiedSession(
+    "Verifique seu e-mail antes de acessar o Linktree."
+  );
+  if (session instanceof NextResponse) {
+    return session;
   }
 
   const linktree = await prisma.linktree.findUnique({
@@ -21,16 +22,11 @@ export async function GET() {
 
 // POST /api/linktree — create or update the linktree with links
 export async function POST(request: Request) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
-  }
-
-  if (!session.user.emailVerified) {
-    return NextResponse.json(
-      { error: "Verifique seu e-mail antes de criar um Linktree." },
-      { status: 403 }
-    );
+  const session = await requireVerifiedSession(
+    "Verifique seu e-mail antes de criar um Linktree."
+  );
+  if (session instanceof NextResponse) {
+    return session;
   }
 
   const body = await request.json();
@@ -86,8 +82,8 @@ export async function POST(request: Request) {
     for (let i = 0; i < data.links.length; i++) {
       const link = data.links[i];
       if (link.id && existingIds.has(link.id)) {
-        await prisma.link.update({
-          where: { id: link.id },
+        await prisma.link.updateMany({
+          where: { id: link.id, linktreeId: linktree.id },
           data: {
             title: link.title,
             url: link.url,

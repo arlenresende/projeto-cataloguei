@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { requireVerifiedSession } from "@/lib/api-session";
 import { prisma } from "@/lib/prisma";
 import { categoryUpdateSchema } from "@/lib/schemas/category";
 import { getPrismaErrorCode } from "@/lib/prisma-error";
@@ -10,9 +9,11 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  const session = await requireVerifiedSession(
+    "Verifique seu e-mail antes de acessar categorias."
+  );
+  if (session instanceof NextResponse) {
+    return session;
   }
 
   const { id } = await params;
@@ -43,9 +44,11 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  const session = await requireVerifiedSession(
+    "Verifique seu e-mail antes de editar categorias."
+  );
+  if (session instanceof NextResponse) {
+    return session;
   }
 
   const { id } = await params;
@@ -80,14 +83,23 @@ export async function PATCH(
   const data = parsed.data;
 
   try {
-    const category = await prisma.category.update({
-      where: { id },
+    const result = await prisma.category.updateMany({
+      where: { id, storeId: store.id },
       data: {
         ...(data.name !== undefined && { name: data.name }),
         ...(data.description !== undefined && { description: data.description || null }),
         ...(data.slug !== undefined && { slug: data.slug }),
         ...(data.isActive !== undefined && { isActive: data.isActive }),
       },
+    });
+
+    if (result.count === 0) {
+      return NextResponse.json({ error: "Categoria não encontrada." }, { status: 404 });
+    }
+
+    const category = await prisma.category.findFirst({
+      where: { id, storeId: store.id },
+      include: { _count: { select: { products: true } } },
     });
 
     return NextResponse.json({ category });
@@ -111,9 +123,11 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  const session = await requireVerifiedSession(
+    "Verifique seu e-mail antes de excluir categorias."
+  );
+  if (session instanceof NextResponse) {
+    return session;
   }
 
   const { id } = await params;
@@ -146,7 +160,14 @@ export async function DELETE(
   }
 
   try {
-    await prisma.category.delete({ where: { id } });
+    const result = await prisma.category.deleteMany({
+      where: { id, storeId: store.id },
+    });
+
+    if (result.count === 0) {
+      return NextResponse.json({ error: "Categoria não encontrada." }, { status: 404 });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting category:", error);

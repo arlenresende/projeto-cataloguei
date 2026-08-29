@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { requireVerifiedSession } from "@/lib/api-session";
 import { prisma } from "@/lib/prisma";
 import { extractSupabaseStorageObjectKey } from "@/lib/store-logo";
 import {
@@ -13,9 +12,11 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string; imageId: string }> }
 ) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  const session = await requireVerifiedSession(
+    "Verifique seu e-mail antes de remover imagens de produto."
+  );
+  if (session instanceof NextResponse) {
+    return session;
   }
 
   const { id, imageId } = await params;
@@ -46,7 +47,13 @@ export async function DELETE(
     return NextResponse.json({ error: "Imagem não encontrada." }, { status: 404 });
   }
 
-  await prisma.productImage.delete({ where: { id: imageId } });
+  const deleteResult = await prisma.productImage.deleteMany({
+    where: { id: imageId, productId: id },
+  });
+
+  if (deleteResult.count === 0) {
+    return NextResponse.json({ error: "Imagem não encontrada." }, { status: 404 });
+  }
 
   const objectKey = extractSupabaseStorageObjectKey(
     image.url,
@@ -69,8 +76,8 @@ export async function DELETE(
     select: { url: true },
   });
 
-  await prisma.product.update({
-    where: { id },
+  await prisma.product.updateMany({
+    where: { id, storeId: store.id },
     data: { imageUrl: firstImage?.url || null },
   });
 

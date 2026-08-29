@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { requireVerifiedSession } from "@/lib/api-session";
 import { prisma } from "@/lib/prisma";
 import { categoryCreateSchema } from "@/lib/schemas/category";
 import { getPrismaErrorCode } from "@/lib/prisma-error";
 
 // GET /api/categories — list categories of the user's store
 export async function GET() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  const session = await requireVerifiedSession(
+    "Verifique seu e-mail antes de acessar categorias."
+  );
+  if (session instanceof NextResponse) {
+    return session;
   }
 
   const store = await prisma.store.findUnique({
@@ -32,16 +33,11 @@ export async function GET() {
 
 // POST /api/categories — create a category
 export async function POST(request: Request) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
-  }
-
-  if (!session.user.emailVerified) {
-    return NextResponse.json(
-      { error: "Verifique seu e-mail antes de criar categorias." },
-      { status: 403 }
-    );
+  const session = await requireVerifiedSession(
+    "Verifique seu e-mail antes de criar categorias."
+  );
+  if (session instanceof NextResponse) {
+    return session;
   }
 
   const store = await prisma.store.findUnique({
