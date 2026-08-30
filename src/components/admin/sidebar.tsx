@@ -15,6 +15,7 @@ import {
   X,
   LogOut,
 } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 interface SidebarProps {
   open: boolean;
@@ -50,15 +51,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         }`}
       >
         <div className="flex items-center justify-between px-1">
-          <Link
-            href="/"
-            className="flex items-center gap-2.5 text-[var(--brand-black)] hover:opacity-70 transition-opacity"
-          >
-            <span className="flex size-8 items-center justify-center rounded-lg bg-[var(--brand-yellow)] text-sm font-bold text-[var(--brand-black)]">
-              C
-            </span>
-            <span className="text-base font-bold">Cataloguei</span>
-          </Link>
+          <BrandLogo variant="sidebar" />
           <button
             onClick={onClose}
             className="rounded-lg p-1 hover:bg-[var(--brand-tertiary)] lg:hidden"

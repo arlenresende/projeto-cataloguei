@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand-logo";
 import { useTheme } from "@/components/providers/ThemeProvider";
 
 interface StoreFooterProps {
@@ -215,15 +216,17 @@ export function StoreFooter({
             {logoUrl ? "Todos os direitos reservados." : `${name}. Todos os direitos reservados.`}
           </p>
           {showCatalogueiBranding ? (
-            <p className="mt-2 text-center text-xs font-semibold opacity-60">
-              Criado com{" "}
+            <div className="mt-3 flex items-center justify-center gap-2 text-xs font-semibold opacity-70">
+              <span>Criado com</span>
               <Link
                 href="/"
-                className="underline underline-offset-2"
+                className="inline-flex items-center transition-opacity hover:opacity-80"
+                aria-label="Cataloguei"
               >
-                Cataloguei
+                <BrandLogo variant="mark" href="" className="size-6" />
+                <span className="ml-1 text-xs font-bold">Cataloguei</span>
               </Link>
-            </p>
+            </div>
           ) : null}
         </div>
       </div>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { MoreVertical } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 export const metadata: Metadata = {
   title: {
@@ -16,12 +16,7 @@ export const metadata: Metadata = {
 function BrandHeader() {
   return (
     <header className="flex items-center justify-between gap-4 px-8 py-7 sm:px-10 lg:px-12">
-      <Link
-        href="/"
-        className="text-lg font-bold tracking-tight text-foreground transition-opacity hover:opacity-60"
-      >
-        Cataloguei
-      </Link>
+      <BrandLogo variant="header" />
     </header>
   );
 }
@@ -92,13 +87,11 @@ function DecorativePreview() {
 
       <div className="absolute bottom-0 right-[7%] w-[77%] max-w-[275px] rounded-t-xl bg-card p-4 shadow-lg">
         <div className="flex items-center gap-3">
-          <span className="flex size-8 items-center justify-center rounded-full bg-foreground text-sm text-background">
-            C
-          </span>
+          <BrandLogo variant="mark" href="" className="size-8 rounded-full" />
           <div>
             <p className="text-xs font-medium">Cataloguei</p>
             <p className="text-[10px] text-foreground/80">
-              Seu catalogo online, pronto para compartilhar! 😉
+              Catálogo online para vender mais.
             </p>
           </div>
           <span className="ml-auto text-[9px] text-muted-foreground">

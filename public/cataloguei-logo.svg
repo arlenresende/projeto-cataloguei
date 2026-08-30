@@ -1,0 +1,11 @@
+<svg width="420" height="100" viewBox="36 34 420 100" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Cataloguei</title>
+  <desc id="desc">Logo da Cataloguei com ícone de sacola e check</desc>
+  <g transform="translate(12 28) scale(1.18)">
+    <path d="M26 39H62L58.5 71H29.5L26 39Z" stroke="#FFD400" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M34 39V31C34 25.48 38.48 21 44 21C49.52 21 54 25.48 54 31V39" stroke="#FFD400" stroke-width="6" stroke-linecap="round"/>
+    <path d="M36 55L42 61L54 49" stroke="#111111" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="122" y="96" fill="#111111" font-family="Inter, Arial, Helvetica, sans-serif" font-size="58" font-weight="800" letter-spacing="0">Cataloguei</text>
+  <text x="126" y="124" fill="#111111" fill-opacity="0.58" font-family="Inter, Arial, Helvetica, sans-serif" font-size="18" font-weight="600" letter-spacing="0">catálogo online para vender mais</text>
+</svg>

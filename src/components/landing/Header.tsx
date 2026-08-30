@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Store, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { BrandLogo } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -19,20 +20,8 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[var(--brand-border)] bg-white/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:h-[72px]">
-        <Link
-          href="/"
-          className="flex items-center gap-2.5"
-          aria-label="Cataloguei - Página inicial"
-        >
-          <span
-            className="flex size-9 items-center justify-center rounded-lg bg-[var(--brand-yellow)] text-[var(--brand-black)]"
-            aria-hidden="true"
-          >
-            <Store className="size-5" />
-          </span>
-          <span className="text-lg font-bold text-[var(--brand-black)]">Cataloguei</span>
-        </Link>
+      <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 md:h-24">
+        <BrandLogo variant="header" />
 
         <nav
           className="hidden items-center gap-7 md:flex"

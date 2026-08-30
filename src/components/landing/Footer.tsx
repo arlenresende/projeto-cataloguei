@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Store } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 const FOOTER_LINKS = [
   {
@@ -27,31 +27,24 @@ const FOOTER_LINKS = [
       { label: "Criar catálogo", href: "/register" },
     ],
   },
+  {
+    title: "Legal",
+    links: [
+      { label: "Privacidade", href: "/privacy" },
+      { label: "Termos de uso", href: "/terms" },
+    ],
+  },
 ];
 
 export function Footer() {
   return (
     <footer className="border-t border-[var(--brand-border)] bg-[var(--brand-tertiary)] py-12 md:py-16">
       <div className="mx-auto max-w-6xl px-4">
-        <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-10 md:grid-cols-5">
           <div className="col-span-2 md:col-span-1">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2.5"
-              aria-label="Cataloguei - Página inicial"
-            >
-              <span
-                className="flex size-9 items-center justify-center rounded-lg bg-[var(--brand-yellow)] text-[var(--brand-black)]"
-                aria-hidden="true"
-              >
-                <Store className="size-5" />
-              </span>
-              <span className="text-lg font-bold text-[var(--brand-black)]">
-                Cataloguei
-              </span>
-            </Link>
+            <BrandLogo variant="footer" />
             <p className="mt-3 text-sm text-muted-foreground">
-              Catálogos online para pequenos negócios. Comece grátis e venda
+              Catálogo online para vender mais. Comece grátis e receba pedidos
               pelo WhatsApp.
             </p>
           </div>
