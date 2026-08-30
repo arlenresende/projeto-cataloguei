@@ -11,6 +11,13 @@ interface SendVerificationEmailParams {
   verificationUrl: string;
 }
 
+interface FeatureRequestEmailParams {
+  email: string;
+  name: string;
+  title: string;
+  adminNote?: string | null;
+}
+
 function getResendConfig() {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL;
@@ -22,7 +29,7 @@ function getResendConfig() {
   return { apiKey, from };
 }
 
-async function sendEmail({ to, subject, html }: SendEmailParams) {
+export async function sendEmail({ to, subject, html }: SendEmailParams) {
   const { apiKey, from } = getResendConfig();
   const resend = new Resend(apiKey);
 
@@ -36,6 +43,32 @@ async function sendEmail({ to, subject, html }: SendEmailParams) {
   if (error) {
     throw error;
   }
+}
+
+function renderFeatureRequestEmail({
+  name,
+  title,
+  message,
+  adminNote,
+}: {
+  name: string;
+  title: string;
+  message: string;
+  adminNote?: string | null;
+}) {
+  return `
+    <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
+      <p>Olá, ${name}.</p>
+      <p>${message}</p>
+      <p><strong>Pedido:</strong> ${title}</p>
+      ${
+        adminNote
+          ? `<p><strong>Observação:</strong> ${adminNote}</p>`
+          : ""
+      }
+      <p>Obrigado por ajudar a melhorar o Cataloguei.</p>
+    </div>
+  `;
 }
 
 export async function sendVerificationEmail({
@@ -64,4 +97,59 @@ export async function sendVerificationEmail({
 
     throw new Error("Nao foi possivel enviar o e-mail de verificacao.");
   }
+}
+
+export async function sendFeatureRequestCreatedEmail({
+  email,
+  name,
+  title,
+}: FeatureRequestEmailParams) {
+  await sendEmail({
+    to: email,
+    subject: "Recebemos sua sugestão para o Cataloguei",
+    html: renderFeatureRequestEmail({
+      name,
+      title,
+      message:
+        "Recebemos sua ideia e ela já está na nossa lista para avaliação.",
+    }),
+  });
+}
+
+export async function sendFeatureRequestInProgressEmail({
+  email,
+  name,
+  title,
+  adminNote,
+}: FeatureRequestEmailParams) {
+  await sendEmail({
+    to: email,
+    subject: "Sua sugestão entrou em desenvolvimento",
+    html: renderFeatureRequestEmail({
+      name,
+      title,
+      adminNote,
+      message:
+        "Boa notícia: começamos a trabalhar na sua sugestão.",
+    }),
+  });
+}
+
+export async function sendFeatureRequestDoneEmail({
+  email,
+  name,
+  title,
+  adminNote,
+}: FeatureRequestEmailParams) {
+  await sendEmail({
+    to: email,
+    subject: "Sua sugestão foi concluída",
+    html: renderFeatureRequestEmail({
+      name,
+      title,
+      adminNote,
+      message:
+        "A sugestão que você enviou foi marcada como concluída.",
+    }),
+  });
 }

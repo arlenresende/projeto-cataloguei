@@ -53,6 +53,11 @@ enum BillingCycle {
   MONTHLY
 }
 
+enum UserRole {
+  MERCHANT
+  ADMIN
+}
+
 enum AnalyticsEventType {
   STORE_VIEW
   PRODUCT_VIEW
@@ -62,6 +67,12 @@ enum AnalyticsEventType {
   PRODUCT_WHATSAPP_CLICK
   SHARE_CLICK
   LINKTREE_LINK_CLICK
+}
+
+enum FeatureRequestStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
 }
 
 // ============================================================
@@ -74,6 +85,7 @@ model User {
   email           String   @unique
   emailVerified   Boolean  @default(false)
   image           String?
+  role            UserRole @default(MERCHANT)
   stripeCustomerId String? @unique
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -84,6 +96,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   webhookEvents StripeWebhookEvent[]
+  featureRequests FeatureRequest[]
 
   @@map("users")
 }
@@ -338,6 +351,23 @@ model AnalyticsEvent {
   @@index([linkId, type, createdAt])
   @@index([createdAt])
   @@map("analytics_events")
+}
+
+model FeatureRequest {
+  id          String               @id @default(cuid())
+  userId      String
+  title       String
+  description String
+  status      FeatureRequestStatus @default(OPEN)
+  adminNote   String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("feature_requests")
 }
 
 model Subscription {

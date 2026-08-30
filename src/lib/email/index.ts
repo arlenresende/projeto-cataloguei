@@ -1,1 +1,6 @@
-export { sendVerificationEmail } from "./resend";
+export {
+  sendFeatureRequestCreatedEmail,
+  sendFeatureRequestDoneEmail,
+  sendFeatureRequestInProgressEmail,
+  sendVerificationEmail,
+} from "./resend";

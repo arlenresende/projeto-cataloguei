@@ -23,6 +23,7 @@ interface StatItem {
 }
 
 interface DashboardContentProps {
+  isAdmin?: boolean;
   stats: StatItem[];
   billing: {
     effectivePlan: "FREE" | "PREMIUM";
@@ -69,6 +70,22 @@ interface DashboardContentProps {
       topCategories: Array<{ id: string; name: string; views: number }>;
     };
   } | null;
+  adminOverview?: {
+    stores: Array<{
+      id: string;
+      name: string;
+      slug: string;
+      isActive: boolean;
+      ownerName: string;
+      ownerEmail: string;
+      plan: "FREE" | "PREMIUM";
+      subscriptionStatus: string;
+      products: number;
+      categories: number;
+      banners: number;
+      createdAt: string;
+    }>;
+  } | null;
 }
 
 function formatNumber(value: number) {
@@ -83,7 +100,13 @@ function getPercent(value: number, total: number) {
   return Math.round((value / total) * 100);
 }
 
-export function DashboardContent({ stats, billing, catalog }: DashboardContentProps) {
+export function DashboardContent({
+  stats,
+  billing,
+  catalog,
+  isAdmin = false,
+  adminOverview = null,
+}: DashboardContentProps) {
   const [filter, setFilter] = useState(false);
   const totals = catalog?.totals;
   const analytics = catalog?.analytics;
@@ -119,18 +142,22 @@ export function DashboardContent({ stats, billing, catalog }: DashboardContentPr
           </h1>
           <div className="mt-3 flex items-baseline gap-2">
             <strong className="text-3xl font-bold text-[var(--brand-black)]">
-              {catalog ? formatNumber(catalog.totals.totalProducts) : "0"}
+              {catalog ? formatNumber(catalog.totals.totalProducts) : stats[0]?.value ?? "0"}
             </strong>
             <Badge variant="default">
-              + {catalog ? formatNumber(catalog.totals.productsCreatedThisWeek) : "0"}
+              {catalog
+                ? `+ ${formatNumber(catalog.totals.productsCreatedThisWeek)}`
+                : stats[0]?.subtitle ?? "Visão geral"}
             </Badge>
             <span className="text-sm text-muted-foreground">
-              produtos esta semana
+              {isAdmin ? "lojas cadastradas" : "produtos esta semana"}
             </span>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
             {catalog
               ? `Loja ${catalog.store.isActive ? "ativa" : "inativa"} · ${catalog.store.name}`
+              : isAdmin
+                ? "Visão administrativa da plataforma"
               : "Nenhuma loja cadastrada"}{" "}
             <ChevronDown className="inline" size={12} />
           </p>
@@ -162,7 +189,71 @@ export function DashboardContent({ stats, billing, catalog }: DashboardContentPr
 
       <StatsGrid stats={stats} />
 
-      {billing ? (
+      {isAdmin && adminOverview ? (
+        <Card className="mt-6">
+          <CardHeader>Últimas lojas</CardHeader>
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[760px] border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-[var(--brand-border)] text-left">
+                  <th className="pb-3 font-semibold text-[var(--brand-black)]">Loja</th>
+                  <th className="pb-3 font-semibold text-[var(--brand-black)]">Dono</th>
+                  <th className="pb-3 font-semibold text-[var(--brand-black)]">Plano</th>
+                  <th className="pb-3 font-semibold text-[var(--brand-black)]">Catálogo</th>
+                  <th className="pb-3 font-semibold text-[var(--brand-black)]">Status</th>
+                  <th className="pb-3 font-semibold text-[var(--brand-black)]">Criada em</th>
+                </tr>
+              </thead>
+              <tbody>
+                {adminOverview.stores.map((store) => (
+                  <tr
+                    key={store.id}
+                    className="border-b border-[var(--brand-border)] last:border-b-0"
+                  >
+                    <td className="py-3">
+                      <Link
+                        href={`/${store.slug}`}
+                        target="_blank"
+                        className="font-semibold text-[var(--brand-black)] hover:underline"
+                      >
+                        {store.name}
+                      </Link>
+                      <p className="text-xs text-muted-foreground">/{store.slug}</p>
+                    </td>
+                    <td className="py-3 text-muted-foreground">
+                      <span className="block text-[var(--brand-black)]">
+                        {store.ownerName}
+                      </span>
+                      {store.ownerEmail}
+                    </td>
+                    <td className="py-3">
+                      <Badge variant={store.plan === "PREMIUM" ? "default" : "neutral"}>
+                        {store.plan}
+                      </Badge>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {store.subscriptionStatus}
+                      </p>
+                    </td>
+                    <td className="py-3 text-muted-foreground">
+                      {store.products} produtos · {store.categories} categorias · {store.banners} banners
+                    </td>
+                    <td className="py-3">
+                      <Badge variant={store.isActive ? "success" : "neutral"}>
+                        {store.isActive ? "Ativa" : "Inativa"}
+                      </Badge>
+                    </td>
+                    <td className="py-3 text-muted-foreground">
+                      {new Date(store.createdAt).toLocaleDateString("pt-BR")}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      ) : null}
+
+      {billing && !isAdmin ? (
         <Card className="mt-6">
           <CardHeader
             action={

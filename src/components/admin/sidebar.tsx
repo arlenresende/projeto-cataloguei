@@ -11,6 +11,7 @@ import {
   Tags,
   Link2,
   CreditCard,
+  Lightbulb,
   X,
   LogOut,
 } from "lucide-react";
@@ -28,6 +29,7 @@ const navItems = [
   { href: "/admin/banners", label: "Banners", icon: Image },
   { href: "/admin/linktree", label: "Linktree", icon: Link2 },
   { href: "/admin/plans", label: "Planos", icon: CreditCard },
+  { href: "/admin/requests", label: "Pedidos Premium", icon: Lightbulb },
   { href: "/admin/settings", label: "Configurações", icon: Settings },
 ];
 
