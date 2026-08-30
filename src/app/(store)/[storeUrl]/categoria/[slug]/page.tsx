@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 import { StructuredData } from "@/components/seo/structured-data";
+import { AnalyticsTracker } from "@/components/store/AnalyticsTracker";
 import { StoreHeader } from "@/components/store/StoreHeader";
 import { ProductGrid } from "@/components/store/ProductGrid";
 import { StoreFooter } from "@/components/store/StoreFooter";
@@ -91,6 +92,11 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <AnalyticsTracker
+        type="CATEGORY_VIEW"
+        storeSlug={store.slug}
+        categorySlug={category.slug}
+      />
       <StructuredData data={buildBreadcrumbJsonLd(breadcrumbItems)} />
       <StructuredData
         data={buildCollectionPageJsonLd({
@@ -214,6 +220,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         <FloatingWhatsApp
           whatsapp={store.whatsapp}
           storeName={store.name}
+          storeSlug={store.slug}
         />
       )}
     </div>

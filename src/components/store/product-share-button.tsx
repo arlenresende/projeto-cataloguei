@@ -2,17 +2,22 @@
 
 import { Share2 } from "lucide-react";
 import { toast } from "sonner";
+import { trackAnalyticsEvent } from "@/lib/analytics/client";
 
 interface ProductShareButtonProps {
   title: string;
   description: string;
   url: string;
+  storeSlug: string;
+  productId: string;
 }
 
 export function ProductShareButton({
   title,
   description,
   url,
+  storeSlug,
+  productId,
 }: ProductShareButtonProps) {
   async function copyUrl() {
     if (navigator.clipboard?.writeText) {
@@ -35,6 +40,13 @@ export function ProductShareButton({
   }
 
   async function handleShare() {
+    trackAnalyticsEvent({
+      type: "SHARE_CLICK",
+      storeSlug,
+      productId,
+      metadata: { source: "product_page" },
+    });
+
     try {
       if (navigator.share) {
         await navigator.share({

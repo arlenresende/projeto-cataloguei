@@ -54,6 +54,20 @@ interface DashboardContentProps {
       contactChannels: number;
       catalogHealth: number;
     };
+    analytics: {
+      periodLabel: string;
+      totalViews: number;
+      storeViews: number;
+      productViews: number;
+      categoryViews: number;
+      linktreeViews: number;
+      whatsappClicks: number;
+      shareClicks: number;
+      linktreeClicks: number;
+      conversionRate: number;
+      topProducts: Array<{ id: string; name: string; views: number }>;
+      topCategories: Array<{ id: string; name: string; views: number }>;
+    };
   } | null;
 }
 
@@ -72,6 +86,7 @@ function getPercent(value: number, total: number) {
 export function DashboardContent({ stats, billing, catalog }: DashboardContentProps) {
   const [filter, setFilter] = useState(false);
   const totals = catalog?.totals;
+  const analytics = catalog?.analytics;
   const activePercent = totals
     ? getPercent(totals.activeProducts, totals.totalProducts)
     : 0;
@@ -186,6 +201,126 @@ export function DashboardContent({ stats, billing, catalog }: DashboardContentPr
           </div>
         </Card>
       ) : null}
+
+      <section className="mt-6 grid gap-4 xl:grid-cols-[1.05fr_1.05fr_0.9fr]">
+        <Card>
+          <CardHeader
+            action={<Badge variant="neutral">{analytics?.periodLabel || "Sem dados"}</Badge>}
+          >
+            Alcance
+          </CardHeader>
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            {[
+              { label: "Views totais", value: analytics?.totalViews ?? 0 },
+              { label: "Loja", value: analytics?.storeViews ?? 0 },
+              { label: "Produtos", value: analytics?.productViews ?? 0 },
+              { label: "Linktree", value: analytics?.linktreeViews ?? 0 },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="rounded-lg bg-[var(--brand-tertiary)] px-3 py-3"
+              >
+                <p className="text-xs text-muted-foreground">{item.label}</p>
+                <strong className="mt-1 block text-lg text-[var(--brand-black)]">
+                  {formatNumber(item.value)}
+                </strong>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card>
+          <CardHeader
+            action={
+              <Badge variant="default" className="font-bold">
+                {analytics?.conversionRate ?? 0}%
+              </Badge>
+            }
+          >
+            Intenção de compra
+          </CardHeader>
+          <div className="mt-5 flex flex-col gap-4">
+            {[
+              {
+                name: "Cliques WhatsApp",
+                value: analytics?.whatsappClicks ?? 0,
+                color: "bg-[var(--brand-yellow)]",
+              },
+              {
+                name: "Compartilhamentos",
+                value: analytics?.shareClicks ?? 0,
+                color: "bg-[var(--brand-black)]",
+              },
+              {
+                name: "Cliques no Linktree",
+                value: analytics?.linktreeClicks ?? 0,
+                color: "bg-muted-foreground",
+              },
+            ].map((item) => (
+              <div key={item.name} className="flex items-center gap-3 text-sm">
+                <span className={`size-6 rounded-full ${item.color}`} />
+                <span className="flex-1 text-[var(--brand-black)]">{item.name}</span>
+                <strong className="text-[var(--brand-black)]">
+                  {formatNumber(item.value)}
+                </strong>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card>
+          <CardHeader>Mais vistos</CardHeader>
+          <div className="mt-4 flex flex-col gap-2">
+            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Produtos
+            </p>
+            {(analytics?.topProducts.length ? analytics.topProducts : []).map(
+              (item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-3 rounded-lg bg-[var(--brand-tertiary)] px-3 py-2.5 text-sm"
+                >
+                  <span className="flex-1 truncate text-[var(--brand-black)]">
+                    {item.name}
+                  </span>
+                  <strong className="text-[var(--brand-black)]">
+                    {formatNumber(item.views)}
+                  </strong>
+                </div>
+              )
+            )}
+            {!analytics?.topProducts.length ? (
+              <p className="rounded-lg bg-[var(--brand-tertiary)] px-3 py-3 text-sm text-muted-foreground">
+                As visualizações de produtos aparecerão aqui.
+              </p>
+            ) : null}
+
+            <p className="mt-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Categorias
+            </p>
+            {(analytics?.topCategories.length ? analytics.topCategories : []).map(
+              (item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-3 rounded-lg bg-[var(--brand-tertiary)] px-3 py-2.5 text-sm"
+                >
+                  <span className="flex-1 truncate text-[var(--brand-black)]">
+                    {item.name}
+                  </span>
+                  <strong className="text-[var(--brand-black)]">
+                    {formatNumber(item.views)}
+                  </strong>
+                </div>
+              )
+            )}
+            {!analytics?.topCategories.length ? (
+              <p className="rounded-lg bg-[var(--brand-tertiary)] px-3 py-3 text-sm text-muted-foreground">
+                As visualizações de categorias aparecerão aqui.
+              </p>
+            ) : null}
+          </div>
+        </Card>
+      </section>
 
       <section className="mt-6 grid gap-4 xl:grid-cols-[1.05fr_1.05fr_0.9fr]">
         <Card>

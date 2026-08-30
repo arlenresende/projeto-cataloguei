@@ -18,6 +18,24 @@ function getStartOfWeek() {
   return start;
 }
 
+function getStartOfLast30Days() {
+  const start = new Date();
+  start.setDate(start.getDate() - 29);
+  start.setHours(0, 0, 0, 0);
+  return start;
+}
+
+type AnalyticsTypeCount = {
+  type: string;
+  count: bigint;
+};
+
+type TopAnalyticsRow = {
+  id: string;
+  name: string;
+  views: bigint;
+};
+
 export default async function DashboardPage() {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -65,6 +83,7 @@ export default async function DashboardPage() {
   }
 
   const weekStart = getStartOfWeek();
+  const analyticsStart = getStartOfLast30Days();
   const [
     totalProducts,
     activeProducts,
@@ -78,6 +97,9 @@ export default async function DashboardPage() {
     activeBanners,
     totalBanners,
     totalImages,
+    analyticsByType,
+    topProductViews,
+    topCategoryViews,
   ] = await Promise.all([
     prisma.product.count({ where: { storeId: store.id } }),
     prisma.product.count({ where: { storeId: store.id, active: true } }),
@@ -112,7 +134,52 @@ export default async function DashboardPage() {
         },
       },
     }),
+    prisma.$queryRaw<AnalyticsTypeCount[]>`
+      SELECT "type"::text AS type, COUNT(*) AS count
+      FROM "analytics_events"
+      WHERE "storeId" = ${store.id}
+        AND "createdAt" >= ${analyticsStart}
+      GROUP BY "type"
+    `,
+    prisma.$queryRaw<TopAnalyticsRow[]>`
+      SELECT p."id", p."name", COUNT(*) AS views
+      FROM "analytics_events" ae
+      INNER JOIN "products" p ON p."id" = ae."productId"
+      WHERE ae."storeId" = ${store.id}
+        AND ae."type" = 'PRODUCT_VIEW'::"AnalyticsEventType"
+        AND ae."createdAt" >= ${analyticsStart}
+      GROUP BY p."id", p."name"
+      ORDER BY views DESC
+      LIMIT 5
+    `,
+    prisma.$queryRaw<TopAnalyticsRow[]>`
+      SELECT c."id", c."name", COUNT(*) AS views
+      FROM "analytics_events" ae
+      INNER JOIN "categories" c ON c."id" = ae."categoryId"
+      WHERE ae."storeId" = ${store.id}
+        AND ae."type" = 'CATEGORY_VIEW'::"AnalyticsEventType"
+        AND ae."createdAt" >= ${analyticsStart}
+      GROUP BY c."id", c."name"
+      ORDER BY views DESC
+      LIMIT 5
+    `,
   ]);
+
+  const analyticsCounts = Object.fromEntries(
+    analyticsByType.map((item) => [item.type, Number(item.count)])
+  ) as Partial<Record<string, number>>;
+  const storeViews = analyticsCounts.STORE_VIEW ?? 0;
+  const productViews = analyticsCounts.PRODUCT_VIEW ?? 0;
+  const categoryViews = analyticsCounts.CATEGORY_VIEW ?? 0;
+  const linktreeViews = analyticsCounts.LINKTREE_VIEW ?? 0;
+  const whatsappClicks =
+    (analyticsCounts.WHATSAPP_CLICK ?? 0) +
+    (analyticsCounts.PRODUCT_WHATSAPP_CLICK ?? 0);
+  const shareClicks = analyticsCounts.SHARE_CLICK ?? 0;
+  const linktreeClicks = analyticsCounts.LINKTREE_LINK_CLICK ?? 0;
+  const totalViews = storeViews + productViews + categoryViews + linktreeViews;
+  const conversionRate =
+    totalViews > 0 ? Number(((whatsappClicks / totalViews) * 100).toFixed(1)) : 0;
 
   const contactChannels = [
     store.whatsappUrl,
@@ -182,6 +249,28 @@ export default async function DashboardPage() {
           totalImages,
           contactChannels,
           catalogHealth,
+        },
+        analytics: {
+          periodLabel: "Últimos 30 dias",
+          totalViews,
+          storeViews,
+          productViews,
+          categoryViews,
+          linktreeViews,
+          whatsappClicks,
+          shareClicks,
+          linktreeClicks,
+          conversionRate,
+          topProducts: topProductViews.map((item) => ({
+            id: item.id,
+            name: item.name,
+            views: Number(item.views),
+          })),
+          topCategories: topCategoryViews.map((item) => ({
+            id: item.id,
+            name: item.name,
+            views: Number(item.views),
+          })),
         },
       }}
     />

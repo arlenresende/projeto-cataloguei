@@ -1,14 +1,25 @@
 "use client";
 
 import { MessageCircle } from "lucide-react";
+import { trackAnalyticsEvent } from "@/lib/analytics/client";
 
 interface FloatingWhatsAppProps {
   whatsapp: string;
   storeName: string;
+  storeSlug: string;
 }
 
-export function FloatingWhatsApp({ whatsapp, storeName }: FloatingWhatsAppProps) {
+export function FloatingWhatsApp({
+  whatsapp,
+  storeName,
+  storeSlug,
+}: FloatingWhatsAppProps) {
   const handleClick = () => {
+    trackAnalyticsEvent({
+      type: "WHATSAPP_CLICK",
+      storeSlug,
+      metadata: { source: "floating_button" },
+    });
     const message = encodeURIComponent(
       `Olá! Gostaria de saber mais sobre os produtos da ${storeName}.`
     );

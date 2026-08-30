@@ -53,6 +53,17 @@ enum BillingCycle {
   MONTHLY
 }
 
+enum AnalyticsEventType {
+  STORE_VIEW
+  PRODUCT_VIEW
+  CATEGORY_VIEW
+  LINKTREE_VIEW
+  WHATSAPP_CLICK
+  PRODUCT_WHATSAPP_CLICK
+  SHARE_CLICK
+  LINKTREE_LINK_CLICK
+}
+
 // ============================================================
 // Models
 // ============================================================
@@ -159,6 +170,7 @@ model Store {
   products   Product[]
   heroes     StoreHero[]
   categories Category[]
+  analyticsEvents AnalyticsEvent[]
 
   @@map("stores")
 }
@@ -192,6 +204,7 @@ model Product {
   store       Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
   categoryRel Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   images      ProductImage[]
+  analyticsEvents AnalyticsEvent[]
 
   @@unique([storeId, slug])
   @@unique([storeId, sku])
@@ -229,6 +242,7 @@ model Category {
 
   store    Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
   products Product[]
+  analyticsEvents AnalyticsEvent[]
 
   @@unique([storeId, slug])
   @@index([storeId])
@@ -293,9 +307,37 @@ model Link {
   updatedAt  DateTime @updatedAt
 
   linktree Linktree @relation(fields: [linktreeId], references: [id], onDelete: Cascade)
+  analyticsEvents AnalyticsEvent[]
 
   @@index([linktreeId])
   @@map("links")
+}
+
+model AnalyticsEvent {
+  id         String             @id @default(cuid())
+  storeId    String
+  productId  String?
+  categoryId String?
+  linkId     String?
+  type       AnalyticsEventType
+  path       String?
+  referrer   String?
+  userAgent  String?
+  ipHash     String?
+  metadata   Json?
+  createdAt  DateTime           @default(now())
+
+  store    Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product  Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  link     Link?     @relation(fields: [linkId], references: [id], onDelete: SetNull)
+
+  @@index([storeId, type, createdAt])
+  @@index([productId, type, createdAt])
+  @@index([categoryId, type, createdAt])
+  @@index([linkId, type, createdAt])
+  @@index([createdAt])
+  @@map("analytics_events")
 }
 
 model Subscription {

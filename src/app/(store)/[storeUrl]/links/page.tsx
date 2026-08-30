@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ExternalLink } from "lucide-react";
 import { StructuredData } from "@/components/seo/structured-data";
+import { AnalyticsTracker } from "@/components/store/AnalyticsTracker";
+import { TrackedLinktreeLink } from "@/components/store/TrackedLinktreeLink";
 import { getPublicLinktreeByStoreSlug } from "@/lib/store-data";
 import {
   buildBreadcrumbJsonLd,
@@ -101,6 +102,7 @@ export default async function LinksPage({ params }: LinksPageProps) {
       className="flex min-h-screen items-center justify-center px-4 py-12"
       style={{ backgroundColor: bg, fontFamily: "Inter, system-ui, sans-serif" }}
     >
+      <AnalyticsTracker type="LINKTREE_VIEW" storeSlug={store.slug} />
       <StructuredData
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: absoluteUrl("/") },
@@ -158,30 +160,16 @@ export default async function LinksPage({ params }: LinksPageProps) {
               const typeInfo = getLinkType(link.linkType);
 
               return (
-                <a
+                <TrackedLinktreeLink
                   key={link.id}
+                  linkId={link.id}
                   href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-3 rounded-2xl px-5 py-4 text-sm font-semibold transition-all hover:scale-[1.02] hover:shadow-lg"
-                  style={{
-                    backgroundColor: typeInfo.color + "15",
-                    color: textColor,
-                    border: `1px solid ${typeInfo.color}25`,
-                  }}
-                >
-                  <span
-                    className="flex size-9 shrink-0 items-center justify-center rounded-xl text-xs font-bold text-white"
-                    style={{ backgroundColor: typeInfo.color + "bb" }}
-                  >
-                    {typeInfo.label.charAt(0)}
-                  </span>
-                  <span className="flex-1 truncate text-left">{link.title}</span>
-                  <ExternalLink
-                    size={16}
-                    className="shrink-0 opacity-25 transition-opacity group-hover:opacity-50"
-                  />
-                </a>
+                  title={link.title}
+                  label={typeInfo.label}
+                  color={typeInfo.color}
+                  textColor={textColor}
+                  storeSlug={store.slug}
+                />
               );
             })}
           </div>

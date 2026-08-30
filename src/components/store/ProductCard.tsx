@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Eye, MessageCircle } from "lucide-react";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { buildProductImageAlt } from "@/lib/seo";
 import type { Product } from "@/types";
 
@@ -47,6 +48,12 @@ export function ProductCard({ product, storeUrl, whatsapp }: ProductCardProps) {
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.preventDefault();
     if (whatsapp) {
+      trackAnalyticsEvent({
+        type: "PRODUCT_WHATSAPP_CLICK",
+        storeSlug: storeUrl,
+        productId: product.id,
+        metadata: { source: "product_card" },
+      });
       const message = encodeURIComponent(
         `Olá! Tenho interesse no produto: ${product.name}`
       );

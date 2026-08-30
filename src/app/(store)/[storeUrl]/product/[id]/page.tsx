@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MessageCircle, Shield, Star, Truck } from "lucide-react";
+import { ArrowLeft, Shield, Star, Truck } from "lucide-react";
 import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 import { HeadMetadata } from "@/components/seo/head-metadata";
 import { StructuredData } from "@/components/seo/structured-data";
+import { AnalyticsTracker } from "@/components/store/AnalyticsTracker";
 import { StoreHeader } from "@/components/store/StoreHeader";
 import { StoreFooter } from "@/components/store/StoreFooter";
 import { ProductCard } from "@/components/store/ProductCard";
 import { FloatingWhatsApp } from "@/components/store/FloatingWhatsApp";
 import { ProductGallery } from "@/components/store/ProductGallery";
 import { ProductShareButton } from "@/components/store/product-share-button";
+import { ProductWhatsAppButton } from "@/components/store/ProductWhatsAppButton";
 import { getPublicProductByIdentifier } from "@/lib/store-data";
 import {
   buildBreadcrumbJsonLd,
@@ -137,6 +139,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <AnalyticsTracker
+        type="PRODUCT_VIEW"
+        storeSlug={store.slug}
+        productId={product.id}
+      />
       <HeadMetadata
         tags={[
           { property: "og:type", content: "product" },
@@ -281,22 +288,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
               <div className="mt-8 flex flex-col gap-3">
                 {store.whatsapp ? (
-                  <a
-                    href={`https://wa.me/${store.whatsapp}?text=${encodeURIComponent(`Olá! Tenho interesse no produto: ${product.name}`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-bold text-white transition-all hover:shadow-lg"
-                    style={{ backgroundColor: "#25D366" }}
-                  >
-                    <MessageCircle size={20} />
-                    Comprar pelo WhatsApp
-                  </a>
+                  <ProductWhatsAppButton
+                    whatsapp={store.whatsapp}
+                    storeSlug={store.slug}
+                    productId={product.id}
+                    productName={product.name}
+                  />
                 ) : null}
 
                 <ProductShareButton
                   title={product.name}
                   description={shareDescription}
                   url={canonicalUrl}
+                  storeSlug={store.slug}
+                  productId={product.id}
                 />
               </div>
 
@@ -365,7 +370,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
       />
 
       {store.whatsapp ? (
-        <FloatingWhatsApp whatsapp={store.whatsapp} storeName={store.name} />
+        <FloatingWhatsApp
+          whatsapp={store.whatsapp}
+          storeName={store.name}
+          storeSlug={store.slug}
+        />
       ) : null}
     </div>
   );
