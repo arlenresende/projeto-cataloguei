@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Crown, Loader2, Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
@@ -66,6 +66,24 @@ export function PlansContent({
   const [loadingAction, setLoadingAction] = useState<"subscribe" | "manage" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!paymentSuccess || billing.isPremium) {
+      return;
+    }
+
+    let refreshCount = 0;
+    const interval = window.setInterval(() => {
+      refreshCount += 1;
+      router.refresh();
+
+      if (refreshCount >= 10) {
+        window.clearInterval(interval);
+      }
+    }, 3000);
+
+    return () => window.clearInterval(interval);
+  }, [billing.isPremium, paymentSuccess, router]);
+
   async function handleSubscribe() {
     setError(null);
     setLoadingAction("subscribe");
@@ -126,7 +144,13 @@ export function PlansContent({
         subtitle="Gerencie seu plano atual e o upgrade para o Premium"
       />
 
-      {paymentSuccess ? (
+      {paymentSuccess && billing.isPremium ? (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+          Assinatura Premium ativa.
+        </div>
+      ) : null}
+
+      {paymentSuccess && !billing.isPremium ? (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
           Pagamento concluido. O acesso Premium sera confirmado assim que o Stripe sincronizar o status.
         </div>
