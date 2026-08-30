@@ -3,10 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  BarChart3,
   ChevronDown,
-  MoreHorizontal,
+  PackageCheck,
+  PackageX,
   SlidersHorizontal,
+  Star,
+  Tags,
 } from "lucide-react";
 import { StatsGrid } from "@/components/admin/stats-grid";
 import { Card, CardHeader } from "@/components/ui/card";
@@ -29,17 +31,60 @@ interface DashboardContentProps {
       currentPeriodEnd?: string | Date | null;
     };
   } | null;
+  catalog: {
+    store: {
+      name: string;
+      slug: string;
+      isActive: boolean;
+      updatedAt: string;
+    };
+    totals: {
+      totalProducts: number;
+      activeProducts: number;
+      inactiveProducts: number;
+      featuredProducts: number;
+      productsCreatedThisWeek: number;
+      outOfStockProducts: number;
+      lowStockProducts: number;
+      productsWithoutImage: number;
+      categories: number;
+      activeBanners: number;
+      totalBanners: number;
+      totalImages: number;
+      contactChannels: number;
+      catalogHealth: number;
+    };
+  } | null;
 }
 
-const platforms = [
-  { name: "Produtos", value: "12", share: "40%", color: "bg-[var(--brand-yellow)]", icon: "P" },
-  { name: "Visualizações", value: "1.234", share: "30%", color: "bg-[var(--brand-black)]", icon: "V" },
-  { name: "WhatsApp", value: "89", share: "22%", color: "bg-muted-foreground", icon: "W" },
-  { name: "Conversão", value: "7.2%", share: "8%", color: "bg-[var(--brand-yellow)]", icon: "C" },
-];
+function formatNumber(value: number) {
+  return new Intl.NumberFormat("pt-BR").format(value);
+}
 
-export function DashboardContent({ stats, billing }: DashboardContentProps) {
+function getPercent(value: number, total: number) {
+  if (total === 0) {
+    return 0;
+  }
+
+  return Math.round((value / total) * 100);
+}
+
+export function DashboardContent({ stats, billing, catalog }: DashboardContentProps) {
   const [filter, setFilter] = useState(false);
+  const totals = catalog?.totals;
+  const activePercent = totals
+    ? getPercent(totals.activeProducts, totals.totalProducts)
+    : 0;
+  const inactivePercent = totals
+    ? getPercent(totals.inactiveProducts, totals.totalProducts)
+    : 0;
+  const stockAttention = totals
+    ? totals.outOfStockProducts + totals.lowStockProducts
+    : 0;
+  const stockAttentionPercent = totals
+    ? getPercent(stockAttention, totals.totalProducts)
+    : 0;
+  const okStockPercent = Math.max(0, 100 - stockAttentionPercent);
 
   return (
     <>
@@ -58,14 +103,20 @@ export function DashboardContent({ stats, billing }: DashboardContentProps) {
             Dashboard
           </h1>
           <div className="mt-3 flex items-baseline gap-2">
-            <strong className="text-3xl font-bold text-[var(--brand-black)]">12</strong>
-            <Badge variant="default">+ 2</Badge>
+            <strong className="text-3xl font-bold text-[var(--brand-black)]">
+              {catalog ? formatNumber(catalog.totals.totalProducts) : "0"}
+            </strong>
+            <Badge variant="default">
+              + {catalog ? formatNumber(catalog.totals.productsCreatedThisWeek) : "0"}
+            </Badge>
             <span className="text-sm text-muted-foreground">
               produtos esta semana
             </span>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            Atualizado agora{" "}
+            {catalog
+              ? `Loja ${catalog.store.isActive ? "ativa" : "inativa"} · ${catalog.store.name}`
+              : "Nenhuma loja cadastrada"}{" "}
             <ChevronDown className="inline" size={12} />
           </p>
         </div>
@@ -80,10 +131,18 @@ export function DashboardContent({ stats, billing }: DashboardContentProps) {
       </div>
 
       <div className="mt-6 flex h-2 overflow-hidden rounded-full bg-[var(--brand-tertiary)]">
-        <span className="w-[40%] bg-[var(--brand-yellow)]" />
-        <span className="w-[30%] bg-[var(--brand-black)]" />
-        <span className="w-[22%] bg-muted-foreground" />
-        <span className="w-[8%] bg-[var(--brand-border)]" />
+        <span
+          className="bg-[var(--brand-yellow)]"
+          style={{ width: `${activePercent}%` }}
+        />
+        <span
+          className="bg-[var(--brand-black)]"
+          style={{ width: `${stockAttentionPercent}%` }}
+        />
+        <span
+          className="bg-muted-foreground"
+          style={{ width: `${inactivePercent}%` }}
+        />
       </div>
 
       <StatsGrid stats={stats} />
@@ -130,34 +189,59 @@ export function DashboardContent({ stats, billing }: DashboardContentProps) {
 
       <section className="mt-6 grid gap-4 xl:grid-cols-[1.05fr_1.05fr_0.9fr]">
         <Card>
-          <CardHeader
-            action={
-              <button className="rounded-md border border-[var(--brand-border)] p-1.5 transition-colors hover:bg-[var(--brand-tertiary)]">
-                <MoreHorizontal size={15} />
-              </button>
-            }
-          >
-            Métricas
-          </CardHeader>
+          <CardHeader>Catálogo</CardHeader>
           <div className="mt-4 flex flex-col gap-2">
-            {platforms.map((p) => (
+            {[
+              {
+                name: "Produtos ativos",
+                value: totals ? formatNumber(totals.activeProducts) : "0",
+                share: `${activePercent}%`,
+                color: "bg-[var(--brand-yellow)]",
+                icon: PackageCheck,
+              },
+              {
+                name: "Produtos inativos",
+                value: totals ? formatNumber(totals.inactiveProducts) : "0",
+                share: `${inactivePercent}%`,
+                color: "bg-muted-foreground",
+                icon: PackageX,
+              },
+              {
+                name: "Produtos em destaque",
+                value: totals ? formatNumber(totals.featuredProducts) : "0",
+                share: totals
+                  ? `${getPercent(totals.featuredProducts, totals.totalProducts)}%`
+                  : "0%",
+                color: "bg-[var(--brand-black)]",
+                icon: Star,
+              },
+              {
+                name: "Categorias",
+                value: totals ? formatNumber(totals.categories) : "0",
+                share: "",
+                color: "bg-[var(--brand-yellow)]",
+                icon: Tags,
+              },
+            ].map((item) => (
               <div
-                key={p.name}
+                key={item.name}
                 className="flex items-center gap-3 rounded-lg bg-[var(--brand-tertiary)] px-3 py-2.5 text-sm"
               >
+                <item.icon className="size-4 text-[var(--brand-black)]" />
                 <span
-                  className={`flex size-7 items-center justify-center rounded-full ${p.color} text-xs font-bold ${
-                    p.color === "bg-[var(--brand-black)]"
-                      ? "text-white"
-                      : "text-[var(--brand-black)]"
-                  }`}
-                >
-                  {p.icon}
+                  className={`size-2 rounded-full ${item.color}`}
+                  aria-hidden="true"
+                />
+                <span className="flex-1 text-[var(--brand-black)]">
+                  {item.name}
                 </span>
-                <span className="flex-1 text-[var(--brand-black)]">{p.name}</span>
-                <strong className="text-[var(--brand-black)]">{p.value}</strong>
-                <span className="w-10 text-right text-xs text-muted-foreground">
-                  {p.share}
+                <strong className="text-[var(--brand-black)]">
+                  {item.value}
+                </strong>
+                <span
+                  className="w-10 text-right text-xs text-muted-foreground"
+                >
+                  {item.share}
                 </span>
               </div>
             ))}
@@ -166,30 +250,45 @@ export function DashboardContent({ stats, billing }: DashboardContentProps) {
 
         <Card>
           <CardHeader
-            action={<BarChart3 size={16} className="text-muted-foreground" />}
+            action={<Badge variant="neutral">{okStockPercent}% ok</Badge>}
           >
-            Visualizações{" "}
-            <span className="font-normal text-muted-foreground">
-              por período
-            </span>
+            Estoque
           </CardHeader>
-          <div className="mt-5 flex h-36 items-end justify-center gap-2">
-            {[55, 78, 92, 65, 44, 70, 100, 82].map((height, i) => (
+          <div className="mt-5 flex h-36 items-end justify-center gap-3">
+            {[
+              {
+                label: "Saudável",
+                value: okStockPercent,
+                color: "bg-[var(--brand-yellow)]",
+              },
+              {
+                label: "Baixo",
+                value: totals
+                  ? getPercent(totals.lowStockProducts, totals.totalProducts)
+                  : 0,
+                color: "bg-muted-foreground",
+              },
+              {
+                label: "Zerado",
+                value: totals
+                  ? getPercent(totals.outOfStockProducts, totals.totalProducts)
+                  : 0,
+                color: "bg-[var(--brand-black)]",
+              },
+            ].map((item) => (
               <div
-                key={i}
-                className={`w-8 rounded-t-md transition-colors ${
-                  i === 6
-                    ? "bg-[var(--brand-yellow)]"
-                    : "bg-[var(--brand-tertiary-hover)]"
-                }`}
-                style={{ height: `${height}%` }}
-              />
+                key={item.label}
+                className="flex h-full w-20 flex-col items-center justify-end gap-2"
+              >
+                <div
+                  className={`w-10 rounded-t-md ${item.color}`}
+                  style={{ height: `${Math.max(item.value, 4)}%` }}
+                />
+                <span className="text-xs text-muted-foreground">
+                  {item.label}
+                </span>
+              </div>
             ))}
-          </div>
-          <div className="mt-3 flex justify-between text-xs text-muted-foreground">
-            <span>Seg</span>
-            <span>Ter</span>
-            <span>Qua</span>
           </div>
         </Card>
 
@@ -197,17 +296,28 @@ export function DashboardContent({ stats, billing }: DashboardContentProps) {
           <CardHeader
             action={
               <Badge variant="default" className="font-bold">
-                7.2%
+                {totals ? `${totals.catalogHealth}%` : "0%"}
               </Badge>
             }
           >
-            Conversão
+            Saúde da loja
           </CardHeader>
           <div className="mt-5 flex flex-col gap-4">
             {[
-              { name: "Cliques WhatsApp", value: "89" },
-              { name: "Visualizações", value: "1.234" },
-              { name: "Produtos", value: "12" },
+              {
+                name: "Banners ativos",
+                value: totals
+                  ? `${formatNumber(totals.activeBanners)} / ${formatNumber(totals.totalBanners)}`
+                  : "0 / 0",
+              },
+              {
+                name: "Produtos sem imagem",
+                value: totals ? formatNumber(totals.productsWithoutImage) : "0",
+              },
+              {
+                name: "Canais de contato",
+                value: totals ? formatNumber(totals.contactChannels) : "0",
+              },
             ].map((item, i) => (
               <div
                 key={item.name}
