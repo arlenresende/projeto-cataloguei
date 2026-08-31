@@ -12,13 +12,13 @@ const LOGO_CONFIG = {
   header: {
     src: "/cataloguei-logo.svg",
     width: 420,
-    height: 100,
+    height: 78,
     className: "h-12 w-auto md:h-14",
   },
   sidebar: {
     src: "/cataloguei-logo.svg",
     width: 420,
-    height: 100,
+    height: 78,
     className: "h-12 w-auto md:h-14",
   },
   footer: {
