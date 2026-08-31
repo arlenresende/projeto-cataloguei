@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { requireVerifiedSession } from "@/lib/api-session";
-import { serializeBillingState, getUserBillingState } from "@/lib/billing/subscription";
+import {
+  BillingAccessError,
+  cancelUserStripeSubscription,
+  serializeBillingState,
+  getUserBillingState,
+} from "@/lib/billing/subscription";
 import { prisma } from "@/lib/prisma";
 import { absoluteUrl } from "@/lib/site-config";
 import { getStripe } from "@/lib/stripe";
@@ -75,6 +80,42 @@ export async function POST() {
     console.error("Erro ao criar portal de assinatura:", error);
     return NextResponse.json(
       { error: "Não foi possível abrir o portal de assinatura no momento." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE() {
+  const session = await requireVerifiedSession(
+    "Verifique seu e-mail antes de cancelar sua assinatura."
+  );
+  if (session instanceof NextResponse) {
+    return session;
+  }
+
+  try {
+    await cancelUserStripeSubscription(session.user.id);
+    const billing = await getUserBillingState(session.user.id);
+
+    return NextResponse.json({
+      success: true,
+      billing: serializeBillingState(billing),
+    });
+  } catch (error) {
+    if (error instanceof BillingAccessError) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.status }
+      );
+    }
+
+    if (error instanceof Error && error.message.includes("STRIPE_SECRET_KEY")) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    console.error("Erro ao cancelar assinatura:", error);
+    return NextResponse.json(
+      { error: "Não foi possível cancelar a assinatura no momento." },
       { status: 500 }
     );
   }

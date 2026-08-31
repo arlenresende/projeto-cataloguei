@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import {
+  BillingAccessError,
+  cancelUserStripeSubscription,
+} from "@/lib/billing/subscription";
 import { prisma } from "@/lib/prisma";
 
 // DELETE /api/user — delete the authenticated user's account
@@ -14,6 +18,19 @@ export async function DELETE() {
   }
 
   try {
+    await cancelUserStripeSubscription(session.user.id, {
+      immediately: true,
+    }).catch((error) => {
+      if (
+        error instanceof BillingAccessError &&
+        error.code === "subscription_not_found"
+      ) {
+        return;
+      }
+
+      throw error;
+    });
+
     // Delete user and all related data (cascading via Prisma schema)
     await prisma.user.delete({
       where: { id: session.user.id },

@@ -50,8 +50,9 @@ export function DeleteAccountSection() {
         </h3>
         <p className="mt-2 text-sm text-red-600/80">
           Ao excluir sua conta, todos os seus dados serão removidos
-          permanentemente, incluindo sua loja e produtos. Essa ação não
-          pode ser desfeita.
+          permanentemente, incluindo sua loja e produtos. Se houver assinatura
+          Premium ativa, ela também será cancelada. Essa ação não pode ser
+          desfeita.
         </p>
         <button
           onClick={() => setShowDialog(true)}
@@ -74,7 +75,8 @@ export function DeleteAccountSection() {
             <DialogDescription className="text-[var(--brand-black)]">
               Essa ação é <strong>irreversível</strong>. Todos os seus dados,
               incluindo sua loja, produtos e configurações serão removidos
-              permanentemente.
+              permanentemente. Se houver assinatura Premium ativa, ela também
+              será cancelada.
             </DialogDescription>
           </DialogHeader>
 

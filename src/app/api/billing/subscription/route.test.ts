@@ -5,12 +5,25 @@ const {
   requireVerifiedSessionMock,
   getUserBillingStateMock,
   serializeBillingStateMock,
+  cancelUserStripeSubscriptionMock,
+  BillingAccessErrorMock,
   stripeMock,
   prismaMock,
 } = vi.hoisted(() => ({
   requireVerifiedSessionMock: vi.fn(),
   getUserBillingStateMock: vi.fn(),
   serializeBillingStateMock: vi.fn((value) => value),
+  cancelUserStripeSubscriptionMock: vi.fn(),
+  BillingAccessErrorMock: class BillingAccessError extends Error {
+    status: number;
+    code: string;
+
+    constructor(message: string, options?: { status?: number; code?: string }) {
+      super(message);
+      this.status = options?.status ?? 403;
+      this.code = options?.code ?? "billing_access_denied";
+    }
+  },
   stripeMock: {
     billingPortal: {
       sessions: {
@@ -36,6 +49,8 @@ vi.mock("@/lib/api-session", () => ({
 }));
 
 vi.mock("@/lib/billing/subscription", () => ({
+  BillingAccessError: BillingAccessErrorMock,
+  cancelUserStripeSubscription: cancelUserStripeSubscriptionMock,
   getUserBillingState: getUserBillingStateMock,
   serializeBillingState: serializeBillingStateMock,
 }));
@@ -52,7 +67,7 @@ vi.mock("@/lib/stripe", () => ({
   getStripe: vi.fn(() => stripeMock),
 }));
 
-import { POST } from "@/app/api/billing/subscription/route";
+import { DELETE, POST } from "@/app/api/billing/subscription/route";
 
 function makeBillingState(options?: {
   effectivePlan?: "FREE" | "PREMIUM";
@@ -128,5 +143,48 @@ describe("POST /api/billing/subscription", () => {
 
     expect(response.status).toBe(401);
     expect(await response.json()).toEqual({ error: "Nao autenticado" });
+  });
+});
+
+describe("DELETE /api/billing/subscription", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    requireVerifiedSessionMock.mockResolvedValue({
+      user: { id: "user_1" },
+    });
+    getUserBillingStateMock.mockResolvedValue(makeBillingState({
+      subscription: {
+        cancelAtPeriodEnd: true,
+      },
+    }));
+  });
+
+  it("cancela a renovacao e retorna o estado atualizado da assinatura", async () => {
+    cancelUserStripeSubscriptionMock.mockResolvedValueOnce({});
+
+    const response = await DELETE();
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(cancelUserStripeSubscriptionMock).toHaveBeenCalledWith("user_1");
+    expect(body.success).toBe(true);
+    expect(body.billing.subscription.cancelAtPeriodEnd).toBe(true);
+  });
+
+  it("retorna erro de dominio quando nao existe assinatura para cancelar", async () => {
+    cancelUserStripeSubscriptionMock.mockRejectedValueOnce(
+      new BillingAccessErrorMock("Nenhuma assinatura encontrada.", {
+        status: 404,
+        code: "subscription_not_found",
+      })
+    );
+
+    const response = await DELETE();
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({
+      error: "Nenhuma assinatura encontrada.",
+      code: "subscription_not_found",
+    });
   });
 });

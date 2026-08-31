@@ -17,6 +17,7 @@ import {
   type BillingFeature,
   type BillingLimit,
 } from "@/lib/billing/plans";
+import { getStripe } from "@/lib/stripe";
 
 export class BillingAccessError extends Error {
   status: number;
@@ -345,4 +346,59 @@ export async function updateSubscriptionSnapshot(
     where,
     data,
   });
+}
+
+export async function cancelUserStripeSubscription(
+  userId: string,
+  options: { immediately?: boolean } = {}
+) {
+  const billing = await getUserBillingState(userId);
+  const stripeSubscriptionId = billing.subscription.stripeSubscriptionId;
+
+  if (
+    billing.subscription.plan !== Plan.PREMIUM ||
+    !stripeSubscriptionId ||
+    billing.subscription.status === SubscriptionStatus.CANCELED
+  ) {
+    throw new BillingAccessError(
+      "Nenhuma assinatura Premium ativa foi encontrada para cancelamento.",
+      { status: 404, code: "subscription_not_found" }
+    );
+  }
+
+  const stripe = getStripe();
+
+  if (options.immediately) {
+    const canceledSubscription = await stripe.subscriptions.cancel(
+      stripeSubscriptionId
+    );
+
+    return updateSubscriptionSnapshot(
+      { userId },
+      {
+        status: SubscriptionStatus.CANCELED,
+        canceledAt: canceledSubscription.canceled_at
+          ? new Date(canceledSubscription.canceled_at * 1000)
+          : new Date(),
+        cancelAtPeriodEnd: false,
+      }
+    );
+  }
+
+  const updatedSubscription = await stripe.subscriptions.update(
+    stripeSubscriptionId,
+    {
+      cancel_at_period_end: true,
+    }
+  );
+
+  return updateSubscriptionSnapshot(
+    { userId },
+    {
+      cancelAtPeriodEnd: updatedSubscription.cancel_at_period_end,
+      canceledAt: updatedSubscription.canceled_at
+        ? new Date(updatedSubscription.canceled_at * 1000)
+        : new Date(),
+    }
+  );
 }

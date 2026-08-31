@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Crown, Loader2, Sparkles } from "lucide-react";
+import { Check, Crown, Loader2, Sparkles, XCircle } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -63,7 +63,9 @@ export function PlansContent({
   paymentSuccess,
 }: PlansContentProps) {
   const router = useRouter();
-  const [loadingAction, setLoadingAction] = useState<"subscribe" | "manage" | null>(null);
+  const [loadingAction, setLoadingAction] = useState<
+    "subscribe" | "manage" | "cancel" | null
+  >(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -132,6 +134,37 @@ export function PlansContent({
       }
     } catch {
       setError("Erro de conexao ao abrir o portal de assinatura.");
+    } finally {
+      setLoadingAction(null);
+    }
+  }
+
+  async function handleCancelSubscription() {
+    if (
+      !window.confirm(
+        "Cancelar a renovação da assinatura? Seu acesso Premium continua ativo até o fim do período pago."
+      )
+    ) {
+      return;
+    }
+
+    setError(null);
+    setLoadingAction("cancel");
+
+    try {
+      const response = await fetch("/api/billing/subscription", {
+        method: "DELETE",
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result.error || "Nao foi possivel cancelar sua assinatura.");
+        return;
+      }
+
+      router.refresh();
+    } catch {
+      setError("Erro de conexao ao cancelar a assinatura.");
     } finally {
       setLoadingAction(null);
     }
@@ -241,17 +274,34 @@ export function PlansContent({
                 Assinar Premium
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={handleManageSubscription}
-                disabled={loadingAction !== null}
-                className="inline-flex items-center gap-2 rounded-xl border border-[var(--brand-border)] px-5 py-3 text-sm font-bold text-[var(--brand-black)] transition-colors hover:bg-[var(--brand-tertiary)] disabled:opacity-60"
-              >
-                {loadingAction === "manage" ? (
-                  <Loader2 className="size-4 animate-spin" />
+              <>
+                <button
+                  type="button"
+                  onClick={handleManageSubscription}
+                  disabled={loadingAction !== null}
+                  className="inline-flex items-center gap-2 rounded-xl border border-[var(--brand-border)] px-5 py-3 text-sm font-bold text-[var(--brand-black)] transition-colors hover:bg-[var(--brand-tertiary)] disabled:opacity-60"
+                >
+                  {loadingAction === "manage" ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : null}
+                  Gerenciar assinatura
+                </button>
+                {!billing.subscription.cancelAtPeriodEnd ? (
+                  <button
+                    type="button"
+                    onClick={handleCancelSubscription}
+                    disabled={loadingAction !== null}
+                    className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-5 py-3 text-sm font-bold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60"
+                  >
+                    {loadingAction === "cancel" ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <XCircle className="size-4" />
+                    )}
+                    Cancelar assinatura
+                  </button>
                 ) : null}
-                Gerenciar assinatura
-              </button>
+              </>
             )}
           </div>
         </Card>
