@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { assertStoreCustomizationAccess, BillingAccessError } from "@/lib/billing/subscription";
 import { prisma } from "@/lib/prisma";
 import { storeUpdateSchema } from "@/lib/schemas/store";
+import { deleteStoreStorageAssets } from "@/lib/storage/store-cleanup";
 import {
   buildStoreUpdateData,
   getStoreConflictMessage,
@@ -187,6 +188,17 @@ export async function DELETE(
   const { id } = await params;
 
   try {
+    const store = await prisma.store.findFirst({
+      where: { id, userId: session.user.id },
+      select: { id: true },
+    });
+
+    if (!store) {
+      return NextResponse.json({ error: "Loja não encontrada." }, { status: 404 });
+    }
+
+    await deleteStoreStorageAssets(store.id);
+
     const result = await prisma.store.deleteMany({
       where: { id, userId: session.user.id },
     });

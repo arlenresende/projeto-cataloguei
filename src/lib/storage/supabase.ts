@@ -91,3 +91,23 @@ export async function deleteFileFromSupabaseStorage(objectKey: string) {
     throw deleteResult.error;
   }
 }
+
+export async function deleteFilesFromSupabaseStorage(objectKeys: string[]) {
+  const uniqueObjectKeys = Array.from(new Set(objectKeys)).filter(Boolean);
+
+  if (uniqueObjectKeys.length === 0) {
+    return;
+  }
+
+  const client = getSupabaseAdminClient();
+  const bucketName = getSupabaseStorageBucketName();
+
+  for (let index = 0; index < uniqueObjectKeys.length; index += 100) {
+    const batch = uniqueObjectKeys.slice(index, index + 100);
+    const deleteResult = await client.storage.from(bucketName).remove(batch);
+
+    if (deleteResult.error) {
+      throw deleteResult.error;
+    }
+  }
+}

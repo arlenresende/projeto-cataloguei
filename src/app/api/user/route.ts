@@ -6,6 +6,7 @@ import {
   cancelUserStripeSubscription,
 } from "@/lib/billing/subscription";
 import { prisma } from "@/lib/prisma";
+import { deleteUserStoreStorageAssets } from "@/lib/storage/store-cleanup";
 
 // DELETE /api/user — delete the authenticated user's account
 export async function DELETE() {
@@ -30,6 +31,8 @@ export async function DELETE() {
 
       throw error;
     });
+
+    await deleteUserStoreStorageAssets(session.user.id);
 
     // Delete user and all related data (cascading via Prisma schema)
     await prisma.user.delete({
