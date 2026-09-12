@@ -67,6 +67,28 @@ describe("billing plan helpers", () => {
     expect(getEffectivePlan(subscription)).toBe("PREMIUM");
   });
 
+  it("mantem Premium em OVERDUE dentro do periodo de tolerancia", () => {
+    const subscription = makeSubscription({
+      plan: "PREMIUM",
+      status: SubscriptionStatus.OVERDUE,
+      currentPeriodEnd: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    });
+
+    expect(getEffectivePlan(subscription)).toBe("PREMIUM");
+    expect(isPremiumSubscription(subscription)).toBe(true);
+  });
+
+  it("faz downgrade para FREE quando OVERDUE passa da tolerancia", () => {
+    const subscription = makeSubscription({
+      plan: "PREMIUM",
+      status: SubscriptionStatus.OVERDUE,
+      currentPeriodEnd: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+    });
+
+    expect(getEffectivePlan(subscription)).toBe("FREE");
+    expect(isPremiumSubscription(subscription)).toBe(false);
+  });
+
   it("retorna limites corretos para FREE e PREMIUM", () => {
     const freeSubscription = makeSubscription();
     const premiumSubscription = makeSubscription({

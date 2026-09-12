@@ -6,6 +6,7 @@ import { Check, Crown, Loader2, Sparkles, XCircle } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { PAYMENT_FAILURE_GRACE_PERIOD_DAYS } from "@/lib/billing/plans";
 
 type PlansContentProps = {
   billing: {
@@ -67,6 +68,14 @@ export function PlansContent({
     "subscribe" | "manage" | "cancel" | null
   >(null);
   const [error, setError] = useState<string | null>(null);
+  const paymentOverdue = billing.subscription.status === "OVERDUE";
+  const gracePeriodEndsAt =
+    paymentOverdue && billing.subscription.currentPeriodEnd
+      ? new Date(
+          new Date(billing.subscription.currentPeriodEnd).getTime() +
+            PAYMENT_FAILURE_GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000
+        )
+      : null;
 
   useEffect(() => {
     if (!paymentSuccess || billing.isPremium) {
@@ -192,6 +201,22 @@ export function PlansContent({
       {error ? (
         <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
           {error}
+        </div>
+      ) : null}
+
+      {paymentOverdue ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+          O pagamento da assinatura falhou. Seu acesso Premium fica em periodo
+          de tolerancia por {PAYMENT_FAILURE_GRACE_PERIOD_DAYS} dias
+          {gracePeriodEndsAt ? (
+            <>
+              {" "}
+              ate{" "}
+              <strong>{gracePeriodEndsAt.toLocaleDateString("pt-BR")}</strong>
+            </>
+          ) : null}
+          . Atualize o pagamento no portal do Stripe para evitar o downgrade
+          para o plano Free.
         </div>
       ) : null}
 

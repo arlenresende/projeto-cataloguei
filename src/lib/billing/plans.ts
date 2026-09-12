@@ -1,5 +1,7 @@
 import type { Plan, Subscription, SubscriptionStatus } from "@prisma/client";
 
+export const PAYMENT_FAILURE_GRACE_PERIOD_DAYS = 3;
+
 export type BillingFeature =
   | "remove_branding"
   | "advanced_analytics"
@@ -64,6 +66,30 @@ export function isSubscriptionActiveStatus(status: SubscriptionStatus) {
   return status === "ACTIVE";
 }
 
+function addDays(date: Date, days: number) {
+  return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+}
+
+export function getPremiumAccessEndsAt(
+  subscription:
+    | Pick<Subscription, "plan" | "status" | "canceledAt" | "currentPeriodEnd">
+    | null
+    | undefined
+) {
+  if (!subscription?.currentPeriodEnd) {
+    return null;
+  }
+
+  if (subscription.status === "OVERDUE") {
+    return addDays(
+      subscription.currentPeriodEnd,
+      PAYMENT_FAILURE_GRACE_PERIOD_DAYS
+    );
+  }
+
+  return subscription.currentPeriodEnd;
+}
+
 export function getEffectivePlan(
   subscription:
     | Pick<Subscription, "plan" | "status" | "canceledAt" | "currentPeriodEnd">
@@ -74,18 +100,26 @@ export function getEffectivePlan(
     return "FREE";
   }
 
-  const currentPeriodEnd = subscription.currentPeriodEnd;
-
-  const periodExpired =
-    currentPeriodEnd !== null && currentPeriodEnd.getTime() <= Date.now();
-
-  if (periodExpired) {
+  if (subscription.plan !== "PREMIUM") {
     return "FREE";
   }
 
-  return subscription.plan === "PREMIUM" && isSubscriptionActiveStatus(subscription.status)
-    ? "PREMIUM"
-    : "FREE";
+  if (
+    subscription.status !== "ACTIVE" &&
+    subscription.status !== "OVERDUE"
+  ) {
+    return "FREE";
+  }
+
+  const accessEndsAt = getPremiumAccessEndsAt(subscription);
+  if (subscription.status === "OVERDUE" && accessEndsAt === null) {
+    return "FREE";
+  }
+
+  const accessExpired =
+    accessEndsAt !== null && accessEndsAt.getTime() <= Date.now();
+
+  return accessExpired ? "FREE" : "PREMIUM";
 }
 
 export function isPremiumSubscription(

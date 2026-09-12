@@ -32,6 +32,7 @@ import {
   assertCanCreateOrActivateBanner,
   assertCanCreateProduct,
   assertStoreCustomizationAccess,
+  getUserBillingState,
 } from "@/lib/billing/subscription";
 
 function makeSubscription(
@@ -205,6 +206,53 @@ describe("billing subscription guards", () => {
       })
     ).resolves.toMatchObject({
       effectivePlan: "PREMIUM",
+    });
+  });
+
+  it("mantem Premium em pagamento atrasado dentro da tolerancia", async () => {
+    prismaMock.subscription.upsert.mockResolvedValue(
+      makeSubscription({
+        plan: "PREMIUM",
+        status: SubscriptionStatus.OVERDUE,
+        price: 24.9 as unknown as Subscription["price"],
+        currentPeriodEnd: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      })
+    );
+
+    await expect(getUserBillingState("user_1")).resolves.toMatchObject({
+      effectivePlan: "PREMIUM",
+      isPremium: true,
+    });
+    expect(prismaMock.subscription.update).not.toHaveBeenCalled();
+  });
+
+  it("faz downgrade persistido para FREE quando pagamento atrasado passa da tolerancia", async () => {
+    prismaMock.subscription.upsert.mockResolvedValue(
+      makeSubscription({
+        plan: "PREMIUM",
+        status: SubscriptionStatus.OVERDUE,
+        price: 24.9 as unknown as Subscription["price"],
+        currentPeriodEnd: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+      })
+    );
+    prismaMock.subscription.update.mockResolvedValue(
+      makeSubscription({
+        status: SubscriptionStatus.INACTIVE,
+      })
+    );
+
+    await expect(getUserBillingState("user_1")).resolves.toMatchObject({
+      effectivePlan: "FREE",
+      isPremium: false,
+    });
+    expect(prismaMock.subscription.update).toHaveBeenCalledWith({
+      where: { userId: "user_1" },
+      data: {
+        plan: "FREE",
+        status: SubscriptionStatus.INACTIVE,
+        price: 0,
+        cancelAtPeriodEnd: false,
+      },
     });
   });
 });

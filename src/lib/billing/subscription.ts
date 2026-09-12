@@ -12,6 +12,7 @@ import {
   canUseFeature,
   getEffectivePlan,
   getPlanLimit,
+  getPremiumAccessEndsAt,
   isPremiumSubscription,
   PREMIUM_MONTHLY_PRICE,
   type BillingFeature,
@@ -92,18 +93,22 @@ export async function ensureUserSubscription(userId: string) {
 
 export async function getUserBillingState(userId: string): Promise<BillingState> {
   let subscription = await ensureUserSubscription(userId);
+  const accessEndsAt = getPremiumAccessEndsAt(subscription);
 
   if (
-    subscription.status === SubscriptionStatus.ACTIVE &&
-    subscription.currentPeriodEnd &&
-    subscription.currentPeriodEnd.getTime() <= Date.now()
+    subscription.plan === Plan.PREMIUM &&
+    ((subscription.status === SubscriptionStatus.OVERDUE && !accessEndsAt) ||
+      (accessEndsAt && accessEndsAt.getTime() <= Date.now()))
   ) {
     subscription = await prisma.subscription.update({
       where: { userId },
       data: {
+        plan: Plan.FREE,
         status: subscription.cancelAtPeriodEnd
           ? SubscriptionStatus.CANCELED
           : SubscriptionStatus.INACTIVE,
+        price: 0,
+        cancelAtPeriodEnd: false,
       },
     });
   }
