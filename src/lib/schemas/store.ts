@@ -81,6 +81,55 @@ export function normalizeStoreSlug(value: string): string {
     .replace(/^-|-$/g, "");
 }
 
+export const RESERVED_STORE_SLUGS = new Set([
+  "_next",
+  "admin",
+  "api",
+  "auth",
+  "banners",
+  "billing",
+  "categorias",
+  "categoria",
+  "categories",
+  "checkout",
+  "dashboard",
+  "entrar",
+  "favicon",
+  "feature-requests",
+  "linktree",
+  "links",
+  "login",
+  "logout",
+  "manifest",
+  "og",
+  "plans",
+  "planos",
+  "privacy",
+  "privacidade",
+  "product",
+  "products",
+  "produto",
+  "produtos",
+  "register",
+  "requests",
+  "robots",
+  "settings",
+  "signin",
+  "signup",
+  "sitemap",
+  "stores",
+  "termos",
+  "terms",
+  "upload",
+  "user",
+  "verify-email",
+  "webhooks",
+]);
+
+export function isReservedStoreSlug(slug: string) {
+  return RESERVED_STORE_SLUGS.has(normalizeStoreSlug(slug));
+}
+
 const storeThemeSchema = z.nativeEnum(StoreThemeSegment);
 
 const baseStoreSchema = z.object({
@@ -101,6 +150,10 @@ const baseStoreSchema = z.object({
       .regex(
         /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
         "Use apenas letras minúsculas, números e hífens."
+      )
+      .refine(
+        (slug) => !isReservedStoreSlug(slug),
+        "Esse endereço é reservado. Escolha outro para sua loja."
       )
   ),
   description: optionalText(500),
