@@ -341,6 +341,7 @@ model AnalyticsEvent {
   userAgent  String?
   ipHash     String?
   metadata   Json?
+  anonymizedAt DateTime?
   createdAt  DateTime           @default(now())
 
   store    Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
@@ -353,6 +354,7 @@ model AnalyticsEvent {
   @@index([categoryId, type, createdAt])
   @@index([linkId, type, createdAt])
   @@index([createdAt])
+  @@index([anonymizedAt, createdAt])
   @@map("analytics_events")
 }
 

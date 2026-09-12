@@ -21,7 +21,7 @@ export default function PrivacyPage() {
           Política de Privacidade
         </h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          Última atualização: 30 de agosto de 2026
+          Última atualização: 12 de setembro de 2026
         </p>
 
         <div className="mt-10 space-y-8 text-sm leading-7 text-muted-foreground">
@@ -55,6 +55,14 @@ export default function PrivacyPage() {
               Registramos eventos de uso da vitrine, como visualizações de loja,
               produto, categoria, Linktree, cliques no WhatsApp e compartilhamentos.
               Esses dados ajudam você a entender o desempenho do catálogo.
+            </p>
+            <p className="mt-2">
+              Dados técnicos associados aos eventos, como caminho acessado,
+              referência, agente do navegador, hash de IP e metadados, são
+              mantidos apenas pelo período necessário para análise recente. Após
+              esse prazo, os eventos são anonimizados e permanecem somente para
+              métricas agregadas. Eventos antigos são removidos conforme nossa
+              política de retenção.
             </p>
           </section>
 
