@@ -75,6 +75,14 @@ enum FeatureRequestStatus {
   DONE
 }
 
+enum LandingLeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  DISCARDED
+}
+
 // ============================================================
 // Models
 // ============================================================
@@ -373,6 +381,31 @@ model FeatureRequest {
   @@index([userId, status])
   @@index([status, createdAt])
   @@map("feature_requests")
+}
+
+model LandingLead {
+  id           String            @id @default(cuid())
+  name         String
+  email        String?
+  whatsapp    String
+  businessType String?
+  currentSalesChannel String?
+  monthlyOrders String?
+  message      String?
+  source       String?
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  utmTerm      String?
+  utmContent   String?
+  status       LandingLeadStatus @default(NEW)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@unique([whatsapp, source])
+  @@index([status, createdAt])
+  @@index([source, createdAt])
+  @@map("landing_leads")
 }
 
 model Subscription {
