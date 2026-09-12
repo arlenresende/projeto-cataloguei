@@ -70,7 +70,7 @@ export async function PATCH(
   // Verify ownership
   const existing = await prisma.store.findFirst({
     where: { id, userId: session.user.id },
-    select: { id: true, slug: true },
+    select: { id: true, slug: true, adminSuspendedAt: true },
   });
 
   if (!existing) {
@@ -103,6 +103,16 @@ export async function PATCH(
     return NextResponse.json(
       { error: "Nenhum campo válido foi enviado." },
       { status: 400 }
+    );
+  }
+
+  if (existing.adminSuspendedAt && data.isActive === true) {
+    return NextResponse.json(
+      {
+        error:
+          "Esta loja foi suspensa pela administração e não pode ser reativada pelo lojista.",
+      },
+      { status: 403 }
     );
   }
 

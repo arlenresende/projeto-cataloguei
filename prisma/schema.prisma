@@ -175,6 +175,9 @@ model Store {
   hideCatalogueiBranding Boolean           @default(false)
   themeStore             StoreThemeSegment @default(DEFAULT)
   isActive               Boolean           @default(true)
+  adminSuspendedAt       DateTime?
+  adminSuspensionReason  String?
+  adminSuspendedById     String?
   userId                 String            @unique
   createdAt              DateTime          @default(now())
   updatedAt              DateTime          @updatedAt

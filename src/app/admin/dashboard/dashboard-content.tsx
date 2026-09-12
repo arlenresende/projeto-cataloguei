@@ -2,10 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
+  Ban,
   ChevronDown,
+  Loader2,
   PackageCheck,
   PackageX,
+  RotateCcw,
   SlidersHorizontal,
   Star,
   Tags,
@@ -76,6 +80,8 @@ interface DashboardContentProps {
       name: string;
       slug: string;
       isActive: boolean;
+      adminSuspendedAt: string | null;
+      adminSuspensionReason: string | null;
       ownerName: string;
       ownerEmail: string;
       plan: "FREE" | "PREMIUM";
@@ -107,7 +113,10 @@ export function DashboardContent({
   isAdmin = false,
   adminOverview = null,
 }: DashboardContentProps) {
+  const router = useRouter();
   const [filter, setFilter] = useState(false);
+  const [updatingStoreId, setUpdatingStoreId] = useState<string | null>(null);
+  const [adminActionError, setAdminActionError] = useState<string | null>(null);
   const totals = catalog?.totals;
   const analytics = catalog?.analytics;
   const activePercent = totals
@@ -123,6 +132,60 @@ export function DashboardContent({
     ? getPercent(stockAttention, totals.totalProducts)
     : 0;
   const okStockPercent = Math.max(0, 100 - stockAttentionPercent);
+
+  async function handleStoreSuspension(store: {
+    id: string;
+    name: string;
+    adminSuspendedAt: string | null;
+  }) {
+    const isSuspended = Boolean(store.adminSuspendedAt);
+    const reason = isSuspended
+      ? null
+      : window.prompt(
+          `Informe o motivo para suspender "${store.name}". O lojista não poderá reativar a loja sozinho.`
+        );
+    const suspensionReason = reason?.trim();
+
+    if (!isSuspended && !suspensionReason) {
+      return;
+    }
+
+    if (
+      isSuspended &&
+      !window.confirm(`Reativar a loja "${store.name}"?`)
+    ) {
+      return;
+    }
+
+    setAdminActionError(null);
+    setUpdatingStoreId(store.id);
+
+    try {
+      const response = await fetch(`/api/admin/stores/${store.id}/suspension`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          isSuspended
+            ? { action: "restore" }
+            : { action: "suspend", reason: suspensionReason }
+        ),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        setAdminActionError(
+          payload.error || "Não foi possível atualizar a loja."
+        );
+        return;
+      }
+
+      router.refresh();
+    } catch {
+      setAdminActionError("Erro de conexão ao atualizar a loja.");
+    } finally {
+      setUpdatingStoreId(null);
+    }
+  }
 
   return (
     <>
@@ -192,8 +255,13 @@ export function DashboardContent({
       {isAdmin && adminOverview ? (
         <Card className="mt-6">
           <CardHeader>Últimas lojas</CardHeader>
+          {adminActionError ? (
+            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
+              {adminActionError}
+            </div>
+          ) : null}
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[760px] border-collapse text-sm">
+            <table className="w-full min-w-[920px] border-collapse text-sm">
               <thead>
                 <tr className="border-b border-[var(--brand-border)] text-left">
                   <th className="pb-3 font-semibold text-[var(--brand-black)]">Loja</th>
@@ -202,6 +270,7 @@ export function DashboardContent({
                   <th className="pb-3 font-semibold text-[var(--brand-black)]">Catálogo</th>
                   <th className="pb-3 font-semibold text-[var(--brand-black)]">Status</th>
                   <th className="pb-3 font-semibold text-[var(--brand-black)]">Criada em</th>
+                  <th className="pb-3 font-semibold text-[var(--brand-black)]">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -238,12 +307,50 @@ export function DashboardContent({
                       {store.products} produtos · {store.categories} categorias · {store.banners} banners
                     </td>
                     <td className="py-3">
-                      <Badge variant={store.isActive ? "success" : "neutral"}>
-                        {store.isActive ? "Ativa" : "Inativa"}
+                      <Badge
+                        variant={
+                          store.adminSuspendedAt
+                            ? "error"
+                            : store.isActive
+                              ? "success"
+                              : "neutral"
+                        }
+                      >
+                        {store.adminSuspendedAt
+                          ? "Suspensa"
+                          : store.isActive
+                            ? "Ativa"
+                            : "Inativa"}
                       </Badge>
+                      {store.adminSuspensionReason ? (
+                        <p className="mt-1 max-w-[220px] text-xs text-muted-foreground">
+                          {store.adminSuspensionReason}
+                        </p>
+                      ) : null}
                     </td>
                     <td className="py-3 text-muted-foreground">
                       {new Date(store.createdAt).toLocaleDateString("pt-BR")}
+                    </td>
+                    <td className="py-3">
+                      <button
+                        type="button"
+                        onClick={() => handleStoreSuspension(store)}
+                        disabled={updatingStoreId === store.id}
+                        className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold transition-colors disabled:opacity-60 ${
+                          store.adminSuspendedAt
+                            ? "border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                            : "border-red-200 text-red-600 hover:bg-red-50"
+                        }`}
+                      >
+                        {updatingStoreId === store.id ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : store.adminSuspendedAt ? (
+                          <RotateCcw className="size-3.5" />
+                        ) : (
+                          <Ban className="size-3.5" />
+                        )}
+                        {store.adminSuspendedAt ? "Reativar" : "Suspender"}
+                      </button>
                     </td>
                   </tr>
                 ))}

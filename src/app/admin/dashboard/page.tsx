@@ -77,6 +77,8 @@ export default async function DashboardPage() {
           name: true,
           slug: true,
           isActive: true,
+          adminSuspendedAt: true,
+          adminSuspensionReason: true,
           createdAt: true,
           user: {
             select: {
@@ -135,6 +137,8 @@ export default async function DashboardPage() {
             name: store.name,
             slug: store.slug,
             isActive: store.isActive,
+            adminSuspendedAt: store.adminSuspendedAt?.toISOString() ?? null,
+            adminSuspensionReason: store.adminSuspensionReason,
             ownerName: store.user.name,
             ownerEmail: store.user.email,
             plan: store.user.subscription?.plan ?? "FREE",
