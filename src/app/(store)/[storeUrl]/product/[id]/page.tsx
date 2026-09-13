@@ -289,10 +289,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <div className="mt-8 flex flex-col gap-3">
                 {store.whatsapp ? (
                   <ProductWhatsAppButton
-                    whatsapp={store.whatsapp}
-                    storeSlug={store.slug}
                     productId={product.id}
                     productName={product.name}
+                    productSlug={product.slug}
+                    productPrice={product.price}
+                    productImageUrl={product.imageUrl || product.images?.[0] || null}
                   />
                 ) : null}
 

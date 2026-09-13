@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, ShoppingBag, Menu, X, ChevronRight, Phone } from "lucide-react";
 import { useState, useCallback } from "react";
+import { useCart } from "@/components/providers/CartProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { CartDrawer } from "./CartDrawer";
 
@@ -29,6 +30,7 @@ export function StoreHeader({
   categories = [],
 }: StoreHeaderProps) {
   const { resolvedColors } = useTheme();
+  const { itemCount } = useCart();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -135,22 +137,24 @@ export function StoreHeader({
             className="mx-1 hidden h-5 w-px sm:block"
             style={{ backgroundColor: resolvedColors.border }}
           />
-          <CartDrawer whatsapp={whatsapp || ""} storeName={name}>
+          <CartDrawer whatsapp={whatsapp || ""} storeName={name} storeUrl={storeUrl}>
             <div
               className="relative cursor-pointer rounded-xl p-2.5 transition-colors"
               style={{ color: resolvedColors.text }}
               aria-label="Carrinho"
             >
               <ShoppingBag size={22} strokeWidth={2} />
-              <span
-                className="absolute right-0.5 top-0.5 flex size-[18px] items-center justify-center rounded-full text-[10px] font-bold"
-                style={{
-                  backgroundColor: resolvedColors.primary,
-                  color: resolvedColors.secondary,
-                }}
-              >
-                2
-              </span>
+              {itemCount > 0 ? (
+                <span
+                  className="absolute right-0.5 top-0.5 flex size-[18px] items-center justify-center rounded-full text-[10px] font-bold"
+                  style={{
+                    backgroundColor: resolvedColors.primary,
+                    color: resolvedColors.secondary,
+                  }}
+                >
+                  {itemCount > 9 ? "9+" : itemCount}
+                </span>
+              ) : null}
             </div>
           </CartDrawer>
           <button

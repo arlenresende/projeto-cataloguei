@@ -21,6 +21,7 @@ export default async function StoreLayout({
   return (
     <ThemeWrapper
       segment={store.theme}
+      storeUrl={store.slug}
       overrides={store.themeOverrides}
     >
       {children}

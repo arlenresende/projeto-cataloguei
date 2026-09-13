@@ -1,45 +1,44 @@
 "use client";
 
-import { MessageCircle } from "lucide-react";
-import { trackAnalyticsEvent } from "@/lib/analytics/client";
+import { ShoppingBag } from "lucide-react";
+import { useCart } from "@/components/providers/CartProvider";
 
 type ProductWhatsAppButtonProps = {
-  whatsapp: string;
-  storeSlug: string;
   productId: string;
   productName: string;
+  productSlug?: string | null;
+  productPrice: number;
+  productImageUrl?: string | null;
 };
 
 export function ProductWhatsAppButton({
-  whatsapp,
-  storeSlug,
   productId,
   productName,
+  productSlug,
+  productPrice,
+  productImageUrl,
 }: ProductWhatsAppButtonProps) {
-  const message = encodeURIComponent(
-    `Olá! Tenho interesse no produto: ${productName}`
-  );
+  const { addItem } = useCart();
 
   function handleClick() {
-    trackAnalyticsEvent({
-      type: "PRODUCT_WHATSAPP_CLICK",
-      storeSlug,
-      productId,
-      metadata: { source: "product_page" },
+    addItem({
+      id: productId,
+      name: productName,
+      slug: productSlug,
+      price: productPrice,
+      imageUrl: productImageUrl,
     });
   }
 
   return (
-    <a
-      href={`https://wa.me/${whatsapp}?text=${message}`}
-      target="_blank"
-      rel="noopener noreferrer"
+    <button
+      type="button"
       onClick={handleClick}
       className="flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-bold text-white transition-all hover:shadow-lg"
       style={{ backgroundColor: "#25D366" }}
     >
-      <MessageCircle size={20} />
-      Comprar pelo WhatsApp
-    </a>
+      <ShoppingBag size={20} />
+      Adicionar ao carrinho
+    </button>
   );
 }

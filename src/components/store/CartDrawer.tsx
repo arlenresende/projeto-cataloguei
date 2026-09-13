@@ -2,7 +2,10 @@
 
 import Image from "next/image";
 import { Minus, Plus, Trash2, ShoppingBag, MessageCircle } from "lucide-react";
+import { useCart } from "@/components/providers/CartProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { trackAnalyticsEvent } from "@/lib/analytics/client";
+import { buildCartWhatsAppMessage } from "@/lib/cart/whatsapp-message";
 import {
   Sheet,
   SheetTrigger,
@@ -13,50 +16,50 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  imageUrl: string;
-  quantity: number;
-}
-
 interface CartDrawerProps {
   whatsapp: string;
   storeName: string;
+  storeUrl: string;
   children: React.ReactNode;
 }
 
-// Mock cart items for demo
-const MOCK_CART: CartItem[] = [
-  {
-    id: "1",
-    name: "Fone Bluetooth Pro",
-    price: 299.9,
-    imageUrl: "/placeholder-product.svg",
-    quantity: 1,
-  },
-  {
-    id: "3",
-    name: "Carregador Turbo 65W",
-    price: 129.9,
-    imageUrl: "/placeholder-product.svg",
-    quantity: 1,
-  },
-];
-
-export function CartDrawer({ whatsapp, storeName, children }: CartDrawerProps) {
+export function CartDrawer({
+  whatsapp,
+  storeName,
+  storeUrl,
+  children,
+}: CartDrawerProps) {
   const { resolvedColors } = useTheme();
-  const items = MOCK_CART;
-  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const { items, itemCount, total, addItem, decreaseItem, removeItem } = useCart();
+  const canSendOrder = Boolean(whatsapp) && items.length > 0;
 
   const handleWhatsAppOrder = () => {
-    const productList = items
-      .map((item) => `${item.quantity}x ${item.name}`)
-      .join(", ");
+    if (!canSendOrder) {
+      return;
+    }
+
+    trackAnalyticsEvent({
+      type: "WHATSAPP_CLICK",
+      storeSlug: storeUrl,
+      metadata: { source: "cart_drawer", itemCount, total },
+    });
+
+    items.forEach((item) => {
+      trackAnalyticsEvent({
+        type: "PRODUCT_WHATSAPP_CLICK",
+        storeSlug: storeUrl,
+        productId: item.id,
+        metadata: { source: "cart_drawer", quantity: item.quantity },
+      });
+    });
+
     const message = encodeURIComponent(
-      `Olá! Gostaria de fazer um pedido na ${storeName}:\n\n${productList}\n\nTotal: ${total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`
+      buildCartWhatsAppMessage({
+        storeName,
+        storeUrl,
+        items,
+        origin: window.location.origin,
+      })
     );
     window.open(`https://wa.me/${whatsapp}?text=${message}`, "_blank");
   };
@@ -103,7 +106,7 @@ export function CartDrawer({ whatsapp, storeName, children }: CartDrawerProps) {
                       style={{ backgroundColor: resolvedColors.background }}
                     >
                       <Image
-                        src={item.imageUrl}
+                        src={item.imageUrl || "/placeholder-product.svg"}
                         alt={item.name}
                         fill
                         className="object-cover"
@@ -134,6 +137,8 @@ export function CartDrawer({ whatsapp, storeName, children }: CartDrawerProps) {
                           style={{ borderColor: resolvedColors.border }}
                         >
                           <button
+                            type="button"
+                            onClick={() => decreaseItem(item.id)}
                             className="flex size-7 items-center justify-center rounded-l-lg transition-colors hover:bg-black/5"
                             style={{ color: resolvedColors.text }}
                             aria-label="Diminuir quantidade"
@@ -147,6 +152,8 @@ export function CartDrawer({ whatsapp, storeName, children }: CartDrawerProps) {
                             {item.quantity}
                           </span>
                           <button
+                            type="button"
+                            onClick={() => addItem(item)}
                             className="flex size-7 items-center justify-center rounded-r-lg transition-colors hover:bg-black/5"
                             style={{ color: resolvedColors.text }}
                             aria-label="Aumentar quantidade"
@@ -155,6 +162,8 @@ export function CartDrawer({ whatsapp, storeName, children }: CartDrawerProps) {
                           </button>
                         </div>
                         <button
+                          type="button"
+                          onClick={() => removeItem(item.id)}
                           className="rounded-lg p-1.5 transition-colors hover:bg-red-50 hover:text-red-500"
                           style={{ color: resolvedColors.text, opacity: 0.4 }}
                           aria-label="Remover produto"
@@ -194,12 +203,14 @@ export function CartDrawer({ whatsapp, storeName, children }: CartDrawerProps) {
                 </span>
               </div>
               <button
+                type="button"
                 onClick={handleWhatsAppOrder}
-                className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white transition-all hover:shadow-lg active:scale-[0.98]"
-                style={{ backgroundColor: "#25D366" }}
+                disabled={!canSendOrder}
+                className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white transition-all hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-none disabled:active:scale-100"
+                style={{ backgroundColor: canSendOrder ? "#25D366" : resolvedColors.text }}
               >
                 <MessageCircle size={18} />
-                Pedir no WhatsApp
+                {whatsapp ? "Pedir no WhatsApp" : "WhatsApp indisponível"}
               </button>
             </div>
           </>

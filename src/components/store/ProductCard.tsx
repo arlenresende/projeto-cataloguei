@@ -3,9 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Eye, MessageCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, ShoppingBag } from "lucide-react";
+import { useCart } from "@/components/providers/CartProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
-import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { buildProductImageAlt } from "@/lib/seo";
 import type { Product } from "@/types";
 
@@ -17,6 +17,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, storeUrl, whatsapp }: ProductCardProps) {
   const { resolvedColors } = useTheme();
+  const { addItem } = useCart();
   const images =
     product.images?.length
       ? product.images
@@ -45,20 +46,15 @@ export function ProductCard({ product, storeUrl, whatsapp }: ProductCardProps) {
     setImgIndex((i) => (i - 1 + images.length) % images.length);
   };
 
-  const handleWhatsApp = (e: React.MouseEvent) => {
+  const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (whatsapp) {
-      trackAnalyticsEvent({
-        type: "PRODUCT_WHATSAPP_CLICK",
-        storeSlug: storeUrl,
-        productId: product.id,
-        metadata: { source: "product_card" },
-      });
-      const message = encodeURIComponent(
-        `Olá! Tenho interesse no produto: ${product.name}`
-      );
-      window.open(`https://wa.me/${whatsapp}?text=${message}`, "_blank");
-    }
+    addItem({
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      price: product.price,
+      imageUrl: images[0],
+    });
   };
 
   return (
@@ -189,12 +185,12 @@ export function ProductCard({ product, storeUrl, whatsapp }: ProductCardProps) {
           </Link>
           {whatsapp && (
             <button
-              onClick={handleWhatsApp}
+              onClick={handleAddToCart}
               className="flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold text-white transition-all hover:opacity-90"
               style={{ backgroundColor: "#25D366" }}
             >
-              <MessageCircle size={14} />
-              Chamar no WhatsApp
+              <ShoppingBag size={14} />
+              Adicionar ao carrinho
             </button>
           )}
         </div>
