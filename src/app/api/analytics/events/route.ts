@@ -23,7 +23,10 @@ const analyticsEventSchema = z.object({
   linkId: z.string().min(1).max(120).optional(),
   path: z.string().max(500).optional().nullable(),
   referrer: z.string().max(500).optional().nullable(),
-  metadata: z.record(z.union([z.string(), z.number(), z.boolean(), z.null()])).optional(),
+  metadata: z.record(
+    z.string(),
+    z.union([z.string(), z.number(), z.boolean(), z.null()])
+  ).optional(),
 });
 
 const PRODUCT_EVENTS = new Set<AnalyticsEventType>([

@@ -1,8 +1,14 @@
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
+import { dash } from "@better-auth/infra";
 import { prisma } from "@/lib/prisma";
 import { sendVerificationEmail } from "@/lib/email";
+
+const betterAuthPlugins = [
+  ...(process.env.BETTER_AUTH_API_KEY ? [dash()] : []),
+  nextCookies(),
+];
 
 /**
  * Better Auth - configuração server-side.
@@ -20,6 +26,7 @@ import { sendVerificationEmail } from "@/lib/email";
  *
  * Lendo variáveis:
  * - BETTER_AUTH_SECRET: chave usada para assinar cookies/JWTs (obrigatório)
+ * - BETTER_AUTH_API_KEY: chave do Better Auth Infrastructure/Dashboard
  * - BETTER_AUTH_URL: URL base da app (obrigatório em produção)
  * - NEXT_PUBLIC_APP_URL: fallback quando BETTER_AUTH_URL não existe
  * - RESEND_API_KEY / RESEND_FROM_EMAIL: credenciais do envio transacional
@@ -64,8 +71,10 @@ export const auth = betterAuth({
     },
   },
 
-  // Necessário no Next.js para gerenciar cookies em Server Actions
-  plugins: [nextCookies()],
+  // `dash()` conecta o app ao Better Auth Infrastructure/Dashboard quando
+  // BETTER_AUTH_API_KEY estiver configurada.
+  // `nextCookies()` é necessário no Next.js para gerenciar cookies em Server Actions.
+  plugins: betterAuthPlugins,
 });
 
 /**

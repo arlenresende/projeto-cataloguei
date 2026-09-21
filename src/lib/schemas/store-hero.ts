@@ -37,7 +37,7 @@ export const storeHeroSchema = z.object({
     .optional()
     .or(z.literal("")),
   position: z.coerce
-    .number()
+    .number<number>()
     .int()
     .min(0, "A posição deve ser um número positivo."),
   isActive: z.boolean(),

@@ -38,26 +38,26 @@ export const productSchema = z.object({
     .or(z.literal(""))
     .transform((v) => (v ? v.trim() : v)),
   price: z.coerce
-    .number()
+    .number<number>()
     .min(0.01, "O preço deve ser maior que zero."),
   compareAtPrice: z.coerce
-    .number()
+    .number<number | null | undefined>()
     .min(0, "O preço promocional não pode ser negativo.")
     .optional()
     .nullable(),
   stock: z.coerce
-    .number()
+    .number<number>()
     .int()
     .min(0, "O estoque não pode ser negativo.")
     .default(0),
   minStock: z.coerce
-    .number()
+    .number<number | null | undefined>()
     .int()
     .min(0, "O estoque mínimo não pode ser negativo.")
     .optional()
     .nullable(),
   weight: z.coerce
-    .number()
+    .number<number | null | undefined>()
     .min(0, "O peso não pode ser negativo.")
     .optional()
     .nullable(),
