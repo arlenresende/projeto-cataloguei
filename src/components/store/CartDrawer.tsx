@@ -5,6 +5,7 @@ import { Minus, Plus, Trash2, ShoppingBag, MessageCircle } from "lucide-react";
 import { useCart } from "@/components/providers/CartProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
+import { trackGoogleEvent } from "@/lib/analytics/google";
 import { buildCartWhatsAppMessage } from "@/lib/cart/whatsapp-message";
 import {
   Sheet,
@@ -42,6 +43,12 @@ export function CartDrawer({
       type: "WHATSAPP_CLICK",
       storeSlug: storeUrl,
       metadata: { source: "cart_drawer", itemCount, total },
+    });
+    trackGoogleEvent("cart_whatsapp_order", {
+      store_slug: storeUrl,
+      item_count: itemCount,
+      value: Number(total.toFixed(2)),
+      currency: "BRL",
     });
 
     items.forEach((item) => {

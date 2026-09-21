@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Confetti } from "@/components/ui/confetti";
 import { Input, Textarea } from "@/components/ui/input";
+import { trackGoogleEvent } from "@/lib/analytics/google";
 import { getSiteHost } from "@/lib/site-config";
 import {
   onboardingSchema,
@@ -83,17 +84,29 @@ export function CreateStoreDialog({ open, onStoreCreated }: CreateStoreDialogPro
 
       if (!response.ok) {
         setServerError(result.error || "Erro ao criar a loja.");
+        trackGoogleEvent("store_create_error", {
+          source: "onboarding_dialog",
+          reason: result.error || "api_error",
+        });
         return;
       }
 
       setShowSuccess(true);
       setShowConfetti(true);
+      trackGoogleEvent("store_created", {
+        source: "onboarding_dialog",
+        store_slug: result.store?.slug || data.slug,
+      });
 
       setTimeout(() => {
         onStoreCreated();
       }, 3000);
     } catch {
       setServerError("Erro de conexão. Tente novamente.");
+      trackGoogleEvent("store_create_error", {
+        source: "onboarding_dialog",
+        reason: "network_error",
+      });
     }
   };
 

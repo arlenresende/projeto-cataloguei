@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
+import { trackGoogleEvent } from "@/lib/analytics/google";
 
 interface GoogleButtonProps {
   mode?: "signin" | "signup";
@@ -25,6 +26,9 @@ export function GoogleButton({
     if (isDisabled) return;
     setIsLoading(true);
     setError(null);
+    trackGoogleEvent(mode === "signup" ? "signup_start" : "login_start", {
+      method: "google",
+    });
 
     const { error: authError } = await signIn.social({
       provider: "google",
@@ -33,6 +37,10 @@ export function GoogleButton({
     });
 
     if (authError) {
+      trackGoogleEvent(mode === "signup" ? "signup_error" : "login_error", {
+        method: "google",
+        reason: authError.code || "unknown",
+      });
       setError(
         authError.message ||
           "Não foi possível iniciar o login com Google. Tente novamente."

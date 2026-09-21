@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
+import { trackGoogleEvent } from "@/lib/analytics/google";
 import { maskPhone, onlyNumbers } from "@/lib/masks";
 
 type LeadFormProps = {
@@ -42,10 +43,28 @@ export function LeadForm({ searchParams }: LeadFormProps) {
     [searchParams]
   );
 
+  useEffect(() => {
+    trackGoogleEvent("landing_view", {
+      page: "catalogo_online",
+      utm_source: utmData.utmSource,
+      utm_medium: utmData.utmMedium,
+      utm_campaign: utmData.utmCampaign,
+    });
+  }, [utmData]);
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     setIsSubmitting(true);
+    trackGoogleEvent("landing_lead_submit_start", {
+      page: "catalogo_online",
+      has_email: Boolean(email),
+      has_business_type: Boolean(businessType),
+      has_sales_channel: Boolean(currentSalesChannel),
+      utm_source: utmData.utmSource,
+      utm_medium: utmData.utmMedium,
+      utm_campaign: utmData.utmCampaign,
+    });
 
     try {
       const response = await fetch("/api/landing-leads", {
@@ -66,12 +85,27 @@ export function LeadForm({ searchParams }: LeadFormProps) {
 
       if (!response.ok) {
         setError(payload.error || "Não foi possível enviar seu contato.");
+        trackGoogleEvent("landing_lead_submit_error", {
+          page: "catalogo_online",
+          reason: payload.error || "api_error",
+        });
         return;
       }
 
       setSubmitted(true);
+      trackGoogleEvent("landing_lead_submit_success", {
+        page: "catalogo_online",
+        lead_id: payload.leadId,
+        utm_source: utmData.utmSource,
+        utm_medium: utmData.utmMedium,
+        utm_campaign: utmData.utmCampaign,
+      });
     } catch {
       setError("Erro de conexão. Tente novamente em alguns instantes.");
+      trackGoogleEvent("landing_lead_submit_error", {
+        page: "catalogo_online",
+        reason: "network_error",
+      });
     } finally {
       setIsSubmitting(false);
     }

@@ -2,6 +2,7 @@
 
 import { ShoppingBag } from "lucide-react";
 import { useCart } from "@/components/providers/CartProvider";
+import { trackGoogleEvent } from "@/lib/analytics/google";
 
 type ProductWhatsAppButtonProps = {
   productId: string;
@@ -27,6 +28,13 @@ export function ProductWhatsAppButton({
       slug: productSlug,
       price: productPrice,
       imageUrl: productImageUrl,
+    });
+    trackGoogleEvent("add_to_cart", {
+      source: "product_page",
+      item_id: productId,
+      item_name: productName,
+      value: productPrice,
+      currency: "BRL",
     });
   }
 

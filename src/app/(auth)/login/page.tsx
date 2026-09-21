@@ -13,6 +13,7 @@ import {
   signIn,
 } from "@/lib/auth-client";
 import { GoogleButton } from "@/components/auth/google-button";
+import { trackGoogleEvent } from "@/lib/analytics/google";
 
 function LoginPageContent() {
   const router = useRouter();
@@ -35,6 +36,7 @@ function LoginPageContent() {
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+    trackGoogleEvent("login_start", { method: "email" });
 
     startTransition(async () => {
       const { error: authError } = await signIn.email({
@@ -46,6 +48,10 @@ function LoginPageContent() {
         const authErrorCode = getAuthErrorCode(authError);
 
         if (authErrorCode === "EMAIL_NOT_VERIFIED") {
+          trackGoogleEvent("login_error", {
+            method: "email",
+            reason: "email_not_verified",
+          });
           router.push(
             buildEmailVerificationPageHref({
               email,
@@ -57,6 +63,10 @@ function LoginPageContent() {
           return;
         }
 
+        trackGoogleEvent("login_error", {
+          method: "email",
+          reason: authErrorCode || "unknown",
+        });
         setError(
           authError.message ||
             "Não foi possível entrar. Verifique seus dados e tente novamente."
@@ -64,6 +74,7 @@ function LoginPageContent() {
         return;
       }
 
+      trackGoogleEvent("login_success", { method: "email" });
       router.push(redirectTarget);
       router.refresh();
     });

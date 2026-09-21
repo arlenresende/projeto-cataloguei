@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { PAYMENT_FAILURE_GRACE_PERIOD_DAYS } from "@/lib/billing/plans";
+import { trackGoogleEvent } from "@/lib/analytics/google";
 
 type PlansContentProps = {
   billing: {
@@ -98,6 +99,10 @@ export function PlansContent({
   async function handleSubscribe() {
     setError(null);
     setLoadingAction("subscribe");
+    trackGoogleEvent("premium_checkout_start", {
+      plan: "PREMIUM",
+      source: "admin_plans",
+    });
 
     try {
       const response = await fetch("/api/billing/subscribe", {
@@ -107,10 +112,18 @@ export function PlansContent({
 
       if (!response.ok) {
         setError(result.error || "Nao foi possivel iniciar sua assinatura.");
+        trackGoogleEvent("premium_checkout_error", {
+          plan: "PREMIUM",
+          reason: result.error || "api_error",
+        });
         return;
       }
 
       if (result.checkoutUrl) {
+        trackGoogleEvent("premium_checkout_redirect", {
+          plan: "PREMIUM",
+          provider: "stripe",
+        });
         window.location.href = result.checkoutUrl;
         return;
       }
@@ -118,6 +131,10 @@ export function PlansContent({
       router.refresh();
     } catch {
       setError("Erro de conexao ao iniciar a assinatura.");
+      trackGoogleEvent("premium_checkout_error", {
+        plan: "PREMIUM",
+        reason: "network_error",
+      });
     } finally {
       setLoadingAction(null);
     }

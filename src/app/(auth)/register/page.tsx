@@ -13,6 +13,7 @@ import {
   signUp,
 } from "@/lib/auth-client";
 import { GoogleButton } from "@/components/auth/google-button";
+import { trackGoogleEvent } from "@/lib/analytics/google";
 
 function RegisterPageContent() {
   const router = useRouter();
@@ -32,9 +33,14 @@ function RegisterPageContent() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
+    trackGoogleEvent("signup_start", { method: "email" });
 
     if (password !== confirmPassword) {
       setError("As senhas não coincidem.");
+      trackGoogleEvent("signup_error", {
+        method: "email",
+        reason: "password_mismatch",
+      });
       return;
     }
 
@@ -50,6 +56,10 @@ function RegisterPageContent() {
       });
 
       if (authError) {
+        trackGoogleEvent("signup_error", {
+          method: "email",
+          reason: authError.code || "unknown",
+        });
         setError(
           authError.message ||
             "Não foi possível criar sua conta. Tente novamente."
@@ -57,6 +67,7 @@ function RegisterPageContent() {
         return;
       }
 
+      trackGoogleEvent("signup_success", { method: "email" });
       router.push(
         buildEmailVerificationPageHref({
           email,

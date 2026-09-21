@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, Eye, ShoppingBag } from "lucide-react";
 import { useCart } from "@/components/providers/CartProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { trackGoogleEvent } from "@/lib/analytics/google";
 import { buildProductImageAlt } from "@/lib/seo";
 import type { Product } from "@/types";
 
@@ -54,6 +55,14 @@ export function ProductCard({ product, storeUrl, whatsapp }: ProductCardProps) {
       slug: product.slug,
       price: product.price,
       imageUrl: images[0],
+    });
+    trackGoogleEvent("add_to_cart", {
+      source: "product_card",
+      store_slug: storeUrl,
+      item_id: product.id,
+      item_name: product.name,
+      value: product.price,
+      currency: "BRL",
     });
   };
 
