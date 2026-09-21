@@ -7,14 +7,23 @@ import { createAuthClient } from "better-auth/react";
  * `signIn`, `signUp`, `signOut`, `useSession`, etc.
  *
  * O `baseURL` é resolvido por ordem:
- * 1. `NEXT_PUBLIC_BETTER_AUTH_URL` (variável pública)
- * 2. `NEXT_PUBLIC_APP_URL`
- * 3. `window.location.origin` em runtime (fallback)
+ * 1. `window.location.origin` em runtime para evitar CORS entre www/apex
+ * 2. `NEXT_PUBLIC_BETTER_AUTH_URL` (fallback de build)
+ * 3. `NEXT_PUBLIC_APP_URL`
  */
-export const authClient = createAuthClient({
-  baseURL:
+function getAuthBaseUrl() {
+  if (typeof window !== "undefined") {
+    return window.location.origin;
+  }
+
+  return (
     process.env.NEXT_PUBLIC_BETTER_AUTH_URL ||
-    process.env.NEXT_PUBLIC_APP_URL,
+    process.env.NEXT_PUBLIC_APP_URL
+  );
+}
+
+export const authClient = createAuthClient({
+  baseURL: getAuthBaseUrl(),
 });
 
 export const DEFAULT_AUTH_REDIRECT = "/admin/dashboard";
