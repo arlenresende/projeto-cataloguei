@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { sendVerificationEmail } from "@/lib/email";
 
 const betterAuthPlugins = [
-  ...(process.env.BETTER_AUTH_API_KEY ? [dash()] : []),
+  dash({ apiKey: process.env.BETTER_AUTH_API_KEY }),
   nextCookies(),
 ];
 
@@ -71,8 +71,7 @@ export const auth = betterAuth({
     },
   },
 
-  // `dash()` conecta o app ao Better Auth Infrastructure/Dashboard quando
-  // BETTER_AUTH_API_KEY estiver configurada.
+  // `dash()` conecta o app ao Better Auth Infrastructure/Dashboard.
   // `nextCookies()` é necessário no Next.js para gerenciar cookies em Server Actions.
   plugins: betterAuthPlugins,
 });
