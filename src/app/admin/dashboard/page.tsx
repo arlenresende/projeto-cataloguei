@@ -56,7 +56,6 @@ export default async function DashboardPage() {
       totalUsers,
       premiumSubscriptions,
       openRequests,
-      stores,
     ] = await Promise.all([
       prisma.store.count(),
       prisma.store.count({ where: { isActive: true } }),
@@ -69,38 +68,6 @@ export default async function DashboardPage() {
         FROM "feature_requests"
         WHERE "status" <> 'DONE'::"FeatureRequestStatus"
       `,
-      prisma.store.findMany({
-        orderBy: { createdAt: "desc" },
-        take: 12,
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          isActive: true,
-          adminSuspendedAt: true,
-          adminSuspensionReason: true,
-          createdAt: true,
-          user: {
-            select: {
-              name: true,
-              email: true,
-              subscription: {
-                select: {
-                  plan: true,
-                  status: true,
-                },
-              },
-            },
-          },
-          _count: {
-            select: {
-              products: true,
-              categories: true,
-              heroes: true,
-            },
-          },
-        },
-      }),
     ]);
 
     return (
@@ -131,24 +98,6 @@ export default async function DashboardPage() {
           },
         ]}
         catalog={null}
-        adminOverview={{
-          stores: stores.map((store) => ({
-            id: store.id,
-            name: store.name,
-            slug: store.slug,
-            isActive: store.isActive,
-            adminSuspendedAt: store.adminSuspendedAt?.toISOString() ?? null,
-            adminSuspensionReason: store.adminSuspensionReason,
-            ownerName: store.user.name,
-            ownerEmail: store.user.email,
-            plan: store.user.subscription?.plan ?? "FREE",
-            subscriptionStatus: store.user.subscription?.status ?? "INACTIVE",
-            products: store._count.products,
-            categories: store._count.categories,
-            banners: store._count.heroes,
-            createdAt: store.createdAt.toISOString(),
-          })),
-        }}
       />
     );
   }
@@ -186,7 +135,6 @@ export default async function DashboardPage() {
           { title: "Imagens", value: "0", subtitle: "Cadastre sua loja" },
         ]}
         catalog={null}
-        adminOverview={null}
       />
     );
   }
@@ -383,7 +331,6 @@ export default async function DashboardPage() {
           })),
         },
       }}
-      adminOverview={null}
     />
   );
 }

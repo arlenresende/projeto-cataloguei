@@ -6,15 +6,17 @@ import { Header } from "./header";
 
 interface AdminShellProps {
   children: React.ReactNode;
+  isAdmin?: boolean;
 }
 
-export function AdminShell({ children }: AdminShellProps) {
+export function AdminShell({ children, isAdmin = false }: AdminShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[var(--brand-tertiary)] p-0 lg:p-3">
       <div className="mx-auto flex min-h-screen max-w-[1500px] overflow-hidden rounded-none border border-[var(--brand-border)] bg-white shadow-sm lg:min-h-[calc(100vh-1.5rem)] lg:rounded-2xl">
         <Sidebar
+          isAdmin={isAdmin}
           open={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />

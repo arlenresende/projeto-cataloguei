@@ -12,12 +12,14 @@ import {
   Link2,
   CreditCard,
   Lightbulb,
+  Users,
   X,
   LogOut,
 } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 
 interface SidebarProps {
+  isAdmin?: boolean;
   open: boolean;
   onClose: () => void;
 }
@@ -30,12 +32,28 @@ const navItems = [
   { href: "/admin/banners", label: "Banners", icon: Image },
   { href: "/admin/linktree", label: "Linktree", icon: Link2 },
   { href: "/admin/plans", label: "Planos", icon: CreditCard },
-  { href: "/admin/requests", label: "Pedidos Premium", icon: Lightbulb },
   { href: "/admin/settings", label: "Configurações", icon: Settings },
 ];
 
-export function Sidebar({ open, onClose }: SidebarProps) {
+const adminNavItems = [
+  { href: "/admin/platform/stores", label: "Lojas", icon: Store },
+  { href: "/admin/platform/users", label: "Usuários", icon: Users },
+  { href: "/admin/requests", label: "Tarefas Premium", icon: Lightbulb },
+];
+
+const premiumRequestNavItem = {
+  href: "/admin/requests",
+  label: "Pedidos Premium",
+  icon: Lightbulb,
+};
+
+function isNavItemActive(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+export function Sidebar({ isAdmin = false, open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const PremiumRequestIcon = premiumRequestNavItem.icon;
 
   return (
     <>
@@ -66,7 +84,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           aria-label="Navegação do painel"
         >
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = isNavItemActive(pathname, item.href);
             return (
               <Link
                 key={item.href}
@@ -83,6 +101,50 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               </Link>
             );
           })}
+          {!isAdmin ? (
+            <Link
+              href={premiumRequestNavItem.href}
+              onClick={onClose}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                isNavItemActive(pathname, premiumRequestNavItem.href)
+                  ? "bg-[var(--brand-yellow)] text-[var(--brand-black)]"
+                  : "text-muted-foreground hover:bg-[var(--brand-tertiary)] hover:text-[var(--brand-black)]"
+              }`}
+            >
+              <PremiumRequestIcon
+                size={18}
+                strokeWidth={
+                  isNavItemActive(pathname, premiumRequestNavItem.href) ? 2.2 : 1.8
+                }
+              />
+              {premiumRequestNavItem.label}
+            </Link>
+          ) : null}
+          {isAdmin ? (
+            <>
+              <div className="mt-5 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                Admin
+              </div>
+              {adminNavItems.map((item) => {
+                const isActive = isNavItemActive(pathname, item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onClose}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-[var(--brand-yellow)] text-[var(--brand-black)]"
+                        : "text-muted-foreground hover:bg-[var(--brand-tertiary)] hover:text-[var(--brand-black)]"
+                    }`}
+                  >
+                    <item.icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </>
+          ) : null}
         </nav>
 
         <div className="border-t border-[var(--brand-border)] pt-4">

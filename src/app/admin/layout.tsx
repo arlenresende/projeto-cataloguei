@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
 import { auth } from "@/lib/auth";
+import { isAdminUser } from "@/lib/feature-requests";
 
 export const metadata: Metadata = {
   title: {
@@ -41,8 +42,13 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
     redirect(`/verify-email?${params.toString()}`);
   }
 
+  const isAdmin = await isAdminUser({
+    userId: session.user.id,
+    email: session.user.email,
+  });
+
   return (
-    <AdminShell>
+    <AdminShell isAdmin={isAdmin}>
       <OnboardingGate />
       {children}
     </AdminShell>
