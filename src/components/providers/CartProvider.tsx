@@ -57,17 +57,25 @@ type CartProviderProps = {
 };
 
 export function CartProvider({ storeUrl, children }: CartProviderProps) {
-  const [items, setItems] = useState<CartItem[]>(() => {
-    if (typeof window === "undefined") {
-      return [];
-    }
-
-    return readStoredCart(storeUrl);
-  });
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setItems(readStoredCart(storeUrl));
+      setHydrated(true);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [storeUrl]);
+
+  useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
+
     window.localStorage.setItem(getStorageKey(storeUrl), JSON.stringify(items));
-  }, [items, storeUrl]);
+  }, [hydrated, items, storeUrl]);
 
   const addItem = useCallback((product: CartProduct) => {
     setItems((currentItems) => {

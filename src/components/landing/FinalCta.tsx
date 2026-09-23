@@ -31,10 +31,9 @@ export function FinalCta() {
             </span>
           </Button>
           <Button
-            variant="outline"
             size="lg"
             render={<Link href="/demo" />}
-            className="border-white/20 text-white hover:bg-white/10"
+            className="border border-white/25 bg-transparent text-white hover:bg-white/10"
           >
             Ver demonstração
           </Button>

@@ -30,6 +30,8 @@ export function StoreHeader({
   categories = [],
 }: StoreHeaderProps) {
   const { resolvedColors } = useTheme();
+  const menuBackground = resolvedColors.primary;
+  const menuText = resolvedColors.secondary;
   const { itemCount } = useCart();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -175,7 +177,7 @@ export function StoreHeader({
           className="hidden border-t md:block"
           style={{
             borderColor: resolvedColors.border,
-            backgroundColor: resolvedColors.secondary,
+            backgroundColor: menuBackground,
           }}
         >
           <div className="mx-auto flex max-w-6xl items-center gap-0 overflow-x-auto px-4">
@@ -190,13 +192,12 @@ export function StoreHeader({
                   key={name}
                   href={href}
                   className="shrink-0 px-5 py-3 text-sm font-semibold transition-colors"
-                  style={{ color: resolvedColors.cardBg + "CC" }}
+                  style={{ color: menuText }}
                   onMouseEnter={(e) => {
-                    (e.target as HTMLElement).style.color = resolvedColors.primary;
-                    (e.target as HTMLElement).style.backgroundColor = resolvedColors.secondary;
+                    (e.target as HTMLElement).style.backgroundColor =
+                      resolvedColors.cardBg + "30";
                   }}
                   onMouseLeave={(e) => {
-                    (e.target as HTMLElement).style.color = resolvedColors.cardBg + "CC";
                     (e.target as HTMLElement).style.backgroundColor = "transparent";
                   }}
                 >

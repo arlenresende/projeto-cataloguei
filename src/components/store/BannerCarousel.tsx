@@ -39,11 +39,12 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
 
   const banner = banners[current];
   const hasContent = banner.title || banner.description || banner.buttonText;
+  const bannerSurface = banner.bgColor || resolvedColors.primary;
 
   return (
     <section
       className="relative overflow-hidden"
-      style={{ backgroundColor: banner.bgColor || "var(--theme-background)" }}
+      style={{ backgroundColor: `${bannerSurface}14` }}
     >
       <div className="mx-auto max-w-6xl px-4 pt-6 pb-8 md:pt-8 md:pb-12">
         <div className="relative overflow-hidden rounded-2xl shadow-lg md:rounded-3xl">
@@ -74,7 +75,7 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
               <div
                 className="absolute inset-0"
                 style={{
-                  background: `linear-gradient(135deg, ${resolvedColors.secondary}E6 0%, ${resolvedColors.secondary}80 40%, transparent 70%)`,
+                  background: `linear-gradient(135deg, ${bannerSurface}E6 0%, ${bannerSurface}80 42%, transparent 72%)`,
                 }}
               />
             )}
@@ -83,7 +84,7 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
               <div
                 className="absolute inset-x-0 bottom-0 h-24"
                 style={{
-                  background: `linear-gradient(to top, ${resolvedColors.secondary}30, transparent)`,
+                  background: `linear-gradient(to top, ${bannerSurface}30, transparent)`,
                 }}
               />
             )}

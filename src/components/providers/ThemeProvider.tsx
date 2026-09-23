@@ -47,7 +47,7 @@ export function ThemeProvider({
           "--theme-accent": value.resolvedColors.accent,
           "--theme-card-bg": value.resolvedColors.cardBg,
           "--theme-border": value.resolvedColors.border,
-          background: value.config.background,
+          background: value.resolvedColors.background,
           color: value.resolvedColors.text,
           fontFamily: "var(--font-manrope), system-ui, sans-serif",
         } as React.CSSProperties}

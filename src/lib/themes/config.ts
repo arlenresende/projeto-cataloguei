@@ -396,6 +396,9 @@ export function resolveThemeColors(
 ) {
   return {
     ...config.colors,
+    background: "#FFFFFF",
+    text: "#111111",
+    cardBg: "#FFFFFF",
     ...(overrides.primaryColor && { primary: overrides.primaryColor }),
     ...(overrides.secondaryColor && { secondary: overrides.secondaryColor }),
   };
