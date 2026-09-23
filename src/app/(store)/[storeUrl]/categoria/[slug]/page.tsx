@@ -84,6 +84,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   });
 
   const canonicalUrl = buildCanonicalUrl(`/${store.slug}/categoria/${category.slug}`);
+  const analyticsEnabled = store.analyticsEnabled !== false;
+  const showCartActions = store.showCartActions ?? Boolean(store.whatsapp);
   const breadcrumbItems = [
     { name: "Home", url: absoluteUrl("/") },
     { name: store.name, url: absoluteUrl(`/${store.slug}`) },
@@ -92,11 +94,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <AnalyticsTracker
-        type="CATEGORY_VIEW"
-        storeSlug={store.slug}
-        categorySlug={category.slug}
-      />
+      {analyticsEnabled ? (
+        <AnalyticsTracker
+          type="CATEGORY_VIEW"
+          storeSlug={store.slug}
+          categorySlug={category.slug}
+        />
+      ) : null}
       <StructuredData data={buildBreadcrumbJsonLd(breadcrumbItems)} />
       <StructuredData
         data={buildCollectionPageJsonLd({
@@ -165,6 +169,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                 products={categoryProducts}
                 storeUrl={store.slug}
                 whatsapp={store.whatsapp}
+                showCartActions={showCartActions}
               />
             ) : (
               <div

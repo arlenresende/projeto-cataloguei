@@ -3,7 +3,7 @@ import type { ThemeSegment } from "@/lib/themes";
 export interface Product {
   id: string;
   name: string;
-  slug?: string;
+  slug?: string | null;
   description: string;
   price: number;
   compareAtPrice?: number | null;
@@ -11,7 +11,9 @@ export interface Product {
   images?: string[];
   category: string;
   categoryId?: string | null;
+  categorySlug?: string | null;
   brand?: string;
+  sku?: string | null;
   stock?: number;
   featured?: boolean;
   originalPrice?: number;

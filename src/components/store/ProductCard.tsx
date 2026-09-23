@@ -14,9 +14,15 @@ interface ProductCardProps {
   product: Product;
   storeUrl: string;
   whatsapp?: string;
+  showCartActions?: boolean;
 }
 
-export function ProductCard({ product, storeUrl, whatsapp }: ProductCardProps) {
+export function ProductCard({
+  product,
+  storeUrl,
+  whatsapp,
+  showCartActions = Boolean(whatsapp),
+}: ProductCardProps) {
   const { resolvedColors } = useTheme();
   const { addItem } = useCart();
   const images =
@@ -192,7 +198,7 @@ export function ProductCard({ product, storeUrl, whatsapp }: ProductCardProps) {
             <Eye size={14} />
             Ver detalhes
           </Link>
-          {whatsapp && (
+          {showCartActions && (
             <button
               onClick={handleAddToCart}
               className="flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold text-white transition-all hover:opacity-90"

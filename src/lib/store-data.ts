@@ -1,6 +1,75 @@
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import type { StoreThemeSegment } from "@prisma/client";
+import { demoStore, isDemoStoreSlug } from "@/lib/demo-store";
+
+export type PublicStore = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  logo: string | null;
+  whatsapp: string;
+  theme: StoreThemeSegment;
+  themeOverrides: {
+    primaryColor?: string;
+    secondaryColor?: string;
+  };
+  hideCatalogueiBranding: boolean;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  postalCode: string | null;
+  websiteUrl: string | null;
+  instagramUrl: string | null;
+  facebookUrl: string | null;
+  country: string | null;
+  updatedAt: Date;
+  analyticsEnabled?: boolean;
+  isDemo?: boolean;
+  showCartActions?: boolean;
+  heroes: Array<{
+    id: string;
+    title: string;
+    description: string;
+    image: string;
+    bgColor: string;
+    textColor: string;
+    alignment: "LEFT" | "CENTER" | "RIGHT";
+    buttonText: string;
+    buttonUrl: string;
+    updatedAt: Date;
+  }>;
+  categories: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
+    updatedAt: Date;
+  }>;
+  products: Array<{
+    id: string;
+    name: string;
+    slug: string | null;
+    description: string;
+    seoTitle: string | null;
+    seoDescription: string | null;
+    price: number;
+    compareAtPrice: number | null;
+    imageUrl: string | null;
+    images: string[];
+    category: string;
+    categoryId: string | null;
+    categorySlug: string | null;
+    brand: string;
+    sku: string | null;
+    stock: number;
+    featured: boolean;
+    updatedAt: Date;
+  }>;
+};
 
 /**
  * Fetches a store by its slug with products and active heroes, adapted
@@ -31,7 +100,11 @@ const getPublicStoreRecordBySlug = cache(async (slug: string) => {
   });
 });
 
-export const getPublicStoreBySlug = cache(async (slug: string) => {
+export const getPublicStoreBySlug = cache(async (slug: string): Promise<PublicStore | null> => {
+  if (isDemoStoreSlug(slug)) {
+    return demoStore;
+  }
+
   const store = await getPublicStoreRecordBySlug(slug);
 
   if (!store) return null;
@@ -190,6 +263,5 @@ export const getPublicLinktreeByStoreSlug = cache(async (storeSlug: string) => {
   };
 });
 
-export type PublicStore = NonNullable<Awaited<ReturnType<typeof getPublicStoreBySlug>>>;
 export type PublicProduct = PublicStore["products"][number];
 export type PublicHero = PublicStore["heroes"][number];

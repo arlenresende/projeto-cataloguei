@@ -35,7 +35,7 @@ export function Hero() {
             <Button
               variant="outline"
               size="lg"
-              render={<Link href="/techstore" />}
+              render={<Link href="/demo" />}
             >
               Ver demonstração
             </Button>

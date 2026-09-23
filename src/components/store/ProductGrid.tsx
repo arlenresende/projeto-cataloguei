@@ -5,9 +5,15 @@ interface ProductGridProps {
   products: Product[];
   storeUrl: string;
   whatsapp?: string;
+  showCartActions?: boolean;
 }
 
-export function ProductGrid({ products, storeUrl, whatsapp }: ProductGridProps) {
+export function ProductGrid({
+  products,
+  storeUrl,
+  whatsapp,
+  showCartActions = Boolean(whatsapp),
+}: ProductGridProps) {
   return (
     <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5 lg:grid-cols-4">
       {products.map((product) => (
@@ -16,6 +22,7 @@ export function ProductGrid({ products, storeUrl, whatsapp }: ProductGridProps) 
             product={product}
             storeUrl={storeUrl}
             whatsapp={whatsapp}
+            showCartActions={showCartActions}
           />
         </li>
       ))}

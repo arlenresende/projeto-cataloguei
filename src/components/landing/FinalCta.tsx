@@ -33,7 +33,7 @@ export function FinalCta() {
           <Button
             variant="outline"
             size="lg"
-            render={<Link href="/techstore" />}
+            render={<Link href="/demo" />}
             className="border-white/20 text-white hover:bg-white/10"
           >
             Ver demonstração

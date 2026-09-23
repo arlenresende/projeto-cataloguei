@@ -118,6 +118,8 @@ export default async function StorePage({ params, searchParams }: StorePageProps
 
   const hasActiveFilters = category || min || max || q;
   const canonicalUrl = buildCanonicalUrl(`/${store.slug}`);
+  const analyticsEnabled = store.analyticsEnabled !== false;
+  const showCartActions = store.showCartActions ?? Boolean(store.whatsapp);
   const breadcrumbItems = [
     { name: "Home", url: absoluteUrl("/") },
     { name: store.name, url: canonicalUrl },
@@ -126,7 +128,9 @@ export default async function StorePage({ params, searchParams }: StorePageProps
 
   return (
     <div className="flex min-h-screen flex-col">
-      <AnalyticsTracker type="STORE_VIEW" storeSlug={store.slug} />
+      {analyticsEnabled ? (
+        <AnalyticsTracker type="STORE_VIEW" storeSlug={store.slug} />
+      ) : null}
       <StructuredData data={buildBreadcrumbJsonLd(breadcrumbItems)} />
       <StructuredData
         data={buildCollectionPageJsonLd({
@@ -249,6 +253,7 @@ export default async function StorePage({ params, searchParams }: StorePageProps
                 products={filteredProducts}
                 storeUrl={store.slug}
                 whatsapp={store.whatsapp}
+                showCartActions={showCartActions}
               />
             ) : (
               <div

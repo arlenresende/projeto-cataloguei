@@ -89,6 +89,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
 
   const { store, product } = result;
+  const analyticsEnabled = store.analyticsEnabled !== false;
+  const showCartActions = store.showCartActions ?? Boolean(store.whatsapp);
 
   if (product.slug && id !== product.slug) {
     permanentRedirect(`/${store.slug}/product/${product.slug}`);
@@ -139,11 +141,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <AnalyticsTracker
-        type="PRODUCT_VIEW"
-        storeSlug={store.slug}
-        productId={product.id}
-      />
+      {analyticsEnabled ? (
+        <AnalyticsTracker
+          type="PRODUCT_VIEW"
+          storeSlug={store.slug}
+          productId={product.id}
+        />
+      ) : null}
       <HeadMetadata
         tags={[
           { property: "og:type", content: "product" },
@@ -287,7 +291,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               ) : null}
 
               <div className="mt-8 flex flex-col gap-3">
-                {store.whatsapp ? (
+                {showCartActions ? (
                   <ProductWhatsAppButton
                     productId={product.id}
                     productName={product.name}
@@ -344,6 +348,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     product={item}
                     storeUrl={store.slug}
                     whatsapp={store.whatsapp}
+                    showCartActions={showCartActions}
                   />
                 ))}
               </div>

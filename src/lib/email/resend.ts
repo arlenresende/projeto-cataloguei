@@ -21,6 +21,13 @@ interface FeatureRequestEmailParams {
   adminNote?: string | null;
 }
 
+interface NewStoreAdminNotificationParams {
+  storeName: string;
+  storeSlug: string;
+  userName: string;
+  userEmail: string;
+}
+
 interface TemplateEmailParams {
   title: string;
   preheader: string;
@@ -87,6 +94,13 @@ function escapeHtml(value: string) {
 
 function paragraph(value: string) {
   return escapeHtml(value).replace(/\n/g, "<br>");
+}
+
+function getAdminEmails() {
+  return (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((email) => email.trim())
+    .filter(Boolean);
 }
 
 function renderTemplateEmail({
@@ -237,4 +251,44 @@ export async function sendFeatureRequestDoneEmail({
         "A sugestão que você enviou foi marcada como concluída.",
     }),
   });
+}
+
+export async function sendNewStoreAdminNotificationEmail({
+  storeName,
+  storeSlug,
+  userName,
+  userEmail,
+}: NewStoreAdminNotificationParams) {
+  const adminEmails = getAdminEmails();
+
+  if (adminEmails.length === 0) {
+    console.warn("[email] ADMIN_EMAILS nao configurado para aviso de nova loja.");
+    return;
+  }
+
+  const storeUrl = absoluteUrl(`/${storeSlug}`);
+
+  await Promise.all(
+    adminEmails.map((adminEmail) =>
+      sendEmail({
+        to: adminEmail,
+        subject: `Nova loja cadastrada: ${storeName}`,
+        html: renderTemplateEmail({
+          title: "Nova loja cadastrada",
+          preheader: `${storeName} acabou de ser cadastrada no Cataloguei.`,
+          heading: "Nova loja cadastrada",
+          name: "admin",
+          message: [
+            `<strong style="color: #09090b;">Loja:</strong> ${paragraph(storeName)}`,
+            `<strong style="color: #09090b;">URL:</strong> <a href="${escapeHtml(storeUrl)}" style="color: #09090b;">${paragraph(storeUrl)}</a>`,
+            `<strong style="color: #09090b;">Responsavel:</strong> ${paragraph(userName)} (${paragraph(userEmail)})`,
+          ].join("<br><br>"),
+          actionLabel: "Ver loja",
+          actionUrl: storeUrl,
+          note: "Este e-mail foi enviado porque uma nova loja foi cadastrada no Cataloguei.",
+          fallbackLabel: "Você também pode acessar a loja pelo link abaixo:",
+        }),
+      })
+    )
+  );
 }

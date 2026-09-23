@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { assertStoreCustomizationAccess, BillingAccessError } from "@/lib/billing/subscription";
+import { sendNewStoreAdminNotificationEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { storeCreateSchema } from "@/lib/schemas/store";
 import {
@@ -122,6 +123,19 @@ export async function POST(request: Request) {
     const store = await prisma.store.create({
       data: buildStoreCreateData(data, session.user.id),
       select: storeAdminSelect,
+    });
+
+    sendNewStoreAdminNotificationEmail({
+      storeName: store.name,
+      storeSlug: store.slug,
+      userName: session.user.name || "Lojista",
+      userEmail: session.user.email,
+    }).catch((emailError) => {
+      console.error("[email] Falha ao avisar admin sobre nova loja", {
+        storeId: store.id,
+        userId: session.user.id,
+        error: emailError,
+      });
     });
 
     return NextResponse.json({ store }, { status: 201 });
