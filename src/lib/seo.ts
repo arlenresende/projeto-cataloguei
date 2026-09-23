@@ -278,9 +278,13 @@ export function buildDefaultMetadata(): Metadata {
     referrer: "origin-when-cross-origin",
     manifest: "/manifest.webmanifest",
     icons: {
-      icon: [{ url: "/favicon.ico" }],
-      shortcut: [{ url: "/favicon.ico" }],
-      apple: [{ url: "/favicon.ico" }],
+      icon: [
+        { url: "/favicon.svg", type: "image/svg+xml" },
+        { url: "/brand/cataloguei-mark-32.svg", sizes: "32x32", type: "image/svg+xml" },
+        { url: "/brand/cataloguei-mark-64.svg", sizes: "64x64", type: "image/svg+xml" },
+      ],
+      shortcut: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+      apple: [{ url: "/brand/cataloguei-mark-180.svg", sizes: "180x180", type: "image/svg+xml" }],
     },
     ...defaultPageMetadata,
     verification: {

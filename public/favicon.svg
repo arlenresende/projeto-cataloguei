@@ -1,0 +1,7 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Cataloguei</title>
+  <desc id="desc">Ícone da Cataloguei com sacola e check</desc>
+  <path d="M14 25H50L46.5 56H17.5L14 25Z" stroke="#FFD400" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M21 25V18C21 11.925 25.925 7 32 7C38.075 7 43 11.925 43 18V25" stroke="#FFD400" stroke-width="6" stroke-linecap="round"/>
+  <path d="M22.5 40L29 46.5L42.5 33" stroke="#111111" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

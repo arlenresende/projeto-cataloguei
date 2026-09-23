@@ -19,15 +19,16 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["shopping", "business", "productivity"],
     icons: [
       {
-        src: "/cataloguei-mark.svg",
-        sizes: "160x160",
+        src: "/brand/cataloguei-mark-180.svg",
+        sizes: "180x180",
         type: "image/svg+xml",
         purpose: "any",
       },
       {
-        src: "/favicon.ico",
-        sizes: "any",
-        type: "image/x-icon",
+        src: "/brand/cataloguei-mark-512.svg",
+        sizes: "512x512",
+        type: "image/svg+xml",
+        purpose: "any",
       },
     ],
   };
