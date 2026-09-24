@@ -120,13 +120,13 @@ export function ProductForm({
     setImages(defaultValues?.images || []);
   }, [defaultValues?.images]);
 
-  function syncSelectedImageFiles(nextImages: ProductImage[]) {
+  useEffect(() => {
     onSelectedImagesChange?.(
-      nextImages
+      images
         .map((image) => image.file)
         .filter((file): file is File => Boolean(file))
     );
-  }
+  }, [images, onSelectedImagesChange]);
 
   async function handleAddImages(files: File[]) {
     if (!canSelectImages || files.length === 0) return;
@@ -169,7 +169,6 @@ export function ProductForm({
           })),
         ];
 
-        syncSelectedImageFiles(nextImages);
         return nextImages;
       });
       setAddingImage(false);
@@ -209,11 +208,7 @@ export function ProductForm({
 
     if (image?.localPreview) {
       URL.revokeObjectURL(image.url);
-      setImages((prev) => {
-        const nextImages = prev.filter((img) => img.id !== imageId);
-        syncSelectedImageFiles(nextImages);
-        return nextImages;
-      });
+      setImages((prev) => prev.filter((img) => img.id !== imageId));
       return;
     }
 
