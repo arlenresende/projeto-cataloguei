@@ -75,8 +75,7 @@ function LoginPageContent() {
       }
 
       trackGoogleEvent("login_success", { method: "email" });
-      router.push(redirectTarget);
-      router.refresh();
+      window.location.assign(redirectTarget);
     });
   }
 
