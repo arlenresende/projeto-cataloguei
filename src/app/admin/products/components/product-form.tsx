@@ -31,6 +31,8 @@ interface ProductImage {
   url: string;
   alt: string | null;
   position: number;
+  file?: File;
+  localPreview?: boolean;
 }
 
 interface ProductFormProps {
@@ -39,6 +41,7 @@ interface ProductFormProps {
   categories: CategoryOption[];
   onSubmit: (data: ProductFormData) => Promise<void>;
   onAddImage?: (file: File) => Promise<void>;
+  onSelectedImagesChange?: (files: File[]) => void;
   onRemoveImage?: (imageId: string) => Promise<void>;
   onReorderImages?: (images: { id: string; position: number }[]) => Promise<void>;
   serverError?: string | null;
@@ -62,6 +65,7 @@ export function ProductForm({
   categories,
   onSubmit,
   onAddImage,
+  onSelectedImagesChange,
   onRemoveImage,
   onReorderImages,
   serverError,
@@ -103,6 +107,7 @@ export function ProductForm({
   const [images, setImages] = useState<ProductImage[]>(defaultValues?.images || []);
   const [addingImage, setAddingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const canSelectImages = Boolean(onAddImage || onSelectedImagesChange);
 
   // Auto-generate slug from name
   useEffect(() => {
@@ -115,8 +120,16 @@ export function ProductForm({
     setImages(defaultValues?.images || []);
   }, [defaultValues?.images]);
 
+  function syncSelectedImageFiles(nextImages: ProductImage[]) {
+    onSelectedImagesChange?.(
+      nextImages
+        .map((image) => image.file)
+        .filter((file): file is File => Boolean(file))
+    );
+  }
+
   async function handleAddImages(files: File[]) {
-    if (!onAddImage || files.length === 0) return;
+    if (!canSelectImages || files.length === 0) return;
 
     const validFiles: File[] = [];
 
@@ -141,6 +154,27 @@ export function ProductForm({
     }
 
     setAddingImage(true);
+
+    if (!onAddImage) {
+      setImages((prev) => {
+        const nextImages = [
+          ...prev,
+          ...validFiles.map((file, index) => ({
+            id: `local-${crypto.randomUUID()}`,
+            url: URL.createObjectURL(file),
+            alt: file.name,
+            position: prev.length + index,
+            file,
+            localPreview: true,
+          })),
+        ];
+
+        syncSelectedImageFiles(nextImages);
+        return nextImages;
+      });
+      setAddingImage(false);
+      return;
+    }
 
     let successCount = 0;
 
@@ -171,6 +205,18 @@ export function ProductForm({
   }
 
   async function handleRemoveImage(imageId: string) {
+    const image = images.find((img) => img.id === imageId);
+
+    if (image?.localPreview) {
+      URL.revokeObjectURL(image.url);
+      setImages((prev) => {
+        const nextImages = prev.filter((img) => img.id !== imageId);
+        syncSelectedImageFiles(nextImages);
+        return nextImages;
+      });
+      return;
+    }
+
     if (!onRemoveImage) return;
     await onRemoveImage(imageId);
     setImages((prev) => prev.filter((img) => img.id !== imageId));
@@ -291,7 +337,7 @@ export function ProductForm({
                   Principal
                 </span>
               )}
-              {onRemoveImage && (
+              {(onRemoveImage || img.localPreview) && (
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(img.id)}
@@ -304,7 +350,7 @@ export function ProductForm({
           ))}
         </div>
 
-        {onAddImage ? (
+        {canSelectImages ? (
           <>
             <button
               type="button"

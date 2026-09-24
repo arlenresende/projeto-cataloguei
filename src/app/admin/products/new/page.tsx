@@ -22,6 +22,7 @@ export default function NewProductPage() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
   useEffect(() => {
     async function loadCategories() {
@@ -60,6 +61,29 @@ export default function NewProductPage() {
         return;
       }
 
+      const productId = result.product?.id;
+
+      if (productId && selectedImages.length > 0) {
+        for (const file of selectedImages) {
+          const formData = new FormData();
+          formData.append("file", file);
+
+          const imageRes = await fetch(`/api/products/${productId}/images`, {
+            method: "POST",
+            body: formData,
+          });
+          const imageResult = await imageRes.json();
+
+          if (!imageRes.ok) {
+            setServerError(
+              imageResult.error ||
+                "Produto criado, mas não foi possível enviar uma das imagens."
+            );
+            return;
+          }
+        }
+      }
+
       router.push("/admin/products");
       router.refresh();
     } catch {
@@ -80,6 +104,7 @@ export default function NewProductPage() {
           mode="create"
           categories={categories}
           onSubmit={handleSubmit}
+          onSelectedImagesChange={setSelectedImages}
           serverError={serverError}
           isSubmitting={isSubmitting}
         />
