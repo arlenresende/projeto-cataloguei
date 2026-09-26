@@ -46,17 +46,17 @@ type PlansContentProps = {
 
 const COMPARISON_ROWS = [
   ["Loja", "1", "1"],
-  ["Produtos", "15", "Ilimitados"],
+  ["Produtos", "5", "Ilimitados"],
   ["URL própria", "Sim", "Sim"],
   ["Remover marca Cataloguei", "Nao", "Sim"],
   ["Analytics", "Basico", "Completo"],
   ["Banners", "2", "Ilimitados"],
   ["Personalizacao", "Basica", "Completa"],
   ["SEO avancado", "Nao", "Sim"],
-  ["Dominio proprio", "Nao", "Sim"],
-  ["Compartilhamento avancado", "Nao", "Sim"],
-  ["Suporte", "Normal", "Prioritario"],
-  ['Pensamos junto com voce?', "Nao", "Sim"],
+  ["Linktree da loja", "Sim", "Sim"],
+  ["Pedidos de features", "Nao", "Sim"],
+  ["Suporte", "Normal", "Via WhatsApp"],
+  ["Pensamos junto com voce?", "Nao", "Sim"],
 ] as const;
 
 export function PlansContent({
@@ -367,7 +367,9 @@ export function PlansContent({
               "Banners ilimitados",
               "Remocao da marca Cataloguei",
               "SEO avancado e personalizacao completa",
-              "Dominio proprio e recursos avancados",
+              "Criacao de Linktree da loja",
+              "Acesso a pedidos de features",
+              "Suporte via WhatsApp",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2">
                 <Check className="mt-0.5 size-4 text-[var(--brand-black)]" />

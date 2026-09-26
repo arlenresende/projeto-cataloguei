@@ -72,18 +72,18 @@ describe("billing subscription guards", () => {
     });
   });
 
-  it("permite criar o produto 15 no FREE", async () => {
+  it("permite criar o produto 5 no FREE", async () => {
     prismaMock.subscription.upsert.mockResolvedValue(makeSubscription());
-    prismaMock.product.count.mockResolvedValue(14);
+    prismaMock.product.count.mockResolvedValue(4);
 
     await expect(assertCanCreateProduct("user_1", "store_1")).resolves.toMatchObject({
       effectivePlan: "FREE",
     });
   });
 
-  it("bloqueia criar o produto 16 no FREE", async () => {
+  it("bloqueia criar o produto 6 no FREE", async () => {
     prismaMock.subscription.upsert.mockResolvedValue(makeSubscription());
-    prismaMock.product.count.mockResolvedValue(15);
+    prismaMock.product.count.mockResolvedValue(5);
 
     await expect(assertCanCreateProduct("user_1", "store_1")).rejects.toMatchObject({
       code: "product_limit_reached",
@@ -91,14 +91,14 @@ describe("billing subscription guards", () => {
     });
   });
 
-  it("permite o produto 16 no PREMIUM", async () => {
+  it("permite o produto 6 no PREMIUM", async () => {
     prismaMock.subscription.upsert.mockResolvedValue(
       makeSubscription({
         plan: "PREMIUM",
         status: SubscriptionStatus.ACTIVE,
       })
     );
-    prismaMock.product.count.mockResolvedValue(15);
+    prismaMock.product.count.mockResolvedValue(5);
 
     await expect(assertCanCreateProduct("user_1", "store_1")).resolves.toMatchObject({
       effectivePlan: "PREMIUM",

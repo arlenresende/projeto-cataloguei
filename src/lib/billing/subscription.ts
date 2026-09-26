@@ -189,7 +189,7 @@ export async function assertCanCreateProduct(userId: string, storeId: string) {
 
     if (total >= limit) {
       throw new BillingAccessError(
-        "Seu plano gratuito permite até 15 produtos. Faça upgrade para o Premium para cadastrar produtos ilimitados.",
+        "Seu plano gratuito permite ate 5 produtos. Faça upgrade para o Premium para cadastrar produtos ilimitados.",
         { code: "product_limit_reached" }
       );
     }

@@ -37,7 +37,7 @@ const PLAN_CONFIG: Record<Plan, PlanConfig> = {
       think_together: false,
     },
     limits: {
-      products: 15,
+      products: 5,
       banners: 2,
       productImages: 1,
     },

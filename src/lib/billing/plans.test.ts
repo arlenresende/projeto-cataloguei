@@ -96,7 +96,7 @@ describe("billing plan helpers", () => {
       status: SubscriptionStatus.ACTIVE,
     });
 
-    expect(getPlanLimit("products", freeSubscription)).toBe(15);
+    expect(getPlanLimit("products", freeSubscription)).toBe(5);
     expect(getPlanLimit("banners", freeSubscription)).toBe(2);
     expect(getPlanLimit("productImages", freeSubscription)).toBe(1);
 

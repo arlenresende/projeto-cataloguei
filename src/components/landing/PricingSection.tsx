@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 const FREE_FEATURES = [
   "1 loja com URL propria do Cataloguei",
-  "Ate 15 produtos",
+  "Ate 5 produtos",
   "Analytics basico",
   "Ate 2 banners ativos",
   "Personalizacao basica",
@@ -19,8 +19,10 @@ const PREMIUM_FEATURES = [
   "Remocao da marca Cataloguei",
   "Analytics completo",
   "Personalizacao completa",
-  "SEO avancado e dominio proprio",
-  "Compartilhamento avancado e suporte prioritario",
+  "SEO avancado",
+  "Criacao de Linktree da loja",
+  "Acesso a pedidos de features",
+  "Suporte via WhatsApp",
 ];
 
 export function PricingSection() {
