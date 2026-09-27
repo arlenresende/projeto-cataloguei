@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { acquisitionPageList } from "@/lib/acquisition-pages";
 import { prisma } from "@/lib/prisma";
 import { absoluteUrl, toAbsoluteAssetUrl } from "@/lib/site-config";
 import { getRealProductImages } from "@/lib/seo";
@@ -82,6 +83,18 @@ export async function buildCoreSitemapEntries(): Promise<MetadataRoute.Sitemap> 
       changeFrequency: "weekly",
       priority: 1,
     },
+    {
+      url: absoluteUrl("/catalogo-online"),
+      lastModified: latestStoreUpdate,
+      changeFrequency: "weekly",
+      priority: 0.95,
+    },
+    ...acquisitionPageList.map((page) => ({
+      url: absoluteUrl(`/${page.slug}`),
+      lastModified: latestStoreUpdate,
+      changeFrequency: "weekly" as const,
+      priority: 0.85,
+    })),
   ];
 
   for (const store of stores) {

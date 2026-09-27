@@ -402,6 +402,88 @@ export function buildWebSiteJsonLd(input: {
   };
 }
 
+export function buildOrganizationJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": absoluteUrl("/#organization"),
+    name: SITE_NAME,
+    url: absoluteUrl("/"),
+    logo: absoluteUrl("/brand/cataloguei-logo-horizontal.svg"),
+    description: SITE_DESCRIPTION,
+    foundingLocation: {
+      "@type": "Country",
+      name: "Brasil",
+    },
+  };
+}
+
+export function buildSoftwareApplicationJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "@id": absoluteUrl("/#software"),
+    name: SITE_NAME,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    url: absoluteUrl("/"),
+    description: SITE_DESCRIPTION,
+    inLanguage: SITE_LANGUAGE,
+    publisher: {
+      "@id": absoluteUrl("/#organization"),
+    },
+    featureList: [
+      "Catálogo digital com produtos e categorias",
+      "Personalização visual da loja online",
+      "Pedidos enviados diretamente pelo WhatsApp",
+      "Linktree para divulgar links do negócio",
+      "Solicitação de novas funcionalidades por clientes Premium",
+    ],
+    offers: [
+      {
+        "@type": "Offer",
+        name: "Plano grátis",
+        price: "0",
+        priceCurrency: "BRL",
+        url: absoluteUrl("/#pricing"),
+        category: "free",
+      },
+      {
+        "@type": "Offer",
+        name: "Plano Premium",
+        price: "24.90",
+        priceCurrency: "BRL",
+        url: absoluteUrl("/#pricing"),
+        category: "subscription",
+      },
+    ],
+  };
+}
+
+export function buildFaqPageJsonLd(
+  items: Array<{ question: string; answer: string }>
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
+}
+
+export function buildJsonLdGraph(items: unknown[]) {
+  return {
+    "@context": "https://schema.org",
+    "@graph": items,
+  };
+}
+
 export function buildStoreJsonLd(input: {
   name: string;
   description?: string | null;

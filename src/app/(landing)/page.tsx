@@ -9,6 +9,8 @@ import {
   FeatureTabs,
   IntegrationsList,
   PricingSection,
+  SeoContent,
+  HOME_FAQS,
   FinalCta,
   ContactSection,
   Footer,
@@ -16,17 +18,21 @@ import {
 import { absoluteUrl, SITE_NAME } from "@/lib/site-config";
 import {
   buildDefaultSeoImage,
+  buildFaqPageJsonLd,
+  buildJsonLdGraph,
+  buildOrganizationJsonLd,
   buildPageMetadata,
+  buildSoftwareApplicationJsonLd,
   buildWebSiteJsonLd,
 } from "@/lib/seo";
 
-const HOME_TITLE = "Catálogo online para vender mais pelo WhatsApp";
+const HOME_TITLE = "Catálogo Digital para WhatsApp | Cataloguei";
 const HOME_DESCRIPTION =
-  "Crie sua vitrine digital com catálogo de produtos, páginas de loja, SEO técnico e compartilhamento rápido para vender mais com o Cataloguei.";
+  "Crie seu catálogo online grátis em minutos. Personalize sua loja, organize seus produtos e receba pedidos diretamente pelo WhatsApp.";
 
 export const metadata: Metadata = buildPageMetadata({
   title: HOME_TITLE,
-  socialTitle: `${SITE_NAME} | Catálogo online para vender mais`,
+  socialTitle: HOME_TITLE,
   description: HOME_DESCRIPTION,
   path: "/",
   images: [buildDefaultSeoImage()],
@@ -36,11 +42,16 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
       <StructuredData
-        data={buildWebSiteJsonLd({
-          name: SITE_NAME,
-          url: absoluteUrl("/"),
-          description: HOME_DESCRIPTION,
-        })}
+        data={buildJsonLdGraph([
+          buildWebSiteJsonLd({
+            name: SITE_NAME,
+            url: absoluteUrl("/"),
+            description: HOME_DESCRIPTION,
+          }),
+          buildOrganizationJsonLd(),
+          buildSoftwareApplicationJsonLd(),
+          buildFaqPageJsonLd(HOME_FAQS),
+        ])}
       />
       <Header />
       <main id="main">
@@ -51,6 +62,7 @@ export default function LandingPage() {
         <FeatureTabs />
         <IntegrationsList />
         <PricingSection />
+        <SeoContent />
         <FinalCta />
         <ContactSection />
       </main>

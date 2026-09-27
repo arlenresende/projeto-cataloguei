@@ -7,6 +7,7 @@ export { ProductShowcase } from "./ProductShowcase";
 export { FeatureTabs } from "./FeatureTabs";
 export { IntegrationsList } from "./IntegrationsList";
 export { PricingSection } from "./PricingSection";
+export { SeoContent, HOME_FAQS } from "./SeoContent";
 export { FinalCta } from "./FinalCta";
 export { ContactSection } from "./ContactSection";
 export { Footer } from "./Footer";

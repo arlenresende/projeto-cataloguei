@@ -2,19 +2,23 @@ const DEFAULT_SITE_URL = "http://localhost:3000";
 
 export const SITE_NAME = "Cataloguei";
 export const SITE_SHORT_NAME = "Cataloguei";
-export const SITE_TITLE = "Catálogo online para vender mais";
+export const SITE_TITLE = "Catálogo Digital para WhatsApp";
 export const SITE_DESCRIPTION =
-  "Crie uma loja virtual leve, compartilhe seu catálogo online e receba pedidos pelo WhatsApp com o Cataloguei.";
+  "Crie seu catálogo online grátis em minutos. Personalize sua loja, organize seus produtos e receba pedidos diretamente pelo WhatsApp.";
 export const SITE_KEYWORDS = [
   "catalogo online",
   "catalogo digital",
+  "catalogo digital gratis",
   "loja virtual",
   "catalogo para whatsapp",
+  "criar catalogo online",
+  "catalogo para loja de roupas",
+  "pedidos pelo whatsapp",
   "vitrine online",
   "e-commerce",
   "Cataloguei",
 ];
-export const DEFAULT_THEME_COLOR = "#7c3aed";
+export const DEFAULT_THEME_COLOR = "#FFD400";
 export const SITE_LOCALE = "pt_BR";
 export const SITE_LANGUAGE = "pt-BR";
 export const DEFAULT_OG_IMAGE_PATH = "/og";
