@@ -6,6 +6,7 @@ import {
   resetCanceledStripeSubscription,
   syncStripeSubscription,
 } from "@/lib/billing/stripe";
+import { createAuditLog } from "@/lib/audit-log";
 import { prisma } from "@/lib/prisma";
 import { getStripe, getStripeWebhookSecret } from "@/lib/stripe";
 
@@ -54,6 +55,16 @@ export async function POST(request: Request) {
 
   try {
     await handleStripeEvent(event);
+    await createAuditLog({
+      action: "STRIPE_WEBHOOK_PROCESSED",
+      targetType: "STRIPE_WEBHOOK_EVENT",
+      targetId: event.id,
+      metadata: {
+        eventType: event.type,
+        livemode: event.livemode,
+      },
+      request: { headers: request.headers },
+    });
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error("Erro ao processar webhook Stripe:", error);

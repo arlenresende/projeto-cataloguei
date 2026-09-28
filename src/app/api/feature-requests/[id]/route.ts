@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireVerifiedSession } from "@/lib/api-session";
+import { createAuditLog } from "@/lib/audit-log";
 import {
   sendFeatureRequestDoneEmail,
   sendFeatureRequestInProgressEmail,
@@ -57,6 +58,22 @@ export async function PATCH(
       { status: 404 }
     );
   }
+
+  await createAuditLog({
+    action: "FEATURE_REQUEST_UPDATED",
+    actor: {
+      id: session.user.id,
+      email: session.user.email,
+    },
+    targetType: "FEATURE_REQUEST",
+    targetId: featureRequest.id,
+    metadata: {
+      title: featureRequest.title,
+      status: featureRequest.status,
+      adminNote: featureRequest.adminNote,
+    },
+    request: { headers: request.headers },
+  });
 
   try {
     if (featureRequest.status === "IN_PROGRESS") {

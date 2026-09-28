@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { createAuditLog } from "@/lib/audit-log";
 import { assertStoreCustomizationAccess, BillingAccessError } from "@/lib/billing/subscription";
 import { sendNewStoreAdminNotificationEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
@@ -43,6 +44,7 @@ export async function GET() {
 
 // POST /api/stores — create a store (only if user doesn't have one)
 export async function POST(request: Request) {
+  const requestHeaders = request.headers;
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -123,6 +125,22 @@ export async function POST(request: Request) {
     const store = await prisma.store.create({
       data: buildStoreCreateData(data, session.user.id),
       select: storeAdminSelect,
+    });
+
+    await createAuditLog({
+      action: "STORE_CREATED",
+      actor: {
+        id: session.user.id,
+        email: session.user.email,
+      },
+      targetType: "STORE",
+      targetId: store.id,
+      storeId: store.id,
+      metadata: {
+        name: store.name,
+        slug: store.slug,
+      },
+      request: { headers: requestHeaders },
     });
 
     sendNewStoreAdminNotificationEmail({

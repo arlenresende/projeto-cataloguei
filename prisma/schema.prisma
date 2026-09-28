@@ -83,6 +83,20 @@ enum LandingLeadStatus {
   DISCARDED
 }
 
+enum AuditAction {
+  USER_CREATED
+  STORE_CREATED
+  STORE_UPDATED
+  STORE_DELETED
+  STORE_SUSPENDED
+  STORE_RESTORED
+  SUBSCRIPTION_STARTED
+  SUBSCRIPTION_CANCELED
+  STRIPE_WEBHOOK_PROCESSED
+  FEATURE_REQUEST_CREATED
+  FEATURE_REQUEST_UPDATED
+}
+
 // ============================================================
 // Models
 // ============================================================
@@ -107,6 +121,27 @@ model User {
   featureRequests FeatureRequest[]
 
   @@map("users")
+}
+
+model AuditLog {
+  id           String      @id @default(cuid())
+  action       AuditAction
+  actorUserId  String?
+  actorEmail   String?
+  targetType   String
+  targetId     String?
+  storeId      String?
+  metadata     Json?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime    @default(now())
+
+  @@index([action])
+  @@index([actorUserId])
+  @@index([targetType, targetId])
+  @@index([storeId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
 
 model Account {

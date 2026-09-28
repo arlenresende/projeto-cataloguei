@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireVerifiedSession } from "@/lib/api-session";
+import { createAuditLog } from "@/lib/audit-log";
 import {
   ensureStripeCustomerForUser,
   STRIPE_PREMIUM_SUBSCRIPTION_METADATA,
@@ -9,7 +10,7 @@ import { prisma } from "@/lib/prisma";
 import { absoluteUrl } from "@/lib/site-config";
 import { getStripe, getStripePremiumPriceId } from "@/lib/stripe";
 
-export async function POST() {
+export async function POST(request: Request) {
   const session = await requireVerifiedSession(
     "Verifique seu e-mail antes de contratar o Premium."
   );
@@ -62,6 +63,22 @@ export async function POST() {
     });
 
     const refreshed = await getUserBillingState(session.user.id);
+
+    await createAuditLog({
+      action: "SUBSCRIPTION_STARTED",
+      actor: {
+        id: session.user.id,
+        email: session.user.email,
+      },
+      targetType: "SUBSCRIPTION",
+      targetId: refreshed.subscription.id,
+      metadata: {
+        stripeCheckoutSessionId: checkoutSession.id,
+        stripeCustomerId,
+        stripePriceId: priceId,
+      },
+      request: { headers: request.headers },
+    });
 
     return NextResponse.json(
       {

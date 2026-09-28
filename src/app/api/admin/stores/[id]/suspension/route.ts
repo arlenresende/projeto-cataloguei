@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireVerifiedSession } from "@/lib/api-session";
+import { createAuditLog } from "@/lib/audit-log";
 import { isAdminUser } from "@/lib/feature-requests";
 import { prisma } from "@/lib/prisma";
 
@@ -22,6 +23,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestHeaders = request.headers;
   const session = await requireVerifiedSession(
     "Verifique seu e-mail antes de alterar lojas."
   );
@@ -56,7 +58,7 @@ export async function PATCH(
   const { id } = await params;
   const existingStore = await prisma.store.findUnique({
     where: { id },
-    select: { id: true },
+    select: { id: true, name: true, slug: true, isActive: true, adminSuspendedAt: true },
   });
 
   if (!existingStore) {
@@ -90,6 +92,25 @@ export async function PATCH(
       adminSuspensionReason: true,
       adminSuspendedById: true,
     },
+  });
+
+  await createAuditLog({
+    action: input.action === "suspend" ? "STORE_SUSPENDED" : "STORE_RESTORED",
+    actor: {
+      id: session.user.id,
+      email: session.user.email,
+    },
+    targetType: "STORE",
+    targetId: store.id,
+    storeId: store.id,
+    metadata: {
+      name: store.name,
+      slug: store.slug,
+      previousIsActive: existingStore.isActive,
+      previousAdminSuspendedAt: existingStore.adminSuspendedAt?.toISOString() ?? null,
+      reason: input.action === "suspend" ? input.reason : null,
+    },
+    request: { headers: requestHeaders },
   });
 
   return NextResponse.json({ store });

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { createAuditLog } from "@/lib/audit-log";
 import { assertStoreCustomizationAccess, BillingAccessError } from "@/lib/billing/subscription";
 import { prisma } from "@/lib/prisma";
 import { storeUpdateSchema } from "@/lib/schemas/store";
@@ -50,6 +51,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestHeaders = request.headers;
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -70,7 +72,7 @@ export async function PATCH(
   // Verify ownership
   const existing = await prisma.store.findFirst({
     where: { id, userId: session.user.id },
-    select: { id: true, slug: true, adminSuspendedAt: true },
+    select: { id: true, name: true, slug: true, isActive: true, adminSuspendedAt: true },
   });
 
   if (!existing) {
@@ -159,6 +161,28 @@ export async function PATCH(
       select: storeAdminSelect,
     });
 
+    if (store) {
+      await createAuditLog({
+        action: "STORE_UPDATED",
+        actor: {
+          id: session.user.id,
+          email: session.user.email,
+        },
+        targetType: "STORE",
+        targetId: store.id,
+        storeId: store.id,
+        metadata: {
+          name: store.name,
+          slug: store.slug,
+          previousSlug: existing.slug,
+          previousIsActive: existing.isActive,
+          isActive: store.isActive,
+          changedFields: Object.keys(data),
+        },
+        request: { headers: requestHeaders },
+      });
+    }
+
     return NextResponse.json({ store });
   } catch (error) {
     const conflictMessage = getStoreConflictMessage(error);
@@ -177,9 +201,10 @@ export async function PATCH(
 
 // DELETE /api/stores/[id]
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestHeaders = request.headers;
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -200,7 +225,7 @@ export async function DELETE(
   try {
     const store = await prisma.store.findFirst({
       where: { id, userId: session.user.id },
-      select: { id: true },
+      select: { id: true, name: true, slug: true },
     });
 
     if (!store) {
@@ -216,6 +241,22 @@ export async function DELETE(
     if (result.count === 0) {
       return NextResponse.json({ error: "Loja não encontrada." }, { status: 404 });
     }
+
+    await createAuditLog({
+      action: "STORE_DELETED",
+      actor: {
+        id: session.user.id,
+        email: session.user.email,
+      },
+      targetType: "STORE",
+      targetId: store.id,
+      storeId: store.id,
+      metadata: {
+        name: store.name,
+        slug: store.slug,
+      },
+      request: { headers: requestHeaders },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

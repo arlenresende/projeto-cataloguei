@@ -12,6 +12,7 @@ import {
   Link2,
   CreditCard,
   Lightbulb,
+  ScrollText,
   Users,
   X,
   LogOut,
@@ -39,6 +40,7 @@ const adminNavItems = [
   { href: "/admin/platform/stores", label: "Lojas", icon: Store },
   { href: "/admin/platform/users", label: "Usuários", icon: Users },
   { href: "/admin/requests", label: "Tarefas Premium", icon: Lightbulb },
+  { href: "/admin/platform/logs", label: "Logs", icon: ScrollText },
 ];
 
 const premiumRequestNavItem = {

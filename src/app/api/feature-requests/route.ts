@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireVerifiedSession } from "@/lib/api-session";
+import { createAuditLog } from "@/lib/audit-log";
 import { getUserBillingState } from "@/lib/billing/subscription";
 import { sendFeatureRequestCreatedEmail } from "@/lib/email";
 import {
@@ -68,6 +69,21 @@ export async function POST(request: Request) {
     userId: session.user.id,
     title: input.title,
     description: input.description,
+  });
+
+  await createAuditLog({
+    action: "FEATURE_REQUEST_CREATED",
+    actor: {
+      id: session.user.id,
+      email: session.user.email,
+    },
+    targetType: "FEATURE_REQUEST",
+    targetId: featureRequest.id,
+    metadata: {
+      title: featureRequest.title,
+      status: featureRequest.status,
+    },
+    request: { headers: request.headers },
   });
 
   try {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireVerifiedSession } from "@/lib/api-session";
+import { createAuditLog } from "@/lib/audit-log";
 import {
   BillingAccessError,
   cancelUserStripeSubscription,
@@ -85,7 +86,7 @@ export async function POST() {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request: Request) {
   const session = await requireVerifiedSession(
     "Verifique seu e-mail antes de cancelar sua assinatura."
   );
@@ -96,6 +97,23 @@ export async function DELETE() {
   try {
     await cancelUserStripeSubscription(session.user.id);
     const billing = await getUserBillingState(session.user.id);
+
+    await createAuditLog({
+      action: "SUBSCRIPTION_CANCELED",
+      actor: {
+        id: session.user.id,
+        email: session.user.email,
+      },
+      targetType: "SUBSCRIPTION",
+      targetId: billing.subscription.id,
+      metadata: {
+        plan: billing.subscription.plan,
+        status: billing.subscription.status,
+        stripeSubscriptionId: billing.subscription.stripeSubscriptionId,
+        cancelAtPeriodEnd: billing.subscription.cancelAtPeriodEnd,
+      },
+      request: { headers: request.headers },
+    });
 
     return NextResponse.json({
       success: true,

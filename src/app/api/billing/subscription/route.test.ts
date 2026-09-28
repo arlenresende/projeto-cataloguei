@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 const {
   requireVerifiedSessionMock,
+  createAuditLogMock,
   getUserBillingStateMock,
   serializeBillingStateMock,
   cancelUserStripeSubscriptionMock,
@@ -11,6 +12,7 @@ const {
   prismaMock,
 } = vi.hoisted(() => ({
   requireVerifiedSessionMock: vi.fn(),
+  createAuditLogMock: vi.fn(),
   getUserBillingStateMock: vi.fn(),
   serializeBillingStateMock: vi.fn((value) => value),
   cancelUserStripeSubscriptionMock: vi.fn(),
@@ -42,6 +44,10 @@ const {
       count: vi.fn(),
     },
   },
+}));
+
+vi.mock("@/lib/audit-log", () => ({
+  createAuditLog: createAuditLogMock,
 }));
 
 vi.mock("@/lib/api-session", () => ({
@@ -162,7 +168,7 @@ describe("DELETE /api/billing/subscription", () => {
   it("cancela a renovacao e retorna o estado atualizado da assinatura", async () => {
     cancelUserStripeSubscriptionMock.mockResolvedValueOnce({});
 
-    const response = await DELETE();
+    const response = await DELETE(new Request("http://localhost:3000/api/billing/subscription"));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -179,7 +185,7 @@ describe("DELETE /api/billing/subscription", () => {
       })
     );
 
-    const response = await DELETE();
+    const response = await DELETE(new Request("http://localhost:3000/api/billing/subscription"));
 
     expect(response.status).toBe(404);
     expect(await response.json()).toEqual({

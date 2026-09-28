@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 const {
   requireVerifiedSessionMock,
+  createAuditLogMock,
   getUserBillingStateMock,
   serializeBillingStateMock,
   ensureStripeCustomerForUserMock,
@@ -10,6 +11,7 @@ const {
   prismaMock,
 } = vi.hoisted(() => ({
   requireVerifiedSessionMock: vi.fn(),
+  createAuditLogMock: vi.fn(),
   getUserBillingStateMock: vi.fn(),
   serializeBillingStateMock: vi.fn((value) => value),
   ensureStripeCustomerForUserMock: vi.fn(),
@@ -25,6 +27,10 @@ const {
       findUnique: vi.fn(),
     },
   },
+}));
+
+vi.mock("@/lib/audit-log", () => ({
+  createAuditLog: createAuditLogMock,
 }));
 
 vi.mock("@/lib/api-session", () => ({
@@ -99,7 +105,7 @@ describe("POST /api/billing/subscribe", () => {
       .mockResolvedValueOnce(makeBillingState())
       .mockResolvedValueOnce(makeBillingState({ stripeCustomerId: "cus_123" }));
 
-    const response = await POST();
+    const response = await POST(new Request("http://localhost:3000/api/billing/subscribe"));
     const body = await response.json();
 
     expect(response.status).toBe(201);
@@ -126,7 +132,7 @@ describe("POST /api/billing/subscribe", () => {
       makeBillingState({ isPremium: true, plan: "PREMIUM", status: "ACTIVE" })
     );
 
-    const response = await POST();
+    const response = await POST(new Request("http://localhost:3000/api/billing/subscribe"));
 
     expect(response.status).toBe(409);
     expect(stripeMock.checkout.sessions.create).not.toHaveBeenCalled();
@@ -137,7 +143,7 @@ describe("POST /api/billing/subscribe", () => {
       NextResponse.json({ error: "Nao autenticado" }, { status: 401 })
     );
 
-    const response = await POST();
+    const response = await POST(new Request("http://localhost:3000/api/billing/subscribe"));
 
     expect(response.status).toBe(401);
     expect(await response.json()).toEqual({ error: "Nao autenticado" });
