@@ -195,6 +195,12 @@ export default function ViewStorePage() {
                   <p className="text-sm font-medium text-[var(--brand-black)]">{store.cellPhone}</p>
                 </div>
               )}
+              {store.whatsappUrl && (
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-black)]/40">WhatsApp</p>
+                  <p className="text-sm font-medium text-[var(--brand-black)]">{store.whatsappUrl}</p>
+                </div>
+              )}
             </div>
           </Card>
         )}
