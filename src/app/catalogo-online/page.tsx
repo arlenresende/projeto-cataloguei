@@ -95,26 +95,26 @@ export default async function CatalogoOnlinePage({
           <div className="flex flex-col justify-center">
             <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[var(--brand-border)] px-3 py-1 text-xs font-bold uppercase text-muted-foreground">
               <span className="size-2 rounded-full bg-[var(--brand-yellow)]" />
-              Captação para lojistas
+              Vitrine online para WhatsApp
             </div>
             <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-tight tracking-tight md:text-5xl">
-              Catálogo online para vender mais pelo WhatsApp
+              Transforme seus produtos em um catálogo pronto para vender
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
-              Organize seus produtos em uma vitrine profissional, compartilhe um
-              link bonito com seus clientes e transforme conversas em pedidos
-              com menos bagunça.
+              Compartilhe um link profissional, deixe o cliente escolher os
+              itens e receba o pedido organizado no WhatsApp. Ideal para quem
+              vende por conversa e quer menos retrabalho no atendimento.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Button size="lg" render={<a href="#contato" />}>
-                Quero vender mais
+                Quero organizar minhas vendas
               </Button>
               <Button variant="outline" size="lg" render={<Link href="/register" />}>
                 Criar conta grátis
               </Button>
             </div>
             <div className="mt-7 grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
-              {["Sem cartão", "Pronto para divulgar", "Pedidos no WhatsApp"].map(
+              {["Sem cartão", "Link para bio", "Pedido mais claro"].map(
                 (item) => (
                   <span key={item} className="inline-flex items-center gap-2">
                     <CheckCircle2 className="size-4 text-emerald-600" />
@@ -158,6 +158,13 @@ export default async function CatalogoOnlinePage({
                   <p className="mt-1 text-xs text-white/70">
                     3 itens selecionados · mensagem automática para a loja
                   </p>
+                  <div className="mt-3 rounded-md bg-white/10 p-3 text-xs leading-5 text-white/85">
+                    Olá! Quero pedir:
+                    <br />
+                    1x Bolsa couro · R$ 189
+                    <br />
+                    2x Brinco dourado · R$ 59
+                  </div>
                 </div>
               </div>
             </div>
@@ -189,7 +196,7 @@ export default async function CatalogoOnlinePage({
               Para quem vende todos os dias
             </p>
             <h2 className="mt-3 text-2xl font-extrabold tracking-tight md:text-3xl">
-              Um catálogo simples para negócios que vivem no atendimento
+              Um catálogo simples para quem vende todos os dias pelo celular
             </h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

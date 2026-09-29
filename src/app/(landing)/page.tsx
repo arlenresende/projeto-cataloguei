@@ -6,6 +6,7 @@ import {
   LogoCloud,
   FeatureGrid,
   ProductShowcase,
+  SalesProofSection,
   FeatureTabs,
   IntegrationsList,
   PricingSection,
@@ -58,6 +59,7 @@ export default function LandingPage() {
         <Hero />
         <LogoCloud />
         <FeatureGrid />
+        <SalesProofSection />
         <ProductShowcase />
         <FeatureTabs />
         <IntegrationsList />

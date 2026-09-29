@@ -12,8 +12,8 @@ export function ProductShowcase() {
     >
       <div className="mx-auto max-w-6xl px-4">
         <SectionHeader
-          title="Um painel completo para você e uma vitrine linda para seus clientes"
-          description="Gerencie produtos pelo painel administrativo e compartilhe o link da sua loja. Simples assim."
+          title="Um painel para organizar sua loja e uma vitrine para vender melhor"
+          description="Cadastre produtos no painel, publique sua loja online e envie o link para clientes que já compram pelo WhatsApp."
         />
 
         <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -29,7 +29,7 @@ export function ProductShowcase() {
             <div className="p-6">
               <div className="mb-4 flex items-center justify-between">
                 <p className="text-sm font-semibold text-[var(--brand-black)]">
-                  Painel administrativo
+                  Painel da loja
                 </p>
                 <Badge variant="success">Online</Badge>
               </div>
@@ -70,7 +70,7 @@ export function ProductShowcase() {
                   href="/register"
                   className="inline-flex items-center text-xs font-medium text-[var(--brand-black)] hover:underline"
                 >
-                  Criar meu catálogo
+                  Organizar produtos
                   <ArrowRight className="ml-1 size-3" />
                 </Link>
               </div>
@@ -94,7 +94,7 @@ export function ProductShowcase() {
                     TechStore
                   </p>
                   <p className="text-[10px] text-muted-foreground">
-                    Tecnologia com os melhores preços
+                    Catálogo pronto para compartilhar
                   </p>
                 </div>
               </div>
@@ -124,7 +124,7 @@ export function ProductShowcase() {
               </div>
 
               <div className="mt-4 rounded-lg bg-[var(--brand-yellow)] px-3 py-2 text-center text-xs font-semibold text-[var(--brand-black)]">
-                Comprar pelo WhatsApp
+                Enviar pedido pelo WhatsApp
               </div>
             </div>
           </article>

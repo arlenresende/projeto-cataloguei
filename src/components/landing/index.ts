@@ -4,6 +4,7 @@ export { HeroVisual } from "./HeroVisual";
 export { LogoCloud } from "./LogoCloud";
 export { FeatureGrid } from "./FeatureGrid";
 export { ProductShowcase } from "./ProductShowcase";
+export { SalesProofSection } from "./SalesProofSection";
 export { FeatureTabs } from "./FeatureTabs";
 export { IntegrationsList } from "./IntegrationsList";
 export { PricingSection } from "./PricingSection";

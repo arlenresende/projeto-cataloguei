@@ -42,11 +42,11 @@ export function PricingSection() {
             id="pricing-title"
             className="mt-3 text-3xl font-bold tracking-tight text-[var(--brand-black)] md:text-4xl lg:text-5xl"
           >
-            Comece do seu jeito
+            Comece grátis e evolua quando sua loja pedir mais
           </h2>
           <p className="mt-4 text-base text-muted-foreground md:text-lg">
-            Crie sua página gratuitamente e evolua quando seu negócio precisar
-            de mais.
+            Valide seu catálogo com os primeiros produtos e assine o Premium
+            quando quiser vender com mais recursos, suporte e liberdade.
           </p>
         </div>
 
@@ -57,7 +57,7 @@ export function PricingSection() {
             <div>
               <h3 className="text-lg font-semibold text-[var(--brand-black)]">Grátis</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Para comecar sua loja online com o essencial.
+                Para testar sua vitrine online sem cartão.
               </p>
             </div>
 
@@ -86,7 +86,7 @@ export function PricingSection() {
                 size="lg"
                 render={<Link href="/register">Começar grátis</Link>}
               >
-                Começar grátis
+                Criar catálogo grátis
                 <ArrowRight className="ml-2 size-4" />
               </Button>
             </div>
@@ -103,7 +103,7 @@ export function PricingSection() {
             <div>
               <h3 className="text-lg font-semibold text-[var(--brand-black)]">Premium</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Para quem quer crescer com recursos avancados e assinatura mensal.
+                Para lojas que querem mais produtos, personalização e suporte.
               </p>
             </div>
 
@@ -131,7 +131,7 @@ export function PricingSection() {
                 size="lg"
                 render={<Link href="/register">Quero ser Premium</Link>}
               >
-                Quero ser Premium
+                Começar e assinar Premium
                 <ArrowRight className="ml-2 size-4" />
               </Button>
             </div>

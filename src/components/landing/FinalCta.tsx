@@ -17,16 +17,16 @@ export function FinalCta() {
           id="final-cta-title"
           className="text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl"
         >
-          Comece a vender online hoje
+          Coloque sua vitrine no ar e pare de vender na bagunça
         </h2>
         <p className="mt-4 text-base text-white/60 md:text-lg">
-          Crie seu catálogo em minutos, compartilhe com seus clientes e receba
-          pedidos pelo WhatsApp. Plano grátis para começar.
+          Crie seu catálogo, envie o link para seus clientes e receba pedidos
+          mais claros pelo WhatsApp. O plano grátis já ajuda você a começar.
         </p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Button size="lg" render={<Link href="/admin/dashboard" />}>
             <span className="flex items-center">
-              Criar catálogo grátis
+              Criar meu catálogo grátis
               <ArrowRight className="ml-2 size-4" />
             </span>
           </Button>

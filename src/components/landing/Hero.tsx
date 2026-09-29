@@ -10,25 +10,25 @@ export function Hero() {
         <div className="mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-[var(--brand-border)] bg-[var(--brand-tertiary)] px-3.5 py-1 text-xs font-medium text-[var(--brand-black)]">
             <Sparkles className="size-3.5" />
-            Novo · Catálogos com IA e integração WhatsApp
+            Catálogo digital para vender pelo WhatsApp
           </span>
 
           <h1 className="mt-6 text-4xl font-bold leading-[1.1] tracking-tight text-[var(--brand-black)] md:text-5xl lg:text-[3.5rem]">
-            Seu catálogo online
+            Crie seu catálogo digital e receba pedidos
             <br className="hidden sm:block" />{" "}
-            <span className="text-[var(--brand-yellow)]">pronto em minutos</span>
+            <span className="text-[var(--brand-yellow)]">organizados no WhatsApp</span>
           </h1>
 
           <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
-            Crie um catálogo profissional para sua pequena empresa, escolha um
-            tema que combina com seu segmento e receba pedidos diretamente no
-            WhatsApp. Sem complicação.
+            Cadastre produtos, organize categorias, compartilhe um único link e
+            deixe o cliente escolher os itens antes de chamar sua loja. Menos
+            mensagens repetidas, mais clareza para vender.
           </p>
 
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button size="lg" render={<Link href="/admin/dashboard" />}>
               <span className="flex items-center">
-                Criar catálogo grátis
+                Criar meu catálogo grátis
                 <ArrowRight className="ml-2 size-4" />
               </span>
             </Button>
@@ -42,7 +42,7 @@ export function Hero() {
           </div>
 
           <p className="mt-4 text-xs text-muted-foreground">
-            Sem cartão de crédito · Setup em menos de 5 minutos
+            Sem cartão de crédito · Até 5 produtos no plano grátis
           </p>
         </div>
 
