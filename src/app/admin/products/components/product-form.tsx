@@ -14,6 +14,7 @@ import {
   type ProductFormInput,
   type ProductFormData,
 } from "@/lib/schemas/product";
+import type { SerializedBillingState } from "@/lib/billing/subscription";
 import { normalizeStoreSlug } from "@/lib/schemas/store";
 import {
   formatProductImageMaxSize,
@@ -71,6 +72,28 @@ export function ProductForm({
   serverError,
   isSubmitting,
 }: ProductFormProps) {
+  const [billing, setBilling] = useState<SerializedBillingState | null>(null);
+  const [billingError, setBillingError] = useState(false);
+  const [billingAttempt, setBillingAttempt] = useState(0);
+  const canUseSeo = billing?.features.advancedSeo === true;
+  const imageLimit = billing?.limits.productImages ?? (billing ? null : 1);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setBillingError(false);
+    fetch("/api/billing/subscription", { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Falha ao consultar plano");
+        const data = await response.json();
+        if (!data.billing) throw new Error("Plano indisponível");
+        setBilling(data.billing);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setBillingError(true);
+      });
+    return () => controller.abort();
+  }, [billingAttempt]);
+
   const {
     register,
     handleSubmit,
@@ -107,7 +130,7 @@ export function ProductForm({
   const [images, setImages] = useState<ProductImage[]>(defaultValues?.images || []);
   const [addingImage, setAddingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canSelectImages = Boolean(onAddImage || onSelectedImagesChange);
+  const canSelectImages = Boolean(billing && (onAddImage || onSelectedImagesChange) && (imageLimit === null || images.length < imageLimit));
 
   // Auto-generate slug from name
   useEffect(() => {
@@ -129,7 +152,10 @@ export function ProductForm({
   }, [images, onSelectedImagesChange]);
 
   async function handleAddImages(files: File[]) {
-    if (!canSelectImages || files.length === 0) return;
+    if (!canSelectImages || addingImage || files.length === 0) return;
+    if (imageLimit !== null) {
+      files = files.slice(0, Math.max(0, imageLimit - images.length));
+    }
 
     const validFiles: File[] = [];
 
@@ -218,7 +244,22 @@ export function ProductForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form onSubmit={handleSubmit((data) => {
+      if (!billing) return;
+      if (!canUseSeo) {
+        delete data.seoTitle;
+        delete data.seoDescription;
+      }
+      return onSubmit(data);
+    })} className="space-y-8">
+      {billingError && (
+        <p role="alert" className="text-sm text-[var(--brand-error)]">
+          Não foi possível consultar seu plano.{" "}
+          <button type="button" className="font-semibold underline" onClick={() => setBillingAttempt((attempt) => attempt + 1)}>
+            Tentar novamente
+          </button>
+        </p>
+      )}
       {/* Basic Info */}
       <Section title="Informações básicas">
         <Input
@@ -361,14 +402,14 @@ export function ProductForm({
                   <Plus size={16} />
                 </>
               )}
-              {addingImage ? "Enviando imagens..." : "Adicionar imagens"}
+              {addingImage ? "Enviando imagens..." : imageLimit === 1 ? "Adicionar imagem" : "Adicionar imagens"}
             </button>
 
             <input
               ref={fileInputRef}
               type="file"
               accept={PRODUCT_IMAGE_ACCEPT}
-              multiple
+              multiple={imageLimit === null || imageLimit > 1}
               className="sr-only"
               disabled={addingImage}
               onChange={(e) => {
@@ -383,7 +424,7 @@ export function ProductForm({
           </>
         ) : null}
         <p className="text-xs text-muted-foreground">
-          Envie uma ou mais imagens JPG, PNG ou WEBP de at&eacute; {formatProductImageMaxSize()}. A primeira imagem ser&aacute; a principal.
+          Envie {imageLimit === 1 ? "uma imagem" : "uma ou mais imagens"} JPG, PNG ou WEBP de at&eacute; {formatProductImageMaxSize()}. A primeira imagem ser&aacute; a principal.
         </p>
       </Section>
 
@@ -482,6 +523,7 @@ export function ProductForm({
       </Section>
 
       {/* SEO */}
+      {canUseSeo && (
       <Section title="SEO">
         <Input
           label="Título SEO"
@@ -504,6 +546,8 @@ export function ProductForm({
         </div>
       </Section>
 
+      )}
+
       {/* Error */}
       {serverError && (
         <div className="rounded-lg bg-[var(--brand-error-light)] px-4 py-3 text-sm font-medium text-[var(--brand-error)]">
@@ -514,7 +558,7 @@ export function ProductForm({
       {/* Submit */}
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || !billing}
         className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold text-[var(--brand-black)] transition-all hover:shadow-md disabled:opacity-60 sm:w-auto sm:px-8"
         style={{ backgroundColor: "var(--brand-yellow)" }}
       >
