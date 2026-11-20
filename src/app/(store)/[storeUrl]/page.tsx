@@ -186,68 +186,33 @@ export default async function StorePage({ params, searchParams }: StorePageProps
           }))}
         />
 
-        {/* Filters */}
-        <Suspense>
-          <ProductFilters categories={categories} storeUrl={store.slug} />
-        </Suspense>
-
-        {/* Products */}
-        <section id="produtos" className="py-8 md:py-12">
+        <section id="produtos" aria-label="Produtos da loja" className="pb-10 pt-6 md:pb-14 md:pt-8">
           <div className="mx-auto max-w-6xl px-4">
-            <header className="mb-8 max-w-3xl">
+            <h1 className="sr-only">{store.name}</h1>
+            {store.description ? (
               <p
-                className="text-xs font-bold uppercase tracking-widest"
-                style={{ color: "var(--theme-primary)" }}
+                className="mb-5 max-w-3xl text-sm leading-relaxed md:text-base"
+                style={{ color: "var(--theme-text)", opacity: 0.75 }}
               >
-                Loja online
+                {store.description}
               </p>
-              <h1
-                className="mt-2 text-3xl font-extrabold tracking-tight md:text-4xl"
-                style={{ color: "var(--theme-text)" }}
-              >
-                {store.name}
-              </h1>
-              {store.description ? (
-                <p
-                  className="mt-3 text-sm leading-relaxed md:text-base"
-                  style={{ color: "var(--theme-text)", opacity: 0.68 }}
-                >
-                  {store.description}
-                </p>
-              ) : null}
-            </header>
+            ) : null}
 
-            <div className="mb-6 flex items-end justify-between">
-              <div>
-                <span
-                  className="text-xs font-bold uppercase tracking-widest"
-                  style={{ color: "var(--theme-primary)" }}
-                >
-                  {q
-                    ? `Resultado para "${q}"`
-                    : hasActiveFilters
-                      ? "Resultado da busca"
-                      : "Catálogo completo"}
-                </span>
-                <h2
-                  className="mt-1 text-xl font-extrabold tracking-tight md:text-2xl"
-                  style={{ color: "var(--theme-text)" }}
-                >
-                  {hasActiveFilters
-                    ? `${filteredProducts.length} ${filteredProducts.length === 1 ? "produto encontrado" : "produtos encontrados"}`
-                    : "Todos os produtos"}
-                </h2>
-              </div>
-              {hasActiveFilters && (
-                <Link
-                  href={`/${storeUrl}`}
-                  className="text-sm font-bold transition-opacity hover:opacity-70"
-                  style={{ color: "var(--theme-text)" }}
-                >
+            <Suspense>
+              <ProductFilters categories={categories} storeUrl={store.slug} />
+            </Suspense>
+
+            {hasActiveFilters && (
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-sm" style={{ color: "var(--theme-text)" }}>
+                <p role="status">
+                  {filteredProducts.length} {filteredProducts.length === 1 ? "produto encontrado" : "produtos encontrados"}
+                  {q ? ` para “${q}”` : ""}
+                </p>
+                <Link href={`/${storeUrl}`} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4 hover:opacity-70">
                   Limpar filtros
                 </Link>
-              )}
-            </div>
+              </div>
+            )}
             {filteredProducts.length > 0 ? (
               <ProductGrid
                 products={filteredProducts}
@@ -257,7 +222,7 @@ export default async function StorePage({ params, searchParams }: StorePageProps
               />
             ) : (
               <div
-                className="flex flex-col items-center justify-center rounded-2xl border py-16 text-center"
+                className="flex flex-col items-center justify-center rounded-2xl border px-6 py-12 text-center"
                 style={{
                   borderColor: "var(--theme-border)",
                   backgroundColor: "var(--theme-card-bg)",
@@ -267,20 +232,22 @@ export default async function StorePage({ params, searchParams }: StorePageProps
                   className="text-lg font-bold"
                   style={{ color: "var(--theme-text)" }}
                 >
-                  Nenhum produto encontrado
+                  {store.products.length === 0 ? "Novidades em breve" : "Nenhum produto encontrado"}
                 </p>
                 <p
                   className="mt-2 text-sm font-medium"
-                  style={{ color: "var(--theme-text)", opacity: 0.5 }}
+                  style={{ color: "var(--theme-text)", opacity: 0.7 }}
                 >
-                  Tente ajustar os filtros ou{" "}
-                  <Link
-                    href={`/${storeUrl}`}
-                    className="underline"
-                    style={{ color: "var(--theme-primary)" }}
-                  >
-                    ver todos os produtos
-                  </Link>
+                  {store.products.length === 0 ? (
+                    "Esta loja está preparando seu catálogo. Volte em breve para conferir."
+                  ) : (
+                    <>
+                      Tente ajustar os filtros ou{" "}
+                      <Link href={`/${storeUrl}`} className="font-semibold underline underline-offset-4">
+                        ver todos os produtos
+                      </Link>
+                    </>
+                  )}
                 </p>
               </div>
             )}

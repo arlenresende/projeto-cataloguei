@@ -15,6 +15,7 @@ import { Confetti } from "@/components/ui/confetti";
 import { Input, Textarea } from "@/components/ui/input";
 import { trackGoogleEvent } from "@/lib/analytics/google";
 import { getSiteHost } from "@/lib/site-config";
+import { maskPhone } from "@/lib/masks";
 import {
   onboardingSchema,
   generateSlug,
@@ -46,6 +47,7 @@ export function CreateStoreDialog({ open, onStoreCreated }: CreateStoreDialogPro
       name: "",
       slug: "",
       description: "",
+      whatsappUrl: "",
     },
   });
 
@@ -188,6 +190,24 @@ export function CreateStoreDialog({ open, onStoreCreated }: CreateStoreDialogPro
                       </p>
                     )}
                   </div>
+
+                  <Input
+                    label="WhatsApp da loja"
+                    type="tel"
+                    autoComplete="tel-national"
+                    placeholder="(11) 99999-9999"
+                    required
+                    maxLength={16}
+                    {...register("whatsappUrl", {
+                      onChange: (event) => {
+                        setValue("whatsappUrl", maskPhone(event.target.value), {
+                          shouldValidate: true,
+                        });
+                      },
+                    })}
+                    error={errors.whatsappUrl?.message}
+                    helperText="Obrigatório. Informe o número com DDD para receber pedidos pelo WhatsApp."
+                  />
 
                   <Textarea
                     label="Descrição da loja"

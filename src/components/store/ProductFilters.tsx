@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectContent,
   SelectItem,
-  SelectValue,
 } from "@/components/ui/select";
 
 interface ProductFiltersProps {
@@ -36,25 +35,28 @@ export function ProductFilters({ categories, storeUrl }: ProductFiltersProps) {
 
   const buildUrl = useCallback(
     (category: string, min: string, max: string) => {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("category");
+      params.delete("min");
+      params.delete("max");
       if (category) params.set("category", category);
       if (min) params.set("min", min);
       if (max) params.set("max", max);
       const qs = params.toString();
       return `/${storeUrl}${qs ? `?${qs}` : ""}`;
     },
-    [storeUrl]
+    [storeUrl, searchParams]
   );
 
   const handleCategoryChange = (value: string | null) => {
     if (!value) return;
-    router.push(buildUrl(value === "__all__" ? "" : value, currentMin, currentMax));
+    router.push(buildUrl(value === "__all__" ? "" : value, currentMin, currentMax), { scroll: false });
   };
 
   const handlePriceChange = (value: string | null) => {
     if (!value) return;
     const range = PRICE_RANGES[Number(value)];
-    router.push(buildUrl(currentCategory, range.min, range.max));
+    router.push(buildUrl(currentCategory, range.min, range.max), { scroll: false });
   };
 
   const currentPriceIdx = PRICE_RANGES.findIndex(
@@ -67,96 +69,68 @@ export function ProductFilters({ categories, storeUrl }: ProductFiltersProps) {
   const triggerStyle = {
     borderColor: resolvedColors.border,
     backgroundColor: resolvedColors.cardBg,
-    color: currentCategory || currentPriceIdx > 0 ? resolvedColors.text : resolvedColors.text + "99",
+    color: resolvedColors.text,
   };
 
   return (
-    <section
-      className="py-8 md:py-12"
-      style={{ backgroundColor: resolvedColors.background }}
+    <div
+      role="group"
+      aria-label="Filtrar produtos"
+      className="mb-5 flex items-center gap-2 border-b pb-5 md:gap-3"
+      style={{ borderColor: resolvedColors.border }}
     >
-      <div className="mx-auto max-w-6xl px-4">
-        <div
-          className="rounded-2xl border p-5 md:p-6"
-          style={{
-            borderColor: resolvedColors.border,
-            backgroundColor: resolvedColors.cardBg,
-          }}
-        >
-          <div className="mb-4 flex items-center gap-2.5">
-            <SlidersHorizontal
-              size={18}
-              style={{ color: resolvedColors.text, opacity: 0.6 }}
-            />
-            <h2
-              className="text-base font-extrabold tracking-tight"
-              style={{ color: resolvedColors.text }}
-            >
-              Encontre seu produto
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <label
-                className="mb-1.5 block text-xs font-bold uppercase tracking-wider"
-                style={{ color: resolvedColors.text, opacity: 0.5 }}
-              >
-                Categoria
-              </label>
-              <Select value={currentCategory || "__all__"} onValueChange={handleCategoryChange}>
-                <SelectTrigger style={triggerStyle}>
-                  <span>{categoryLabel}</span>
-                </SelectTrigger>
-                <SelectContent
-                  style={{
-                    borderColor: resolvedColors.border,
-                    backgroundColor: resolvedColors.cardBg,
-                    color: resolvedColors.text,
-                  }}
-                >
-                  <SelectItem value="__all__">Todas as categorias</SelectItem>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label
-                className="mb-1.5 block text-xs font-bold uppercase tracking-wider"
-                style={{ color: resolvedColors.text, opacity: 0.5 }}
-              >
-                Preço
-              </label>
-              <Select
-                value={String(currentPriceIdx >= 0 ? currentPriceIdx : 0)}
-                onValueChange={handlePriceChange}
-              >
-                <SelectTrigger style={triggerStyle}>
-                  <span>{priceLabel}</span>
-                </SelectTrigger>
-                <SelectContent
-                  style={{
-                    borderColor: resolvedColors.border,
-                    backgroundColor: resolvedColors.cardBg,
-                    color: resolvedColors.text,
-                  }}
-                >
-                  {PRICE_RANGES.map((range, i) => (
-                    <SelectItem key={i} value={String(i)}>
-                      {range.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
+      <span className="hidden shrink-0 items-center gap-2 text-sm font-medium sm:flex" style={{ color: resolvedColors.text }}>
+        <SlidersHorizontal size={16} aria-hidden="true" />
+        Filtrar
+      </span>
+      <div className="min-w-0 flex-1 sm:max-w-64">
+        <Select value={currentCategory || "__all__"} onValueChange={handleCategoryChange}>
+          <SelectTrigger aria-label="Categoria" className="gap-2 px-3 font-medium focus-visible:ring-2 focus-visible:ring-current" style={triggerStyle}>
+            <span className="truncate">
+            <span className="sm:hidden">{currentCategory || "Categorias"}</span>
+            <span className="hidden sm:inline">{categoryLabel}</span>
+          </span>
+          </SelectTrigger>
+          <SelectContent
+            style={{
+              borderColor: resolvedColors.border,
+              backgroundColor: resolvedColors.cardBg,
+              color: resolvedColors.text,
+            }}
+          >
+            <SelectItem value="__all__">Todas as categorias</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat} value={cat}>
+                {cat}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-    </section>
+
+      <div className="min-w-0 flex-1 sm:max-w-56">
+        <Select
+          value={String(currentPriceIdx >= 0 ? currentPriceIdx : 0)}
+          onValueChange={handlePriceChange}
+        >
+          <SelectTrigger aria-label="Preço" className="gap-2 px-3 font-medium focus-visible:ring-2 focus-visible:ring-current" style={triggerStyle}>
+            <span className="truncate">{priceLabel}</span>
+          </SelectTrigger>
+          <SelectContent
+            style={{
+              borderColor: resolvedColors.border,
+              backgroundColor: resolvedColors.cardBg,
+              color: resolvedColors.text,
+            }}
+          >
+            {PRICE_RANGES.map((range, i) => (
+              <SelectItem key={i} value={String(i)}>
+                {range.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
   );
 }
