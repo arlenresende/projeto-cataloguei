@@ -5,11 +5,11 @@ export const THEME_CONFIGS: Record<ThemeSegment, ThemeConfig> = {
     name: "Padrão",
     icon: "Store",
     colors: {
-      primary: "#FFD400",
+      primary: "#0A0A0A",
       secondary: "#0A0A0A",
       background: "#FFFFFF",
       text: "#0A0A0A",
-      accent: "#FFD400",
+      accent: "#404040",
       cardBg: "#FFFFFF",
       border: "#E8E8E3",
     },

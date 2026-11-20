@@ -66,11 +66,11 @@ export function StoreFooter({
             >
               <span
                 className={`relative flex items-center justify-center overflow-hidden text-base font-extrabold ${
-                  logoUrl ? "h-14 w-36 rounded-2xl" : "size-10 rounded-xl"
+                  logoUrl ? "h-28 w-48" : "size-10 rounded-xl"
                 }`}
                 style={{
-                  backgroundColor: resolvedColors.primary,
-                  color: resolvedColors.secondary,
+                  backgroundColor: logoUrl ? "transparent" : resolvedColors.primary,
+                  color: "var(--theme-on-primary)",
                 }}
               >
                 {logoUrl ? (
@@ -78,8 +78,8 @@ export function StoreFooter({
                     src={logoUrl}
                     alt={`Logo de ${name}`}
                     fill
-                    className="bg-white object-contain p-2"
-                    sizes="144px"
+                    className="object-contain object-left"
+                    sizes="192px"
                   />
                 ) : (
                   name.charAt(0)
@@ -223,7 +223,7 @@ export function StoreFooter({
                 className="inline-flex items-center transition-opacity hover:opacity-80"
                 aria-label="Cataloguei"
               >
-                <BrandLogo variant="mark" href="" className="size-6" />
+                <BrandLogo variant="mark" href="" className="size-6 grayscale" />
                 <span className="ml-1 text-xs font-bold">Cataloguei</span>
               </Link>
             </div>

@@ -132,7 +132,7 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
                     className="mt-6 inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold transition-all hover:gap-3 hover:shadow-lg"
                     style={{
                       backgroundColor: resolvedColors.primary,
-                      color: resolvedColors.secondary,
+                      color: "var(--theme-on-primary)",
                     }}
                   >
                     {banner.buttonText}

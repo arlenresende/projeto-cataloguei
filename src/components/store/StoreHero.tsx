@@ -66,7 +66,7 @@ export function StoreHero({ name, description, bannerUrl, logoUrl }: StoreHeroPr
                 className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
                 style={{
                   backgroundColor: resolvedColors.primary,
-                  color: resolvedColors.secondary,
+                  color: "var(--theme-on-primary)",
                 }}
               >
                 Ver produtos

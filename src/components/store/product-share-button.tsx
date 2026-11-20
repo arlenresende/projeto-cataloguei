@@ -95,7 +95,7 @@ export function ProductShareButton({
       className="flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold transition-all hover:shadow-md"
       style={{
         backgroundColor: "var(--theme-primary)",
-        color: "var(--theme-secondary)",
+        color: "var(--theme-on-primary)",
       }}
     >
       <Share2 size={16} />

@@ -28,7 +28,7 @@ export function StoreCtaBanner({
           className="flex flex-col items-center gap-4 rounded-2xl px-6 py-8 text-center md:flex-row md:text-left md:py-10 md:px-10"
           style={{
             backgroundColor: resolvedColors.primary,
-            color: resolvedColors.secondary,
+            color: "var(--theme-on-primary)",
           }}
         >
           <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-black/10">

@@ -301,6 +301,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   />
                 ) : null}
 
+                {store.whatsapp ? (
+                  <a
+                    href={`https://wa.me/${store.whatsapp.replace(/\D/g, "").replace(/^(\d{10,11})$/, "55$1")}?text=${encodeURIComponent(`Olá! Tenho interesse no produto ${product.name}. Pode me ajudar?\n${canonicalUrl}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-green-700 px-6 py-3.5 text-base font-bold text-green-700 transition-colors hover:bg-green-50"
+                  >
+                    Chamar no WhatsApp
+                  </a>
+                ) : null}
+
                 <ProductShareButton
                   title={product.name}
                   description={shareDescription}

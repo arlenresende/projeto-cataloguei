@@ -191,7 +191,7 @@ export default async function StorePage({ params, searchParams }: StorePageProps
             <h1 className="sr-only">{store.name}</h1>
             {store.description ? (
               <p
-                className="mb-5 max-w-3xl text-sm leading-relaxed md:text-base"
+                className="mx-auto mb-6 max-w-3xl text-center text-sm leading-relaxed md:text-base"
                 style={{ color: "var(--theme-text)", opacity: 0.75 }}
               >
                 {store.description}

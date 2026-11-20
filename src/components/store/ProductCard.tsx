@@ -102,8 +102,8 @@ export function ProductCard({
           <span
             className="absolute left-3 top-3 z-10 rounded-lg px-2.5 py-1 text-xs font-bold shadow-sm"
             style={{
-              backgroundColor: resolvedColors.primary,
-              color: resolvedColors.secondary,
+              backgroundColor: resolvedColors.secondary,
+              color: "#FFFFFF",
             }}
           >
             -{discount}%
@@ -191,8 +191,8 @@ export function ProductCard({
             href={`/${storeUrl}/product/${product.slug || product.id}`}
             className="flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold transition-all hover:shadow-md"
             style={{
-              backgroundColor: resolvedColors.primary,
-              color: resolvedColors.secondary,
+              backgroundColor: resolvedColors.secondary,
+              color: "#FFFFFF",
             }}
           >
             <Eye size={14} />

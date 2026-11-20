@@ -80,7 +80,7 @@ export function CartDrawer({
           color: resolvedColors.text,
         }}
       >
-        {/* Yellow accent stripe */}
+        {/* Theme accent stripe */}
         <div
           className="h-1 w-full shrink-0"
           style={{ backgroundColor: resolvedColors.primary }}
@@ -105,7 +105,7 @@ export function CartDrawer({
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex gap-3 rounded-xl border p-3 transition-colors hover:border-[var(--brand-yellow)]/40"
+                    className="flex gap-3 rounded-xl border p-3 transition-colors hover:border-[var(--theme-primary)]"
                     style={{ borderColor: resolvedColors.border }}
                   >
                     <div
@@ -249,7 +249,7 @@ export function CartDrawer({
               className="mt-6 rounded-xl px-6 py-2.5 text-sm font-bold transition-all hover:shadow-md active:scale-[0.98]"
               style={{
                 backgroundColor: resolvedColors.primary,
-                color: resolvedColors.secondary,
+                color: "var(--theme-on-primary)",
               }}
             >
               Continuar comprando

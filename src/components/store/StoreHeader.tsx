@@ -30,8 +30,6 @@ export function StoreHeader({
   categories = [],
 }: StoreHeaderProps) {
   const { resolvedColors } = useTheme();
-  const menuBackground = resolvedColors.primary;
-  const menuText = resolvedColors.secondary;
   const { itemCount } = useCart();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -60,20 +58,20 @@ export function StoreHeader({
       }}
     >
       {/* Top bar */}
-      <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between px-4 md:h-[76px]">
+      <div className={`mx-auto flex max-w-6xl items-center justify-between px-4 ${logoUrl ? "h-24 md:h-28" : "h-[68px] md:h-[76px]"}`}>
         {/* Logo */}
         <Link
           href={`/${storeUrl}`}
-          className={`flex items-center ${logoUrl ? "gap-0" : "gap-3"}`}
+          className={`flex shrink-0 items-center ${logoUrl ? "gap-0" : "gap-3"}`}
           aria-label={`${name} - Página inicial`}
         >
           <span
             className={`relative flex items-center justify-center overflow-hidden text-base font-extrabold ${
-              logoUrl ? "h-14 w-36 rounded-2xl md:h-16 md:w-44" : "size-10 rounded-xl"
+              logoUrl ? "h-20 w-36 md:h-24 md:w-48" : "size-10 rounded-xl"
             }`}
             style={{
-              backgroundColor: resolvedColors.primary,
-              color: resolvedColors.secondary,
+              backgroundColor: logoUrl ? "transparent" : resolvedColors.primary,
+              color: "var(--theme-on-primary)",
             }}
           >
             {logoUrl ? (
@@ -81,8 +79,8 @@ export function StoreHeader({
                 src={logoUrl}
                 alt={`Logo de ${name}`}
                 fill
-                className="bg-white object-contain p-2"
-                sizes="(max-width: 768px) 144px, 176px"
+                className="object-contain object-left"
+                sizes="(max-width: 768px) 144px, 192px"
               />
             ) : (
               name.charAt(0)
@@ -151,7 +149,7 @@ export function StoreHeader({
                   className="absolute right-0.5 top-0.5 flex size-[18px] items-center justify-center rounded-full text-[10px] font-bold"
                   style={{
                     backgroundColor: resolvedColors.primary,
-                    color: resolvedColors.secondary,
+                    color: "var(--theme-on-primary)",
                   }}
                 >
                   {itemCount > 9 ? "9+" : itemCount}
@@ -169,45 +167,6 @@ export function StoreHeader({
           </button>
         </div>
       </div>
-
-      {/* Categories bar - desktop */}
-      {categories.length > 0 && (
-        <nav
-          aria-label="Categorias da loja"
-          className="hidden border-t md:block"
-          style={{
-            borderColor: resolvedColors.border,
-            backgroundColor: menuBackground,
-          }}
-        >
-          <div className="mx-auto flex max-w-6xl items-center gap-0 overflow-x-auto px-4">
-            {categories.map((cat) => {
-              const name = typeof cat === "string" ? cat : cat.name;
-              const slug = typeof cat === "string" ? null : cat.slug;
-              const href = slug
-                ? `/${storeUrl}/categoria/${slug}`
-                : `/${storeUrl}?category=${encodeURIComponent(name)}`;
-              return (
-                <Link
-                  key={name}
-                  href={href}
-                  className="shrink-0 px-5 py-3 text-sm font-semibold transition-colors"
-                  style={{ color: menuText }}
-                  onMouseEnter={(e) => {
-                    (e.target as HTMLElement).style.backgroundColor =
-                      resolvedColors.cardBg + "30";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.target as HTMLElement).style.backgroundColor = "transparent";
-                  }}
-                >
-                  {name}
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
-      )}
 
       {/* Mobile menu */}
       {mobileOpen && (
