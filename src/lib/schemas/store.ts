@@ -19,6 +19,23 @@ function optionalUrl() {
   );
 }
 
+function optionalWebUrl() {
+  return z.preprocess(
+    (value) => {
+      if (typeof value !== "string") return value;
+      const url = value.trim();
+      if (!url) return "";
+      if (url.startsWith("//")) return `https:${url}`;
+      return /^[a-z][a-z\d+.-]*:/i.test(url) ? url : `https://${url}`;
+    },
+    z.url({
+      protocol: /^https?$/,
+      hostname: z.regexes.domain,
+      error: "Informe uma URL válida.",
+    }).optional().or(z.literal(""))
+  );
+}
+
 function optionalEmail() {
   return z.preprocess(
     trimString,
@@ -164,10 +181,10 @@ const baseStoreSchema = z.object({
   country: optionalText(100),
   email: optionalEmail(),
   logo: optionalUrl(),
-  websiteUrl: optionalUrl(),
+  websiteUrl: optionalWebUrl(),
   whatsappUrl: optionalPhone(),
-  instagramUrl: optionalUrl(),
-  facebookUrl: optionalUrl(),
+  instagramUrl: optionalWebUrl(),
+  facebookUrl: optionalWebUrl(),
   phoneNumber: optionalPhone(),
   cellPhone: optionalPhone(),
   primaryColor: optionalHexColor(),

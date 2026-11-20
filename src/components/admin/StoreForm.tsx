@@ -420,19 +420,19 @@ export function StoreForm({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
             label="Website"
-            placeholder="https://www.sualoja.com.br"
+            placeholder="www.sualoja.com.br"
             {...register("websiteUrl")}
             error={errors.websiteUrl?.message}
           />
           <Input
             label="Instagram"
-            placeholder="https://instagram.com/sualoja"
+            placeholder="instagram.com/sualoja"
             {...register("instagramUrl")}
             error={errors.instagramUrl?.message}
           />
           <Input
             label="Facebook"
-            placeholder="https://facebook.com/sualoja"
+            placeholder="facebook.com/sualoja"
             {...register("facebookUrl")}
             error={errors.facebookUrl?.message}
           />

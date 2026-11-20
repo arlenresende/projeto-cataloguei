@@ -3,6 +3,7 @@ import {
   isReservedStoreSlug,
   normalizeStoreSlug,
   storeCreateSchema,
+  storeUpdateSchema,
 } from "@/lib/schemas/store";
 
 const validStoreInput = {
@@ -11,6 +12,34 @@ const validStoreInput = {
 };
 
 describe("store schema", () => {
+  it.each(["websiteUrl", "instagramUrl", "facebookUrl"] as const)(
+    "normaliza %s no cadastro e na edição",
+    (field) => {
+      for (const [input, expected] of [
+        [" minhaloja.com ", "https://minhaloja.com"],
+        ["www.minhaloja.com.br", "https://www.minhaloja.com.br"],
+        ["instagram.com/minhaloja?ref=perfil", "https://instagram.com/minhaloja?ref=perfil"],
+        ["https://minhaloja.com", "https://minhaloja.com"],
+        ["http://minhaloja.com", "http://minhaloja.com"],
+        ["//minhaloja.com", "https://minhaloja.com"],
+        ["   ", ""],
+      ]) {
+        expect(storeCreateSchema.parse({ ...validStoreInput, [field]: input })[field]).toBe(expected);
+        expect(storeUpdateSchema.parse({ [field]: input })[field]).toBe(expected);
+      }
+      expect(storeUpdateSchema.parse({})[field]).toBeUndefined();
+    }
+  );
+
+  it.each(["websiteUrl", "instagramUrl", "facebookUrl"] as const)(
+    "rejeita endereços inválidos em %s",
+    (field) => {
+      for (const value of ["minha loja.com", "qualquercoisa", "https://", "javascript:alert(1)", "ftp://minhaloja.com"]) {
+        expect(storeUpdateSchema.safeParse({ [field]: value }).success).toBe(false);
+      }
+    }
+  );
+
   it("normaliza slugs de loja", () => {
     expect(normalizeStoreSlug("  Minha Loja Ágil!!  ")).toBe(
       "minha-loja-agil"
