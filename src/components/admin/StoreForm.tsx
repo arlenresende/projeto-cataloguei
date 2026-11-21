@@ -79,6 +79,8 @@ export function StoreForm({
       facebookUrl: "",
       phoneNumber: "",
       cellPhone: "",
+      headerColor: "",
+      footerColor: "",
       primaryColor: "",
       secondaryColor: "",
       hideCatalogueiBranding: false,
@@ -456,6 +458,34 @@ export function StoreForm({
                 </option>
               ))}
             </select>
+          </div>
+          <Input
+            label="Cor do cabeçalho"
+            placeholder="#FFFFFF"
+            {...register("headerColor")}
+            error={errors.headerColor?.message}
+            helperText="Disponível em todos os planos. Texto e ícones se ajustam automaticamente."
+          />
+          <Input
+            label="Cor do rodapé"
+            placeholder="Padrão do tema"
+            {...register("footerColor")}
+            error={errors.footerColor?.message}
+            helperText="Independente das cores dos botões. Use uma cor hexadecimal, como #123456."
+          />
+          <div className="sm:col-span-2">
+            <button
+              type="button"
+              className="rounded-lg border px-4 py-2 text-sm font-medium"
+              onClick={() => {
+                for (const field of ["headerColor", "footerColor", "primaryColor", "secondaryColor"] as const) {
+                  setValue(field, "", { shouldDirty: true, shouldValidate: true });
+                }
+              }}
+            >
+              Restaurar cores do tema
+            </button>
+            <p className="mt-1.5 text-xs text-muted-foreground">Salve a loja para aplicar as alterações.</p>
           </div>
           <Input
             label="Cor principal"

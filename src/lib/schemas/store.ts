@@ -187,6 +187,8 @@ const baseStoreSchema = z.object({
   facebookUrl: optionalWebUrl(),
   phoneNumber: optionalPhone(),
   cellPhone: optionalPhone(),
+  headerColor: optionalHexColor(),
+  footerColor: optionalHexColor(),
   primaryColor: optionalHexColor(),
   secondaryColor: optionalHexColor(),
   hideCatalogueiBranding: z.boolean().optional(),

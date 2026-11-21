@@ -12,6 +12,8 @@ export type PublicStore = {
   whatsapp: string;
   theme: StoreThemeSegment;
   themeOverrides: {
+    headerColor?: string;
+    footerColor?: string;
     primaryColor?: string;
     secondaryColor?: string;
   };
@@ -124,6 +126,8 @@ export const getPublicStoreBySlug = cache(async (slug: string): Promise<PublicSt
     whatsapp: whatsappNumber,
     theme: (store.themeStore || "DEFAULT") as StoreThemeSegment,
     themeOverrides: {
+      headerColor: store.headerColor || undefined,
+      footerColor: store.footerColor || undefined,
       primaryColor: store.primaryColor || undefined,
       secondaryColor: store.secondaryColor || undefined,
     },

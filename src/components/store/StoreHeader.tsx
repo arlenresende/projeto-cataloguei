@@ -1,5 +1,6 @@
 "use client";
 
+import { getSurfaceTextColor } from "@/lib/themes/contrast";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -30,6 +31,7 @@ export function StoreHeader({
   categories = [],
 }: StoreHeaderProps) {
   const { resolvedColors } = useTheme();
+  const headerText = getSurfaceTextColor(resolvedColors.header);
   const { itemCount } = useCart();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -54,7 +56,7 @@ export function StoreHeader({
       className="sticky top-0 z-50 border-b shadow-sm backdrop-blur-lg"
       style={{
         borderColor: resolvedColors.border,
-        backgroundColor: resolvedColors.cardBg + "F5",
+        backgroundColor: resolvedColors.header,
       }}
     >
       {/* Top bar */}
@@ -89,7 +91,7 @@ export function StoreHeader({
           {!logoUrl ? (
             <span
               className="text-xl font-extrabold tracking-tight"
-              style={{ color: resolvedColors.text }}
+              style={{ color: headerText }}
             >
               {name}
             </span>
@@ -126,7 +128,7 @@ export function StoreHeader({
               target="_blank"
               rel="noopener noreferrer"
               className="hidden rounded-xl p-2.5 transition-colors sm:block"
-              style={{ color: resolvedColors.text, opacity: 0.7 }}
+              style={{ color: headerText }}
               aria-label="Fale conosco"
               title="Fale conosco"
             >
@@ -140,7 +142,7 @@ export function StoreHeader({
           <CartDrawer whatsapp={whatsapp || ""} storeName={name} storeUrl={storeUrl}>
             <div
               className="relative cursor-pointer rounded-xl p-2.5 transition-colors"
-              style={{ color: resolvedColors.text }}
+              style={{ color: headerText }}
               aria-label="Carrinho"
             >
               <ShoppingBag size={22} strokeWidth={2} />
@@ -160,7 +162,7 @@ export function StoreHeader({
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="rounded-xl p-2.5 md:hidden"
-            style={{ color: resolvedColors.text }}
+            style={{ color: headerText }}
             aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -174,7 +176,7 @@ export function StoreHeader({
           className="border-t md:hidden"
           style={{
             borderColor: resolvedColors.border,
-            backgroundColor: resolvedColors.cardBg,
+            backgroundColor: resolvedColors.header,
           }}
         >
           <div className="px-4 py-5">

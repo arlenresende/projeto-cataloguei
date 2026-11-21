@@ -392,10 +392,12 @@ export function getThemeConfig(segment: ThemeSegment): ThemeConfig {
 
 export function resolveThemeColors(
   config: ThemeConfig,
-  overrides: { primaryColor?: string; secondaryColor?: string }
+  overrides: { primaryColor?: string; secondaryColor?: string; headerColor?: string; footerColor?: string }
 ) {
   return {
     ...config.colors,
+    header: overrides.headerColor || "#FFFFFF",
+    footer: overrides.footerColor || config.colors.secondary,
     background: "#FFFFFF",
     text: "#111111",
     cardBg: "#FFFFFF",

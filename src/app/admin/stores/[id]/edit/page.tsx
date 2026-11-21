@@ -37,6 +37,8 @@ export default function EditStorePage() {
             facebookUrl: data.store.facebookUrl || "",
             phoneNumber: data.store.phoneNumber || "",
             cellPhone: data.store.cellPhone || "",
+            headerColor: data.store.headerColor || "",
+            footerColor: data.store.footerColor || "",
             primaryColor: data.store.primaryColor || "",
             secondaryColor: data.store.secondaryColor || "",
             hideCatalogueiBranding: data.store.hideCatalogueiBranding || false,

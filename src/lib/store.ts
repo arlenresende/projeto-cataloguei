@@ -19,6 +19,8 @@ export const storeAdminSelect = {
   facebookUrl: true,
   phoneNumber: true,
   cellPhone: true,
+  headerColor: true,
+  footerColor: true,
   primaryColor: true,
   secondaryColor: true,
   hideCatalogueiBranding: true,
@@ -53,6 +55,8 @@ export function buildStoreCreateData(
     facebookUrl: nullableText(data.facebookUrl),
     phoneNumber: nullableText(data.phoneNumber),
     cellPhone: nullableText(data.cellPhone),
+    headerColor: nullableText(data.headerColor),
+    footerColor: nullableText(data.footerColor),
     primaryColor: nullableText(data.primaryColor),
     secondaryColor: nullableText(data.secondaryColor),
     hideCatalogueiBranding: data.hideCatalogueiBranding ?? false,
@@ -98,6 +102,8 @@ export function buildStoreUpdateData(
     ...(data.cellPhone !== undefined && {
       cellPhone: nullableText(data.cellPhone),
     }),
+    ...(data.headerColor !== undefined && { headerColor: nullableText(data.headerColor) }),
+    ...(data.footerColor !== undefined && { footerColor: nullableText(data.footerColor) }),
     ...(data.primaryColor !== undefined && {
       primaryColor: nullableText(data.primaryColor),
     }),

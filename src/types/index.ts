@@ -40,6 +40,8 @@ export interface Store {
   banners?: StoreBanner[];
   whatsapp: string;
   theme: ThemeSegment;
+  headerColor?: string;
+  footerColor?: string;
   primaryColor?: string;
   secondaryColor?: string;
   products: Product[];

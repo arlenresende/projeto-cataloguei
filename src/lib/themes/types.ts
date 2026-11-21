@@ -50,6 +50,8 @@ export interface ThemeConfig {
 }
 
 export interface StoreThemeOverrides {
+  headerColor?: string;
+  footerColor?: string;
   primaryColor?: string;
   secondaryColor?: string;
 }

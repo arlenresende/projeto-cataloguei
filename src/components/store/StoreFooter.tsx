@@ -1,5 +1,6 @@
 "use client";
 
+import { getSurfaceTextColor } from "@/lib/themes/contrast";
 import Image from "next/image";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
@@ -41,6 +42,7 @@ export function StoreFooter({
   showCatalogueiBranding = true,
 }: StoreFooterProps) {
   const { resolvedColors } = useTheme();
+  const footerText = getSurfaceTextColor(resolvedColors.footer);
 
   const hasAddress = address || city || postalCode;
   const hasContact = email || phone || whatsapp;
@@ -50,9 +52,9 @@ export function StoreFooter({
     <footer
       className="border-t"
       style={{
-        borderColor: resolvedColors.secondary + "15",
-        backgroundColor: resolvedColors.secondary,
-        color: resolvedColors.cardBg,
+        borderColor: footerText + "15",
+        backgroundColor: resolvedColors.footer,
+        color: footerText,
       }}
     >
       <div className="mx-auto max-w-6xl px-4 py-12 md:py-16">
@@ -92,7 +94,7 @@ export function StoreFooter({
               ) : null}
             </Link>
             {description && (
-              <p className="mt-4 max-w-xs text-sm font-medium opacity-60">
+              <p className="mt-4 max-w-xs text-sm font-medium">
                 {description}
               </p>
             )}
@@ -104,15 +106,15 @@ export function StoreFooter({
               <p className="text-sm font-bold">Endereço</p>
               <ul className="mt-4 space-y-2">
                 {address && (
-                  <li className="text-sm font-medium opacity-60">{address}</li>
+                  <li className="text-sm font-medium">{address}</li>
                 )}
                 {(city || state) && (
-                  <li className="text-sm font-medium opacity-60">
+                  <li className="text-sm font-medium">
                     {city}{state ? ` - ${state}` : ""}
                   </li>
                 )}
                 {postalCode && (
-                  <li className="text-sm font-medium opacity-60">
+                  <li className="text-sm font-medium">
                     CEP: {postalCode}
                   </li>
                 )}
@@ -130,14 +132,14 @@ export function StoreFooter({
                     <a
                       href={`mailto:${email}`}
                       className="text-sm font-medium transition-colors hover:opacity-100"
-                      style={{ opacity: 0.6 }}
+
                     >
                       {email}
                     </a>
                   </li>
                 )}
                 {phone && (
-                  <li className="text-sm font-medium opacity-60">
+                  <li className="text-sm font-medium">
                     {phone}
                   </li>
                 )}
@@ -148,7 +150,7 @@ export function StoreFooter({
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-medium transition-colors hover:opacity-100"
-                      style={{ opacity: 0.6 }}
+
                     >
                       WhatsApp
                     </a>
@@ -170,7 +172,7 @@ export function StoreFooter({
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-medium transition-colors hover:opacity-100"
-                      style={{ opacity: 0.6 }}
+
                     >
                       Website
                     </a>
@@ -183,7 +185,7 @@ export function StoreFooter({
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-medium transition-colors hover:opacity-100"
-                      style={{ opacity: 0.6 }}
+
                     >
                       Instagram
                     </a>
@@ -196,7 +198,7 @@ export function StoreFooter({
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-medium transition-colors hover:opacity-100"
-                      style={{ opacity: 0.6 }}
+
                     >
                       Facebook
                     </a>
@@ -209,14 +211,14 @@ export function StoreFooter({
 
         <div
           className="mt-12 border-t pt-8"
-          style={{ borderColor: resolvedColors.cardBg + "15" }}
+          style={{ borderColor: footerText + "15" }}
         >
-          <p className="text-center text-xs font-medium opacity-40">
+          <p className="text-center text-xs font-medium">
             &copy; {new Date().getFullYear()}{" "}
             {logoUrl ? "Todos os direitos reservados." : `${name}. Todos os direitos reservados.`}
           </p>
           {showCatalogueiBranding ? (
-            <div className="mt-3 flex items-center justify-center gap-2 text-xs font-semibold opacity-70">
+            <div className="mt-3 flex items-center justify-center gap-2 text-xs font-semibold">
               <span>Criado com</span>
               <Link
                 href="/"

@@ -1,21 +1,23 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Manrope } from "next/font/google";
+import localFont from "next/font/local";
 import Script from "next/script";
 import { AppToaster } from "@/components/ui/sonner";
 import { buildDefaultMetadata } from "@/lib/seo";
 import { DEFAULT_THEME_COLOR } from "@/lib/site-config";
 import "./globals.css";
 
-const inter = Inter({
+const inter = localFont({
+  src: "./fonts/Inter.ttf",
   variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  weight: "100 900",
 });
 
-const manrope = Manrope({
+const manrope = localFont({
+  src: "./fonts/Manrope.ttf",
   variable: "--font-manrope",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+  weight: "200 800",
 });
 
 export const metadata: Metadata = buildDefaultMetadata();

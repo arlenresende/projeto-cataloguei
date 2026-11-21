@@ -213,6 +213,8 @@ model Store {
   facebookUrl            String?
   phoneNumber            String?
   cellPhone              String?
+  headerColor            String?
+  footerColor            String?
   primaryColor           String?
   secondaryColor         String?
   hideCatalogueiBranding Boolean           @default(false)
