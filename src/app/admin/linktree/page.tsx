@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -60,6 +61,7 @@ export default function LinktreePage() {
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
+  const [storeLogo, setStoreLogo] = useState<string | null>(null);
   const [storeSlug, setStoreSlug] = useState<string>("");
 
   const {
@@ -99,13 +101,16 @@ export default function LinktreePage() {
 
         if (storeData.store?.slug) {
           setStoreSlug(storeData.store.slug);
+          setStoreLogo(storeData.store.logo || null);
+          setValue("title", storeData.store.name);
+          setValue("description", storeData.store.description || "");
         }
 
         if (linktreeData.linktree) {
           const linktree = linktreeData.linktree as LinktreePayload;
           reset({
-            title: linktree.title,
-            description: linktree.description || "",
+            title: storeData.store?.name || "",
+            description: storeData.store?.description || "",
             backgroundColor: linktree.backgroundColor || "#1a1a2e",
             textColor: linktree.textColor || "#e2e8f0",
             links: linktree.links.map((l) => ({
@@ -124,7 +129,7 @@ export default function LinktreePage() {
       }
     }
     load();
-  }, [reset]);
+  }, [reset, setValue]);
 
   function addLink() {
     const current = watchedLinks || [];
@@ -343,16 +348,22 @@ export default function LinktreePage() {
             <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-[var(--brand-black)]/40">
               Informações
             </h3>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Nome, descrição e logo são usados automaticamente do cadastro da loja.
+              Para alterá-los, edite sua loja.
+            </p>
             <div className="space-y-4">
               <Input
-                label="Título"
-                placeholder="Meu Linktree"
+                label="Nome da loja"
+                readOnly
+                placeholder="Nome da loja"
                 {...register("title")}
                 error={errors.title?.message}
               />
               <Textarea
                 label="Descrição"
-                placeholder="Uma breve descrição sobre você"
+                readOnly
+                placeholder="Descrição cadastrada na loja"
                 rows={2}
                 {...register("description")}
                 error={errors.description?.message}
@@ -580,14 +591,18 @@ export default function LinktreePage() {
                 <div className="flex flex-col items-center text-center">
                   {/* Avatar */}
                   <div
-                    className="mb-4 flex size-20 items-center justify-center rounded-full text-3xl font-extrabold"
+                    className="mb-4 flex size-20 items-center justify-center overflow-hidden rounded-full text-3xl font-extrabold"
                     style={{
                       backgroundColor: textColor + "15",
                       color: textColor,
                       border: `2px solid ${textColor}25`,
                     }}
                   >
-                    {(watchedTitle || "M").charAt(0).toUpperCase()}
+                    {storeLogo ? (
+                      <Image src={storeLogo} alt={`Logo de ${watchedTitle}`} width={80} height={80} className="size-full object-contain" />
+                    ) : (
+                      (watchedTitle || "M").charAt(0).toUpperCase()
+                    )}
                   </div>
 
                   {/* Title */}

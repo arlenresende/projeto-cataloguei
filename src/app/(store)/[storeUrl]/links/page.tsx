@@ -51,11 +51,11 @@ export async function generateMetadata({
     return buildNoIndexMetadata("Links não encontrados");
   }
 
-  const { store, linktree } = result;
+  const { store } = result;
   const canonicalPath = `/${storeUrl}/links`;
-  const title = `${linktree.title} | Links`;
+  const title = `${store.name} | Links`;
   const description = truncateText(
-    linktree.description || `Links oficiais de ${linktree.title}.`
+    store.description || `Links oficiais de ${store.name}.`
   );
   const shareImages = [
     ...(toAbsoluteAssetUrl(store.logo)
@@ -68,14 +68,14 @@ export async function generateMetadata({
       : []),
     {
       url: absoluteUrl(`/og/store/${storeUrl}`),
-      alt: `Compartilhamento da página de links de ${linktree.title}`,
+      alt: `Compartilhamento da página de links de ${store.name}`,
     },
     buildDefaultSeoImage(),
   ];
 
   return buildPageMetadata({
     title,
-    socialTitle: `${linktree.title} | Links | Cataloguei`,
+    socialTitle: `${store.name} | Links | Cataloguei`,
     description,
     path: canonicalPath,
     openGraphType: "profile",
@@ -112,8 +112,8 @@ export default async function LinksPage({ params }: LinksPageProps) {
       />
       <StructuredData
         data={buildCollectionPageJsonLd({
-          name: `${linktree.title} | Links`,
-          description: linktree.description,
+          name: `${store.name} | Links`,
+          description: store.description,
           url: canonicalUrl,
         })}
       />
@@ -134,24 +134,24 @@ export default async function LinksPage({ params }: LinksPageProps) {
                 alt={`Logo de ${store.name}`}
                 width={96}
                 height={96}
-                className="size-full object-cover"
+                className="size-full object-contain"
                 priority
               />
             ) : (
-              linktree.title.charAt(0).toUpperCase()
+              store.name.charAt(0).toUpperCase()
             )}
           </div>
 
           <h1 className="text-2xl font-extrabold" style={{ color: textColor }}>
-            {linktree.title}
+            {store.name}
           </h1>
 
-          {linktree.description ? (
+          {store.description ? (
             <p
               className="mt-2 max-w-sm text-sm leading-relaxed"
               style={{ color: textColor, opacity: 0.55 }}
             >
-              {linktree.description}
+              {store.description}
             </p>
           ) : null}
 

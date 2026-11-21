@@ -30,7 +30,18 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const parsed = linktreeSchema.safeParse(body);
+  const store = await prisma.store.findUnique({
+    where: { userId: session.user.id },
+    select: { name: true, description: true },
+  });
+  if (!store) {
+    return NextResponse.json({ error: "Cadastre sua loja antes de configurar os links." }, { status: 400 });
+  }
+  const parsed = linktreeSchema.safeParse({
+    ...body,
+    title: store.name,
+    description: store.description || "",
+  });
 
   if (!parsed.success) {
     return NextResponse.json(

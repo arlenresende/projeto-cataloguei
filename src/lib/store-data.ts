@@ -242,6 +242,7 @@ export const getPublicLinktreeByStoreSlug = cache(async (storeSlug: string) => {
       id: true,
       userId: true,
       name: true,
+      description: true,
       slug: true,
       logo: true,
       updatedAt: true,

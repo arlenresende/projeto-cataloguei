@@ -21,7 +21,7 @@ export const linktreeSchema = z.object({
     .max(100, "O título deve ter no máximo 100 caracteres."),
   description: z
     .string()
-    .max(300, "A descrição deve ter no máximo 300 caracteres.")
+    .max(500, "A descrição deve ter no máximo 500 caracteres.")
     .optional()
     .or(z.literal("")),
   backgroundColor: z
